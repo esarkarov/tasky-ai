@@ -1,7 +1,7 @@
 import { Separator } from '@/components/ui/separator';
 import { SOCIAL_LINKS } from '@/constants';
 
-const Footer = () => {
+export const Footer = () => {
   return (
     <footer className='p-4 pb-0'>
       <div className='container min-h-16 py-4 bg-background border border-b-0 rounded-t-xl flex flex-col gap-3 items-center lg:flex-row lg:justify-between'>
@@ -34,5 +34,3 @@ const Footer = () => {
     </footer>
   );
 };
-
-export default Footer;

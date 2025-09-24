@@ -1,5 +1,5 @@
 import { heroBannerLg, heroBannerSm } from '@/assets';
-import Head from '@/components/Head';
+import { Head } from '@/components/Head';
 import { Button } from '@/components/ui/button';
 import { Link } from 'react-router';
 

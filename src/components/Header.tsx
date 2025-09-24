@@ -2,7 +2,7 @@ import { Link, useLocation } from 'react-router';
 import { Button } from '@/components/ui/button';
 import { Logo } from './Logo';
 
-const Header = () => {
+export const Header = () => {
   const location = useLocation();
 
   return (
@@ -32,5 +32,3 @@ const Header = () => {
     </header>
   );
 };
-
-export default Header;

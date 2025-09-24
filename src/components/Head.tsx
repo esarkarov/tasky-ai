@@ -4,12 +4,10 @@ type HeadProps = {
   title: string;
 };
 
-const Head = ({ title }: HeadProps) => {
+export const Head = ({ title }: HeadProps) => {
   return (
     <Helmet>
       <title>{title}</title>
     </Helmet>
   );
 };
-
-export default Head;
