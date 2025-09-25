@@ -3,6 +3,7 @@ import { Button } from '@/components/ui/button';
 import { Header } from '@/components/Header';
 import { Footer } from '@/components/Footer';
 import { pageNotFound } from '@/assets';
+import { PATHS } from '@/constants';
 
 const ErrorPage = () => {
   const error = useRouteError();
@@ -26,14 +27,14 @@ const ErrorPage = () => {
 
         <div className='flex gap-2'>
           <Button asChild>
-            <Link to='/'>Return to Home</Link>
+            <Link to={PATHS.HOME}>Return to Home</Link>
           </Button>
 
           <Button
             asChild
             variant='ghost'
           >
-            <Link to='/app/inbox'>View Inbox</Link>
+            <Link to={PATHS.INBOX}>View Inbox</Link>
           </Button>
         </div>
 

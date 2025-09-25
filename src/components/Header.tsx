@@ -1,6 +1,6 @@
 import { Link, useLocation } from 'react-router';
 import { Button } from '@/components/ui/button';
-import { Logo } from './Logo';
+import { Logo } from '@/components/Logo';
 
 export const Header = () => {
   const location = useLocation();

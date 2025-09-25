@@ -1,12 +1,13 @@
 import { heroBannerLg, heroBannerSm } from '@/assets';
 import { Head } from '@/components/Head';
 import { Button } from '@/components/ui/button';
+import { PATHS } from '@/constants';
 import { Link } from 'react-router';
 
 const HomePage = () => {
   return (
     <>
-      <Head title='Tasky AI – AI-Powered To-Do List & Project Management App' />
+      <Head title='Tasky AI | AI-Powered Task Management App' />
 
       <section>
         <div className='container !px-8 grid grid-cols-1 gap-8 items-center xl:gap-12 xl:grid-cols-[1fr_1.5fr]'>
@@ -20,7 +21,7 @@ const HomePage = () => {
             </h1>
 
             <p className='max-w-[48ch] text-foreground/80 md:text-lg lg:text-xl'>
-              Simplify life for both you and your team with the world’s #1 task
+              Simplify life for both you and your team with the AI powered task
               manager and to-do list app.
             </p>
 
@@ -28,7 +29,7 @@ const HomePage = () => {
               asChild
               size='lg'
             >
-              <Link to='/register'>Start for free</Link>
+              <Link to={PATHS.REGISTER}>Start for free</Link>
             </Button>
           </div>
 
