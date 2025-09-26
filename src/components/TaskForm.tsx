@@ -24,6 +24,8 @@ import {
 import { cn, formatCustomDate, getTaskDueDateColorClass } from '@/lib/utils';
 import { useCallback, useEffect, useState } from 'react';
 
+import { DEFAULT_FORM_DATA } from '@/constants';
+import { ITaskForm } from '@/interfaces';
 import { TTaskMode } from '@/types';
 import * as chrono from 'chrono-node';
 import type { ClassValue } from 'clsx';
@@ -35,9 +37,6 @@ import {
   SendHorizonal,
   X,
 } from 'lucide-react';
-import { ITaskForm } from '@/interfaces';
-import { DEFAULT_FORM_DATA } from '@/constants';
-import { BlobOptions } from 'buffer';
 
 interface TaskFormProps {
   defaultFormData?: ITaskForm;
@@ -56,7 +55,7 @@ export const TaskForm = ({
 }: TaskFormProps) => {
   const [taskContent, setTaskContent] = useState(defaultFormData.content);
   const [dueDate, setDueDate] = useState(defaultFormData.due_date);
-  const [projectId, setProjectId] = useState(defaultFormData.project);
+  const [projectId] = useState(defaultFormData.project);
   const [projectName, setProjectName] = useState<string>('');
   const [projectColorHex, setProjectColorHex] = useState<string>('');
   const [dueDateOpen, setDueDateOpen] = useState<boolean>(false);
@@ -80,7 +79,7 @@ export const TaskForm = ({
       ...prevFormData,
       content: taskContent,
       due_date: dueDate,
-      project: projectId,
+      projectId: projectId,
     }));
   }, [taskContent, dueDate, projectId]);
 

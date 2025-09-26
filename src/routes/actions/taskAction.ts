@@ -36,8 +36,20 @@ const updateTask = async (data: ITask) => {
   }
 };
 
+const deleteTask = async (data: ITask) => {
+  const documentId = data.id;
+
+  if (!documentId) throw new Error('Task id not found.');
+
+  try {
+    await databases.deleteDocument(env.appwriteDatabaseId, 'tasks', documentId);
+  } catch (err) {
+    console.log(err);
+  }
+};
+
 const taskAction: ActionFunction = async ({ request }) => {
-  const data = (await request.json()) as ITask;
+  const data = await request.json() as ITask;
 
   if (request.method === 'POST') {
     return await createTask(data);
@@ -45,6 +57,10 @@ const taskAction: ActionFunction = async ({ request }) => {
 
   if (request.method === 'PUT') {
     return await updateTask(data);
+  }
+
+  if (request.method === 'DELETE') {
+    return await deleteTask(data);
   }
 };
 
