@@ -5,7 +5,7 @@ import { PATHS } from '@/constants';
 const LoginPage = () => {
   return (
     <>
-      <Head title='Log In | AI-Powered Task Management App' />
+      <Head title='Tasky AI | Log In' />
 
       <section>
         <div className='container flex justify-center'>

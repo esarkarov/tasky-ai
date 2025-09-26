@@ -4,12 +4,15 @@ import { Header } from '@/components/Header';
 import { Footer } from '@/components/Footer';
 import { pageNotFound } from '@/assets';
 import { PATHS } from '@/constants';
+import { Head } from '@/components/Head';
 
 const ErrorPage = () => {
   const error = useRouteError();
 
   return (
     <div className='min-h-[100dvh] flex flex-col'>
+      <Head title='Tasky AI | Not Found' />
+
       <Header />
 
       <div className='grow container flex flex-col justify-center items-center pt-32 pb-12'>

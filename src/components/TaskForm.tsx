@@ -24,7 +24,7 @@ import {
 import { cn, formatCustomDate, getTaskDueDateColorClass } from '@/lib/utils';
 import { useCallback, useEffect, useState } from 'react';
 
-import { TMode } from '@/types';
+import { TTaskMode } from '@/types';
 import * as chrono from 'chrono-node';
 import type { ClassValue } from 'clsx';
 import {
@@ -40,7 +40,7 @@ import { ITaskForm } from '@/interfaces';
 interface TaskFormProps {
   defaultFormData?: ITaskForm;
   className?: ClassValue;
-  mode: TMode;
+  mode: TTaskMode;
   onCancel?: () => void;
   onSubmit?: (formData: ITaskForm) => void;
 }

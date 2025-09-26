@@ -5,7 +5,7 @@ import { SignUp } from '@clerk/clerk-react';
 const RegisterPage = () => {
   return (
     <>
-      <Head title='Create an Account | AI-Powered Task Management App' />
+      <Head title='Tasky AI | Create an Account' />
 
       <section>
         <div className='container flex justify-center'>
