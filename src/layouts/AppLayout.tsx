@@ -4,6 +4,7 @@ import { SidebarProvider } from '@/components/ui/sidebar';
 import { Toaster } from '@/components/ui/toaster';
 import { TooltipProvider } from '@/components/ui/tooltip';
 import { AppSidebar } from '@/components/AppSidebar';
+import { TOOLTIP_DELAY } from '@/constants';
 
 const AppLayout = () => {
   const navigation = useNavigation();
@@ -13,7 +14,7 @@ const AppLayout = () => {
     <>
       <SidebarProvider>
         <TooltipProvider
-          delayDuration={500}
+          delayDuration={TOOLTIP_DELAY}
           disableHoverableContent
         >
           <AppSidebar />

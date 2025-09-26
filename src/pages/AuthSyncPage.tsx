@@ -2,9 +2,9 @@ import { useNavigate } from 'react-router';
 import { useEffect } from 'react';
 import { useAuth } from '@clerk/clerk-react';
 import { PATHS } from '@/constants';
+import { env } from '@/config/env';
 
 const AuthSyncPage = () => {
-  const KEY = import.meta.env.VITE_CLERK_USER_STORAGE_KEY;
   const navigate = useNavigate();
   const { isSignedIn, isLoaded, userId } = useAuth();
 
@@ -12,8 +12,8 @@ const AuthSyncPage = () => {
     if (!isLoaded) return;
 
     if (!isSignedIn) {
-      if (localStorage.getItem(KEY)) {
-        localStorage.removeItem(KEY);
+      if (localStorage.getItem(env.clerkUserStorageKey)) {
+        localStorage.removeItem(env.clerkUserStorageKey);
       }
 
       navigate(PATHS.HOME);
@@ -21,10 +21,10 @@ const AuthSyncPage = () => {
     }
 
     if (isSignedIn) {
-      localStorage.setItem(KEY, userId);
+      localStorage.setItem(env.clerkUserStorageKey, userId);
       navigate(PATHS.TODAY);
     }
-  }, [userId, isSignedIn, isLoaded, navigate, KEY]);
+  }, [userId, isSignedIn, isLoaded, navigate, env.clerkUserStorageKey]);
 
   return <></>;
 };

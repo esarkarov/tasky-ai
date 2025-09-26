@@ -12,6 +12,7 @@ import {
 } from 'date-fns';
 import { redirect } from 'react-router';
 import { PATHS, RELATIVE_DAYS } from '@/constants';
+import { env } from '@/config/env';
 
 export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs));
@@ -59,7 +60,7 @@ export function generateID(): string {
 }
 
 export function getUserId(): string {
-  const clerkUserId = localStorage.getItem('clerkUserId');
+  const clerkUserId = localStorage.getItem(env.clerkUserStorageKey);
 
   if (!clerkUserId) {
     redirect(PATHS.AUTH_SYNC);

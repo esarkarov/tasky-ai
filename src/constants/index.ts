@@ -1,5 +1,7 @@
 import { Calendar1, CalendarDays, CircleCheck, Inbox } from 'lucide-react';
 
+export const TOOLTIP_DELAY = 500;
+
 export const PATHS = {
   HOME: '/',
   REGISTER: '/register',

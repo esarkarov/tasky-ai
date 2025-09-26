@@ -3,17 +3,12 @@ import { RouterProvider } from 'react-router';
 import router from '@/routes';
 import { dark } from '@clerk/themes';
 import { PATHS } from '@/constants';
-
-const PUBLISHABLE_KEY = import.meta.env.VITE_CLERK_PUBLISHABLE_KEY;
-
-if (!PUBLISHABLE_KEY) {
-  throw new Error('Missing Publishable Key');
-}
+import { env } from '@/config/env';
 
 const App = () => {
   return (
     <ClerkProvider
-      publishableKey={PUBLISHABLE_KEY}
+      publishableKey={env.clerkPublishableKey}
       afterSignOutUrl={PATHS.AUTH_SYNC}
       signInForceRedirectUrl={PATHS.AUTH_SYNC}
       signUpForceRedirectUrl={PATHS.AUTH_SYNC}
