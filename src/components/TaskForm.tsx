@@ -36,6 +36,8 @@ import {
   X,
 } from 'lucide-react';
 import { ITaskForm } from '@/interfaces';
+import { DEFAULT_FORM_DATA } from '@/constants';
+import { BlobOptions } from 'buffer';
 
 interface TaskFormProps {
   defaultFormData?: ITaskForm;
@@ -44,12 +46,6 @@ interface TaskFormProps {
   onCancel?: () => void;
   onSubmit?: (formData: ITaskForm) => void;
 }
-
-const DEFAULT_FORM_DATA: ITaskForm = {
-  content: '',
-  due_date: null,
-  project: null,
-};
 
 export const TaskForm = ({
   defaultFormData = DEFAULT_FORM_DATA,
@@ -61,12 +57,16 @@ export const TaskForm = ({
   const [taskContent, setTaskContent] = useState(defaultFormData.content);
   const [dueDate, setDueDate] = useState(defaultFormData.due_date);
   const [projectId, setProjectId] = useState(defaultFormData.project);
-  const [projectName, setProjectName] = useState('');
-  const [projectColorHex, setProjectColorHex] = useState('');
-  const [dueDateOpen, setDueDateOpen] = useState(false);
-  const [projectOpen, setProjectOpen] = useState(false);
+  const [projectName, setProjectName] = useState<string>('');
+  const [projectColorHex, setProjectColorHex] = useState<string>('');
+  const [dueDateOpen, setDueDateOpen] = useState<boolean>(false);
+  const [projectOpen, setProjectOpen] = useState<boolean>(false);
 
-  const [formData, setFormData] = useState(defaultFormData);
+  const [formData, setFormData] = useState<ITaskForm>({
+    content: '',
+    due_date: null,
+    project: null,
+  });
 
   useEffect(() => {
     if (projectId) {

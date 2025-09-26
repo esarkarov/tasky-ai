@@ -14,6 +14,7 @@ import {
   SidebarGroupLabel,
   SidebarHeader,
   SidebarMenu,
+  SidebarMenuBadge,
   SidebarMenuButton,
   SidebarMenuItem,
   useSidebar,
@@ -27,10 +28,12 @@ import { TaskFormDialog } from '@/components/TaskFormDialog';
 import { PATHS, SIDEBAR_LINKS } from '@/constants';
 import { UserButton } from '@clerk/clerk-react';
 import { ChevronRight, CirclePlus, Plus } from 'lucide-react';
-import { Link, useLocation } from 'react-router';
+import { Link, useLoaderData, useLocation } from 'react-router';
+import { IAppLoaderData } from '@/interfaces';
 
 export const AppSidebar = () => {
   const location = useLocation();
+  const { taskCounts } = useLoaderData() as IAppLoaderData;
   const { isMobile, setOpenMobile } = useSidebar();
 
   return (
@@ -71,6 +74,20 @@ export const AppSidebar = () => {
                       <span>{item.label}</span>
                     </Link>
                   </SidebarMenuButton>
+
+                  {item.href === PATHS.INBOX &&
+                    Boolean(taskCounts?.inboxTasks) && (
+                      <SidebarMenuBadge>
+                        {taskCounts?.inboxTasks}
+                      </SidebarMenuBadge>
+                    )}
+
+                  {item.href === PATHS.TODAY &&
+                    Boolean(taskCounts?.todayTasks) && (
+                      <SidebarMenuBadge>
+                        {taskCounts?.todayTasks}
+                      </SidebarMenuBadge>
+                    )}
                 </SidebarMenuItem>
               ))}
             </SidebarMenu>

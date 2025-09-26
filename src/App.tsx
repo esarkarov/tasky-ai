@@ -1,9 +1,9 @@
 import { ClerkProvider } from '@clerk/clerk-react';
 import { RouterProvider } from 'react-router';
-import router from '@/routes';
 import { dark } from '@clerk/themes';
 import { PATHS } from '@/constants';
 import { env } from '@/config/env';
+import router from '@/routes';
 
 const App = () => {
   return (

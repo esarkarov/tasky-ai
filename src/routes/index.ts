@@ -1,3 +1,4 @@
+import { createElement } from 'react';
 import { PATHS } from '@/constants';
 import AppLayout from '@/layouts/AppLayout';
 import RootLayout from '@/layouts/RootLayout';
@@ -7,9 +8,10 @@ import HomePage from '@/pages/HomePage';
 import InboxPage from '@/pages/InboxPage';
 import LoginPage from '@/pages/LoginPage';
 import RegisterPage from '@/pages/RegisterPage';
-import { createElement } from 'react';
-import { createBrowserRouter, type RouteObject } from 'react-router';
 import appAction from './actions/appAction';
+import appLoader from './loaders/appLoader';
+import { createBrowserRouter, type RouteObject } from 'react-router';
+import inboxLoader from './loaders/inboxLoader';
 
 const rootRouteChildren: RouteObject[] = [
   {
@@ -34,6 +36,7 @@ const appRouteChildren: RouteObject[] = [
   {
     path: 'inbox',
     element: createElement(InboxPage),
+    loader: inboxLoader,
   },
 ];
 
@@ -50,6 +53,7 @@ const router = createBrowserRouter([
     errorElement: createElement(ErrorPage),
     children: appRouteChildren,
     action: appAction,
+    loader: appLoader,
   },
 ]);
 

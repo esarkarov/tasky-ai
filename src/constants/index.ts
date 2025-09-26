@@ -5,7 +5,7 @@ import {
   todayTaskEmptyState,
   upcomingTaskEmptyState,
 } from '@/assets';
-import { IEmptyStateContent } from '@/interfaces';
+import { IEmptyStateContent, ITaskForm } from '@/interfaces';
 import { TEmptyStateType } from '@/types';
 import { Calendar1, CalendarDays, CircleCheck, Inbox } from 'lucide-react';
 
@@ -119,4 +119,10 @@ export const EMPTY_STATES: Record<TEmptyStateType, IEmptyStateContent> = {
     description:
       'Add tasks specific to this project. Click + to start planning.',
   },
+};
+
+export const DEFAULT_FORM_DATA: ITaskForm = {
+  content: '',
+  due_date: null,
+  project: null,
 };
