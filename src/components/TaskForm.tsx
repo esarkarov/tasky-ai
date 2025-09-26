@@ -22,17 +22,25 @@ import {
   TooltipTrigger,
 } from '@/components/ui/tooltip';
 import { cn, formatCustomDate, getTaskDueDateColorClass } from '@/lib/utils';
-import { useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 
-import { CalendarIcon, ChevronDown, SendHorizonal, X } from 'lucide-react';
-
-import { ITaskForm } from '@/types';
+import { TMode } from '@/types';
+import * as chrono from 'chrono-node';
 import type { ClassValue } from 'clsx';
+import {
+  CalendarIcon,
+  ChevronDown,
+  Hash,
+  Inbox,
+  SendHorizonal,
+  X,
+} from 'lucide-react';
+import { ITaskForm } from '@/interfaces';
 
 interface TaskFormProps {
   defaultFormData?: ITaskForm;
   className?: ClassValue;
-  mode: 'create' | 'edit';
+  mode: TMode;
   onCancel?: () => void;
   onSubmit?: (formData: ITaskForm) => void;
 }
@@ -52,6 +60,47 @@ export const TaskForm = ({
 }: TaskFormProps) => {
   const [taskContent, setTaskContent] = useState(defaultFormData.content);
   const [dueDate, setDueDate] = useState(defaultFormData.due_date);
+  const [projectId, setProjectId] = useState(defaultFormData.project);
+  const [projectName, setProjectName] = useState('');
+  const [projectColorHex, setProjectColorHex] = useState('');
+  const [dueDateOpen, setDueDateOpen] = useState(false);
+  const [projectOpen, setProjectOpen] = useState(false);
+
+  const [formData, setFormData] = useState(defaultFormData);
+
+  useEffect(() => {
+    if (projectId) {
+      setProjectName('Project Name');
+      setProjectColorHex('#000000');
+    }
+  }, [projectId]);
+
+  useEffect(() => {
+    setFormData((prevFormData) => ({
+      ...prevFormData,
+      content: taskContent,
+      due_date: dueDate,
+      project: projectId,
+    }));
+  }, [taskContent, dueDate, projectId]);
+
+  useEffect(() => {
+    const chronoParsed = chrono.parse(taskContent);
+
+    if (chronoParsed.length) {
+      const lastDate = chronoParsed[chronoParsed.length - 1];
+
+      setDueDate(lastDate.date());
+    }
+  }, [taskContent]);
+
+  const handleSubmit = useCallback(() => {
+    if (!taskContent) return;
+
+    if (onSubmit) onSubmit(formData);
+
+    setTaskContent('');
+  }, [taskContent, onSubmit, formData]);
 
   return (
     <Card className={cn('focus-within:border-foreground/30', className)}>
@@ -65,12 +114,17 @@ export const TaskForm = ({
           onKeyDown={(e) => {
             if (e.key === 'Enter') {
               e.preventDefault();
+
+              handleSubmit();
             }
           }}
         />
 
         <div className='ring-1 ring-border rounded-md max-w-max'>
-          <Popover>
+          <Popover
+            open={dueDateOpen}
+            onOpenChange={setDueDateOpen}
+          >
             <PopoverTrigger asChild>
               <Button
                 type='button'
@@ -92,6 +146,7 @@ export const TaskForm = ({
                 initialFocus
                 onSelect={(selected) => {
                   setDueDate(selected || null);
+                  setDueDateOpen(false);
                 }}
               />
             </PopoverContent>
@@ -120,14 +175,21 @@ export const TaskForm = ({
       <Separator />
 
       <CardFooter className='grid grid-cols-[minmax(0,1fr),max-content] gap-2 p-2'>
-        <Popover modal>
+        <Popover
+          open={projectOpen}
+          onOpenChange={setProjectOpen}
+          modal
+        >
           <PopoverTrigger asChild>
             <Button
               variant='ghost'
               role='combobox'
+              aria-expanded={projectOpen}
               className='max-w-max'
             >
-              <span className='truncate'>Inbox</span>
+              {projectName ? <Hash color={projectColorHex} /> : <Inbox />}
+
+              <span className='truncate'>{projectName || 'Inbox'}</span>
 
               <ChevronDown />
             </Button>
@@ -161,7 +223,10 @@ export const TaskForm = ({
             <X className='md:hidden' />
           </Button>
 
-          <Button disabled={!taskContent}>
+          <Button
+            disabled={!taskContent}
+            onClick={handleSubmit}
+          >
             <span className='max-md:hidden'>
               {mode === 'create' ? 'Add task' : 'Save'}
             </span>

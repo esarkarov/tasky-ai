@@ -1,8 +1,8 @@
 import { Helmet } from 'react-helmet';
 
-type HeadProps = {
+interface HeadProps {
   title: string;
-};
+}
 
 export const Head = ({ title }: HeadProps) => {
   return (

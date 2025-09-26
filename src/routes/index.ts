@@ -9,6 +9,7 @@ import LoginPage from '@/pages/LoginPage';
 import RegisterPage from '@/pages/RegisterPage';
 import { createElement } from 'react';
 import { createBrowserRouter, type RouteObject } from 'react-router';
+import appAction from './actions/appAction';
 
 const rootRouteChildren: RouteObject[] = [
   {
@@ -48,6 +49,7 @@ const router = createBrowserRouter([
     element: createElement(AppLayout),
     errorElement: createElement(ErrorPage),
     children: appRouteChildren,
+    action: appAction,
   },
 ]);
 

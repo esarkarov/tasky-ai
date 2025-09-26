@@ -3,7 +3,7 @@ import { useLocation, useFetcher } from 'react-router';
 import { startOfToday } from 'date-fns';
 import { Dialog, DialogContent, DialogTrigger } from '@/components/ui/dialog';
 import { TaskForm } from '@/components/TaskForm';
-import type { PropsWithChildren } from 'react';
+import { type PropsWithChildren } from 'react';
 import { PATHS } from '@/constants';
 
 export const TaskFormDialog = ({ children }: PropsWithChildren) => {
