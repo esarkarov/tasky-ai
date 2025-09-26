@@ -8,10 +8,10 @@ import HomePage from '@/pages/HomePage';
 import InboxPage from '@/pages/InboxPage';
 import LoginPage from '@/pages/LoginPage';
 import RegisterPage from '@/pages/RegisterPage';
-import appAction from './actions/appAction';
 import appLoader from './loaders/appLoader';
 import { createBrowserRouter, type RouteObject } from 'react-router';
 import inboxLoader from './loaders/inboxLoader';
+import taskAction from './actions/taskAction';
 
 const rootRouteChildren: RouteObject[] = [
   {
@@ -52,7 +52,7 @@ const router = createBrowserRouter([
     element: createElement(AppLayout),
     errorElement: createElement(ErrorPage),
     children: appRouteChildren,
-    action: appAction,
+    action: taskAction,
     loader: appLoader,
   },
 ]);

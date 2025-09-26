@@ -17,12 +17,35 @@ const createTask = async (data: ITask) => {
   }
 };
 
-const appAction: ActionFunction = async ({ request }) => {
+const updateTask = async (data: ITask) => {
+  const documentId = data.id;
+
+  if (!documentId) throw new Error('Task id not found.');
+
+  delete data.id;
+
+  try {
+    return await databases.updateDocument(
+      env.appwriteDatabaseId,
+      'tasks',
+      documentId,
+      data,
+    );
+  } catch (err) {
+    console.log(err);
+  }
+};
+
+const taskAction: ActionFunction = async ({ request }) => {
   const data = (await request.json()) as ITask;
 
   if (request.method === 'POST') {
     return await createTask(data);
   }
+
+  if (request.method === 'PUT') {
+    return await updateTask(data);
+  }
 };
 
-export default appAction;
+export default taskAction;
