@@ -74,7 +74,7 @@ export const TaskCard = ({
         encType: 'application/json',
       });
     },
-    [task.id, task.completed],
+    [fetcher, task.id],
   );
 
   return (
@@ -242,7 +242,7 @@ export const TaskCard = ({
           className='my-1'
           defaultFormData={{
             ...task,
-            projectId: "9249dbb79876",
+            projectId: '9249dbb79876',
           }}
           mode='edit'
           onCancel={() => setTaskFormShow(false)}

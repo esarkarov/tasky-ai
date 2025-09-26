@@ -1,5 +1,5 @@
-import { logo } from "@/assets";
-import { Loader2 } from "lucide-react";
+import { logo } from '@/assets';
+import { Loader2 } from 'lucide-react';
 
 export const Loader = () => {
   return (

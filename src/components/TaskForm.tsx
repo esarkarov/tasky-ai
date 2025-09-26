@@ -64,7 +64,7 @@ export const TaskForm = ({
   const [formData, setFormData] = useState<ITaskForm>({
     content: '',
     due_date: null,
-    projectId: "9249dbb79876",
+    projectId: '9249dbb79876',
   });
 
   useEffect(() => {

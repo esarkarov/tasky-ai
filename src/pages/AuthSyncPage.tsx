@@ -24,7 +24,7 @@ const AuthSyncPage = () => {
       localStorage.setItem(env.clerkUserStorageKey, userId);
       navigate(PATHS.TODAY);
     }
-  }, [userId, isSignedIn, isLoaded, navigate, env.clerkUserStorageKey]);
+  }, [userId, isSignedIn, isLoaded, navigate]);
 
   return <></>;
 };
