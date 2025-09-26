@@ -11,7 +11,7 @@ const ErrorPage = () => {
 
   return (
     <div className='min-h-[100dvh] flex flex-col'>
-      <Head title='Tasky AI | Not Found' />
+      <Head title='Tasky AI | Something went wrong' />
 
       <Header />
 
