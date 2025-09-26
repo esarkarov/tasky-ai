@@ -16,6 +16,8 @@ import TodayPage from '@/pages/TodayPage';
 import todayLoader from './loaders/todayLoader';
 import UpcomingPage from '@/pages/UpcomingPage';
 import upcomingLoader from './loaders/upcomingLoader';
+import CompletedPage from '@/pages/CompletedPage';
+import completedLoader from './loaders/completedLoader';
 
 const rootRouteChildren: RouteObject[] = [
   {
@@ -51,6 +53,11 @@ const appRouteChildren: RouteObject[] = [
     path: 'upcoming',
     element: createElement(UpcomingPage),
     loader: upcomingLoader,
+  },
+  {
+    path: 'completed',
+    element: createElement(CompletedPage),
+    loader: completedLoader,
   },
 ];
 
