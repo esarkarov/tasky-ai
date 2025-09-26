@@ -14,6 +14,8 @@ import inboxLoader from './loaders/inboxLoader';
 import taskAction from './actions/taskAction';
 import TodayPage from '@/pages/TodayPage';
 import todayLoader from './loaders/todayLoader';
+import UpcomingPage from '@/pages/UpcomingPage';
+import upcomingLoader from './loaders/upcomingLoader';
 
 const rootRouteChildren: RouteObject[] = [
   {
@@ -44,6 +46,11 @@ const appRouteChildren: RouteObject[] = [
     path: 'today',
     element: createElement(TodayPage),
     loader: todayLoader,
+  },
+  {
+    path: 'upcoming',
+    element: createElement(UpcomingPage),
+    loader: upcomingLoader,
   },
 ];
 
