@@ -19,6 +19,7 @@ export const PATHS = {
   APP: '/app',
   TODAY: '/app/today',
   INBOX: '/app/inbox',
+  PROJECT: (id: string | undefined) => `/app/projects/${id}`,
 } as const;
 
 export const SOCIAL_LINKS = [
@@ -124,5 +125,5 @@ export const EMPTY_STATES: Record<TEmptyStateType, IEmptyStateContent> = {
 export const DEFAULT_FORM_DATA: ITaskForm = {
   content: '',
   due_date: null,
-  project: null,
+  projectId: null,
 };

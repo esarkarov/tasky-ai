@@ -55,7 +55,7 @@ export const TaskForm = ({
 }: TaskFormProps) => {
   const [taskContent, setTaskContent] = useState(defaultFormData.content);
   const [dueDate, setDueDate] = useState(defaultFormData.due_date);
-  const [projectId] = useState(defaultFormData.project);
+  const [projectId] = useState(defaultFormData.projectId);
   const [projectName, setProjectName] = useState<string>('');
   const [projectColorHex, setProjectColorHex] = useState<string>('');
   const [dueDateOpen, setDueDateOpen] = useState<boolean>(false);
@@ -64,7 +64,7 @@ export const TaskForm = ({
   const [formData, setFormData] = useState<ITaskForm>({
     content: '',
     due_date: null,
-    project: null,
+    projectId: "9249dbb79876",
   });
 
   useEffect(() => {

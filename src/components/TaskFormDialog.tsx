@@ -39,7 +39,7 @@ export const TaskFormDialog: React.FC<PropsWithChildren> = ({ children }) => {
           defaultFormData={{
             content: '',
             due_date: location.pathname === PATHS.TODAY ? startOfToday() : null,
-            project: null,
+            projectId: null,
           }}
           mode='create'
           onCancel={() => setOpen(false)}

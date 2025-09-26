@@ -31,6 +31,7 @@ import { useToast } from '@/hooks/use-toast';
 import { Check, CalendarDays, Hash, Inbox, Edit, Trash2 } from 'lucide-react';
 import type { Models } from 'appwrite';
 import { ITask } from '@/interfaces';
+import { PATHS } from '@/constants';
 
 interface TaskCardProps {
   id: string;
@@ -68,7 +69,7 @@ export const TaskCard = ({
   const handleTaskComplete = useCallback(
     async (completed: boolean) => {
       return await fetcher.submit(JSON.stringify({ id: task.id, completed }), {
-        action: '/app',
+        action: PATHS.APP,
         method: 'PUT',
         encType: 'application/json',
       });
@@ -145,8 +146,8 @@ export const TaskCard = ({
                 </div>
               )}
 
-              {location.pathname !== '/app/inbox' &&
-                location.pathname !== `/app/projects/${project?.$id}` && (
+              {location.pathname !== PATHS.INBOX &&
+                location.pathname !== PATHS.PROJECT(project?.$id) && (
                   <div className='grid grid-cols-[minmax(0,180px),max-content] items-center gap-1 text-xs text-muted-foreground ms-auto'>
                     <div className='truncate text-right'>
                       {task.project?.name || 'Inbox'}
@@ -221,7 +222,7 @@ export const TaskCard = ({
                   <AlertDialogAction
                     onClick={() => {
                       fetcher.submit(JSON.stringify({ id: task.id }), {
-                        action: '/app',
+                        action: PATHS.APP,
                         method: 'DELETE',
                         encType: 'application/json',
                       });
@@ -241,14 +242,13 @@ export const TaskCard = ({
           className='my-1'
           defaultFormData={{
             ...task,
-            project: project && project?.$id,
+            projectId: "9249dbb79876",
           }}
           mode='edit'
           onCancel={() => setTaskFormShow(false)}
           onSubmit={(formData) => {
-            console.log(formData);
             fetcher.submit(JSON.stringify(formData), {
-              action: '/app',
+              action: PATHS.APP,
               method: 'PUT',
               encType: 'application/json',
             });

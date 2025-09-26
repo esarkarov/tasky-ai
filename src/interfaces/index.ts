@@ -5,7 +5,7 @@ export interface ITaskForm {
   content: string;
   due_date: Date | null;
   completed?: boolean;
-  project: string | null;
+  projectId: string | null;
 }
 
 export interface IProject {

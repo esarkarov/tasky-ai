@@ -49,7 +49,7 @@ const deleteTask = async (data: ITask) => {
 };
 
 const taskAction: ActionFunction = async ({ request }) => {
-  const data = await request.json() as ITask;
+  const data = (await request.json()) as ITask;
 
   if (request.method === 'POST') {
     return await createTask(data);
