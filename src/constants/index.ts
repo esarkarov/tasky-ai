@@ -43,3 +43,16 @@ export const SIDEBAR_LINKS = [
     icon: CircleCheck,
   },
 ] as const;
+
+export const RELATIVE_DAYS = [
+  'Today',
+  'Tomorrow',
+  'Yesterday',
+  'Saturday',
+  'Sunday',
+  'Monday',
+  'Tuesday',
+  'Wednesday',
+  'Thursday',
+  'Friday',
+];

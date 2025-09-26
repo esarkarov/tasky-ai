@@ -23,6 +23,7 @@ import {
   TooltipContent,
   TooltipTrigger,
 } from '@/components/ui/tooltip';
+import { TaskFormDialog } from '@/components/TaskFormDialog';
 import { PATHS, SIDEBAR_LINKS } from '@/constants';
 import { UserButton } from '@clerk/clerk-react';
 import { ChevronRight, CirclePlus, Plus } from 'lucide-react';
@@ -48,9 +49,11 @@ export const AppSidebar = () => {
           <SidebarGroupContent>
             <SidebarMenu>
               <SidebarMenuItem>
-                <SidebarMenuButton className='!text-primary'>
-                  <CirclePlus /> Add task
-                </SidebarMenuButton>
+                <TaskFormDialog>
+                  <SidebarMenuButton className='!text-primary'>
+                    <CirclePlus /> Add task
+                  </SidebarMenuButton>
+                </TaskFormDialog>
               </SidebarMenuItem>
 
               {SIDEBAR_LINKS.map((item, index) => (
