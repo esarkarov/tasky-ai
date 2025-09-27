@@ -6,6 +6,5 @@ const client = new Client()
   .setProject(env.appwriteProjectId);
 
 const databases = new Databases(client);
-const accounts = new Databases(client);
 
-export { databases, accounts, ID, Query };
+export { databases, ID, Query };

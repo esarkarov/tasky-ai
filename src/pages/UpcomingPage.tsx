@@ -33,7 +33,7 @@ const UpcomingPage = () => {
         </PageHeader>
 
         <PageList>
-          {tasks.documents.map(
+          {tasks?.documents.map(
             ({ $id, content, completed, due_date, project }) => (
               <TaskCard
                 key={$id}

@@ -34,7 +34,7 @@ export interface IEmptyStateContent {
   description: string;
 }
 
-interface ITaskCounts {
+export interface ITaskCounts {
   inboxTasks: number;
   todayTasks: number;
 }
@@ -42,4 +42,9 @@ interface ITaskCounts {
 export interface IAppLoaderData {
   projects: Models.DocumentList<Models.Document>;
   taskCounts: ITaskCounts;
+}
+
+export interface IProjectInfo {
+  name: string;
+  colorHex: string;
 }

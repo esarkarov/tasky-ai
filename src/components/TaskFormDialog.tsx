@@ -1,13 +1,14 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { useLocation, useFetcher } from 'react-router';
 import { startOfToday } from 'date-fns';
 import { Dialog, DialogContent, DialogTrigger } from '@/components/ui/dialog';
 import { TaskForm } from '@/components/TaskForm';
 import type { PropsWithChildren } from 'react';
-import { PATHS } from '@/constants';
+import { HTTP_METHODS, ROUTES } from '@/constants';
+import { ITaskForm } from '@/interfaces';
 
 export const TaskFormDialog: React.FC<PropsWithChildren> = ({ children }) => {
-  const [open, setOpen] = useState<boolean>(false);
+  const [isOpen, setIsOpen] = useState<boolean>(false);
   const location = useLocation();
   const fetcher = useFetcher();
 
@@ -18,7 +19,7 @@ export const TaskFormDialog: React.FC<PropsWithChildren> = ({ children }) => {
         if (target.localName === 'textarea') return;
 
         event.preventDefault();
-        setOpen(true);
+        setIsOpen(true);
       }
     };
 
@@ -27,10 +28,23 @@ export const TaskFormDialog: React.FC<PropsWithChildren> = ({ children }) => {
     return () => document.removeEventListener('keydown', listener);
   }, []);
 
+  const handleSubmitCreate = useCallback(
+    (formData: ITaskForm) => {
+      fetcher.submit(JSON.stringify(formData), {
+        action: ROUTES.APP,
+        method: HTTP_METHODS.POST,
+        encType: 'application/json',
+      });
+
+      setIsOpen(false);
+    },
+    [fetcher],
+  );
+
   return (
     <Dialog
-      open={open}
-      onOpenChange={setOpen}
+      open={isOpen}
+      onOpenChange={setIsOpen}
     >
       <DialogTrigger asChild>{children}</DialogTrigger>
 
@@ -38,20 +52,13 @@ export const TaskFormDialog: React.FC<PropsWithChildren> = ({ children }) => {
         <TaskForm
           defaultFormData={{
             content: '',
-            due_date: location.pathname === PATHS.TODAY ? startOfToday() : null,
+            due_date:
+              location.pathname === ROUTES.TODAY ? startOfToday() : null,
             projectId: null,
           }}
           mode='create'
-          onCancel={() => setOpen(false)}
-          onSubmit={(formData) => {
-            fetcher.submit(JSON.stringify(formData), {
-              action: PATHS.APP,
-              method: 'POST',
-              encType: 'application/json',
-            });
-
-            setOpen(false);
-          }}
+          onCancel={() => setIsOpen(false)}
+          onSubmit={handleSubmitCreate}
         />
       </DialogContent>
     </Dialog>

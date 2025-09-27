@@ -11,7 +11,6 @@ const envSchema = z.object({
 export const parsedEnv = envSchema.safeParse(import.meta.env);
 
 if (!parsedEnv.success) {
-  console.error('Invalid environment variables:', parsedEnv.error.message);
   throw new Error('Invalid environment configuration');
 }
 

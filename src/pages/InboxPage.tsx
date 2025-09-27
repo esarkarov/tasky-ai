@@ -6,8 +6,10 @@ import { TaskCreateButton } from '@/components/TaskCreateButton';
 import { TaskEmptyState } from '@/components/TaskEmptyState';
 import { TaskForm } from '@/components/TaskForm';
 import { TopAppBar } from '@/components/TopAppBar';
+import { HTTP_METHODS, ROUTES } from '@/constants';
+import { ITaskForm } from '@/interfaces';
 import { Models } from 'appwrite';
-import { useState } from 'react';
+import { useCallback, useState } from 'react';
 import { useFetcher, useLoaderData } from 'react-router';
 
 const InboxPage = () => {
@@ -15,7 +17,18 @@ const InboxPage = () => {
   const { tasks } = useLoaderData<{
     tasks: Models.DocumentList<Models.Document>;
   }>();
-  const [taskFormShow, setTaskFormShow] = useState(false);
+  const [isFormOpen, setIsFormOpen] = useState<boolean>(false);
+
+  const handleSubmitCreate = useCallback(
+    (formData: ITaskForm) => {
+      fetcher.submit(JSON.stringify(formData), {
+        action: ROUTES.APP,
+        method: HTTP_METHODS.POST,
+        encType: 'application/json',
+      });
+    },
+    [fetcher],
+  );
 
   return (
     <>
@@ -44,24 +57,18 @@ const InboxPage = () => {
 
           {fetcher.state !== 'idle' && <TaskCardSkeleton />}
 
-          {!taskFormShow && (
-            <TaskCreateButton onClick={() => setTaskFormShow(true)} />
+          {!isFormOpen && (
+            <TaskCreateButton onClick={() => setIsFormOpen(true)} />
           )}
 
-          {!taskFormShow && <TaskEmptyState type='inbox' />}
+          {!isFormOpen && <TaskEmptyState type='inbox' />}
 
-          {taskFormShow && (
+          {isFormOpen && (
             <TaskForm
               className='mt-1'
               mode='create'
-              onCancel={() => setTaskFormShow(false)}
-              onSubmit={(formData) => {
-                fetcher.submit(JSON.stringify(formData), {
-                  action: '/app',
-                  method: 'POST',
-                  encType: 'application/json',
-                });
-              }}
+              onCancel={() => setIsFormOpen(false)}
+              onSubmit={handleSubmitCreate}
             />
           )}
         </PageList>

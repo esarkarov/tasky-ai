@@ -1,5 +1,5 @@
 import { Head } from '@/components/Head';
-import { PATHS } from '@/constants';
+import { ROUTES } from '@/constants';
 import { SignUp } from '@clerk/clerk-react';
 
 const RegisterPage = () => {
@@ -9,7 +9,7 @@ const RegisterPage = () => {
 
       <section>
         <div className='container flex justify-center'>
-          <SignUp signInUrl={PATHS.LOGIN} />
+          <SignUp signInUrl={ROUTES.LOGIN} />
         </div>
       </section>
     </>

@@ -10,16 +10,34 @@ import { TEmptyStateType } from '@/types';
 import { Calendar1, CalendarDays, CircleCheck, Inbox } from 'lucide-react';
 
 export const TOOLTIP_DELAY = 500;
+export const SCROLL_THRESHOLD = 70;
 
-export const PATHS = {
+export const ROUTES = {
   HOME: '/',
-  REGISTER: '/register',
   LOGIN: '/login',
+  REGISTER: '/register',
   AUTH_SYNC: '/auth-sync',
+
   APP: '/app',
-  TODAY: '/app/today',
   INBOX: '/app/inbox',
+  TODAY: '/app/today',
+  UPCOMING: '/app/upcoming',
+  COMPLETED: '/app/completed',
   PROJECT: (id: string | undefined) => `/app/projects/${id}`,
+
+  APP_PATHS: {
+    INBOX: 'inbox',
+    TODAY: 'today',
+    UPCOMING: 'upcoming',
+    COMPLETED: 'completed',
+  },
+} as const;
+
+export const HTTP_METHODS = {
+  POST: 'POST',
+  PUT: 'PUT',
+  DELETE: 'DELETE',
+  GET: 'GET',
 } as const;
 
 export const SOCIAL_LINKS = [

@@ -1,7 +1,7 @@
 import { useNavigate } from 'react-router';
 import { useEffect } from 'react';
 import { useAuth } from '@clerk/clerk-react';
-import { PATHS } from '@/constants';
+import { ROUTES } from '@/constants';
 import { env } from '@/config/env';
 
 const AuthSyncPage = () => {
@@ -16,13 +16,13 @@ const AuthSyncPage = () => {
         localStorage.removeItem(env.clerkUserStorageKey);
       }
 
-      navigate(PATHS.HOME);
+      navigate(ROUTES.HOME);
       return;
     }
 
     if (isSignedIn) {
       localStorage.setItem(env.clerkUserStorageKey, userId);
-      navigate(PATHS.TODAY);
+      navigate(ROUTES.TODAY);
     }
   }, [userId, isSignedIn, isLoaded, navigate]);
 

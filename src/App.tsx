@@ -1,7 +1,7 @@
 import { ClerkProvider } from '@clerk/clerk-react';
 import { RouterProvider } from 'react-router';
 import { dark } from '@clerk/themes';
-import { PATHS } from '@/constants';
+import { ROUTES } from '@/constants';
 import { env } from '@/config/env';
 import router from '@/routes';
 
@@ -9,9 +9,9 @@ const App = () => {
   return (
     <ClerkProvider
       publishableKey={env.clerkPublishableKey}
-      afterSignOutUrl={PATHS.AUTH_SYNC}
-      signInForceRedirectUrl={PATHS.AUTH_SYNC}
-      signUpForceRedirectUrl={PATHS.AUTH_SYNC}
+      afterSignOutUrl={ROUTES.AUTH_SYNC}
+      signInForceRedirectUrl={ROUTES.AUTH_SYNC}
+      signUpForceRedirectUrl={ROUTES.AUTH_SYNC}
       appearance={{
         baseTheme: dark,
         variables: {

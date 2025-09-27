@@ -2,7 +2,7 @@ import { databases, Query } from '@/lib/appwrite';
 import { redirect } from 'react-router';
 import { getUserId } from '@/lib/utils';
 import { env } from '@/config/env';
-import { PATHS } from '@/constants';
+import { ROUTES } from '@/constants';
 import type { LoaderFunction } from 'react-router';
 
 const getProjects = async () => {
@@ -22,7 +22,7 @@ const getProjects = async () => {
 const appLoader: LoaderFunction = async () => {
   const userId = getUserId();
 
-  if (!userId) return redirect(PATHS.LOGIN);
+  if (!userId) return redirect(ROUTES.LOGIN);
 
   const projects = await getProjects();
 

@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useCallback, useState } from 'react';
 import { useFetcher, useLoaderData } from 'react-router';
 import { startOfToday } from 'date-fns';
 import { Head } from '@/components/Head';
@@ -10,16 +10,27 @@ import { TaskForm } from '@/components/TaskForm';
 import { TaskCard } from '@/components/TaskCard';
 import { TaskCardSkeleton } from '@/components/TaskCardSkeleton';
 import { CheckCircle2 } from 'lucide-react';
+import { HTTP_METHODS, ROUTES } from '@/constants';
 import type { Models } from 'appwrite';
-import { PATHS } from '@/constants';
+import { ITaskForm } from '@/interfaces';
 
 const TodayPage = () => {
   const fetcher = useFetcher();
   const { tasks } = useLoaderData<{
     tasks: Models.DocumentList<Models.Document>;
   }>();
+  const [isFormOpen, setIsFormOpen] = useState<boolean>(false);
 
-  const [taskFormShow, setTaskFormShow] = useState<boolean>(false);
+  const handleSubmitCreate = useCallback(
+    (formData: ITaskForm) => {
+      fetcher.submit(JSON.stringify(formData), {
+        action: ROUTES.APP,
+        method: HTTP_METHODS.POST,
+        encType: 'application/json',
+      });
+    },
+    [fetcher],
+  );
 
   return (
     <>
@@ -57,13 +68,13 @@ const TodayPage = () => {
 
           {fetcher.state !== 'idle' && <TaskCardSkeleton />}
 
-          {!taskFormShow && (
-            <TaskCreateButton onClick={() => setTaskFormShow(true)} />
+          {!isFormOpen && (
+            <TaskCreateButton onClick={() => setIsFormOpen(true)} />
           )}
 
-          {!tasks.total && !taskFormShow && <TaskEmptyState />}
+          {!tasks.total && !isFormOpen && <TaskEmptyState />}
 
-          {taskFormShow && (
+          {isFormOpen && (
             <TaskForm
               className='mt-1'
               mode='create'
@@ -72,14 +83,8 @@ const TodayPage = () => {
                 due_date: startOfToday(),
                 projectId: null,
               }}
-              onCancel={() => setTaskFormShow(false)}
-              onSubmit={(formData) => {
-                fetcher.submit(JSON.stringify(formData), {
-                  action: PATHS.APP,
-                  method: 'POST',
-                  encType: 'application/json',
-                });
-              }}
+              onCancel={() => setIsFormOpen(false)}
+              onSubmit={handleSubmitCreate}
             />
           )}
         </PageList>

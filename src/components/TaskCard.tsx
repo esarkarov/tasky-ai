@@ -1,37 +1,10 @@
-import { cn } from '@/lib/utils';
-import { useState, useCallback } from 'react';
-import { useFetcher, useLocation } from 'react-router';
-import {
-  formatCustomDate,
-  getTaskDueDateColorClass,
-  truncateString,
-} from '@/lib/utils';
-import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardFooter } from '@/components/ui/card';
-import {
-  Tooltip,
-  TooltipTrigger,
-  TooltipContent,
-} from '@/components/ui/tooltip';
 import { TaskForm } from '@/components/TaskForm';
-import { ToastAction } from '@/components/ui/toast';
-import {
-  AlertDialog,
-  AlertDialogTrigger,
-  AlertDialogContent,
-  AlertDialogHeader,
-  AlertDialogTitle,
-  AlertDialogDescription,
-  AlertDialogFooter,
-  AlertDialogAction,
-  AlertDialogCancel,
-} from '@/components/ui/alert-dialog';
-
-import { useToast } from '@/hooks/use-toast';
-import { Check, CalendarDays, Hash, Inbox, Edit, Trash2 } from 'lucide-react';
+import { HTTP_METHODS, ROUTES } from '@/constants';
+import { ITask, ITaskForm } from '@/interfaces';
 import type { Models } from 'appwrite';
-import { ITask } from '@/interfaces';
-import { PATHS } from '@/constants';
+import { useCallback, useState } from 'react';
+import { useFetcher } from 'react-router';
+import { TaskDisplay } from './TaskDisplay';
 
 interface TaskCardProps {
   id: string;
@@ -49,12 +22,9 @@ export const TaskCard = ({
   project,
 }: TaskCardProps) => {
   const fetcher = useFetcher();
-  const location = useLocation();
-  const { toast } = useToast();
-  const [taskFormShow, setTaskFormShow] = useState<boolean>(false);
+  const [isEditing, setIsEditing] = useState<boolean>(false);
 
   const fetcherTask = fetcher.json as unknown as ITask;
-
   const task: ITask = Object.assign(
     {
       id,
@@ -66,178 +36,51 @@ export const TaskCard = ({
     fetcherTask,
   );
 
-  const handleTaskComplete = useCallback(
-    async (completed: boolean) => {
-      return await fetcher.submit(JSON.stringify({ id: task.id, completed }), {
-        action: PATHS.APP,
-        method: 'PUT',
-        encType: 'application/json',
-      });
+  const handleToggleComplete = useCallback(
+    async (newCompletedState: boolean) => {
+      await fetcher.submit(
+        JSON.stringify({ id: task.id, completed: newCompletedState }),
+        {
+          action: ROUTES.APP,
+          method: HTTP_METHODS.PUT,
+          encType: 'application/json',
+        },
+      );
     },
     [fetcher, task.id],
   );
 
+  const handleSubmitEdit = useCallback(
+    (formData: ITaskForm) => {
+      fetcher.submit(JSON.stringify(formData), {
+        action: ROUTES.APP,
+        method: HTTP_METHODS.PUT,
+        encType: 'application/json',
+      });
+      setIsEditing(false);
+    },
+    [fetcher],
+  );
+
+  const handleDelete = useCallback(() => {
+    fetcher.submit(JSON.stringify({ id: task.id }), {
+      action: ROUTES.APP,
+      method: HTTP_METHODS.DELETE,
+      encType: 'application/json',
+    });
+  }, [fetcher, task.id]);
+
   return (
     <>
-      {!taskFormShow && (
-        <div className='group/card relative grid grid-cols-[max-content,minmax(0,1fr)] gap-3 border-b'>
-          <Button
-            variant='outline'
-            size='icon'
-            className={cn(
-              'group/button rounded-full w-5 h-5 mt-2',
-              task.completed && 'bg-border',
-            )}
-            role='checkbox'
-            aria-checked={task.completed}
-            aria-label={`Mark task as ${task.completed ? 'incomplete' : 'complete'}`}
-            aria-describedby='task-content'
-            onClick={async () => {
-              await handleTaskComplete(!task.completed);
-
-              if (!task.completed) {
-                toast({
-                  title: '1 task completed',
-                  action: (
-                    <ToastAction
-                      altText='Undo'
-                      onClick={handleTaskComplete.bind(null, false)}
-                    >
-                      Undo
-                    </ToastAction>
-                  ),
-                });
-              }
-            }}
-          >
-            <Check
-              strokeWidth={4}
-              className={cn(
-                '!w-3 !h-3 text-muted-foreground group-hover/button:opacity-100 transition-opacity',
-                task.completed ? 'opacity-100' : 'opacity-0',
-              )}
-            />
-          </Button>
-
-          <Card className='rounded-none py-2 space-y-1.5 border-none'>
-            <CardContent className='p-0'>
-              <p
-                id='task-content'
-                className={cn(
-                  'text-sm max-md:me-16',
-                  task.completed && 'text-muted-foreground line-through',
-                )}
-              >
-                {task.content}
-              </p>
-            </CardContent>
-
-            <CardFooter className='p-0 flex gap-4'>
-              {task.due_date && location.pathname !== '/app/today' && (
-                <div
-                  className={cn(
-                    'flex items-center gap-1 text-xs text-muted-foreground',
-                    getTaskDueDateColorClass(task.due_date, task.completed),
-                  )}
-                >
-                  <CalendarDays size={14} />
-
-                  {formatCustomDate(task.due_date)}
-                </div>
-              )}
-
-              {location.pathname !== PATHS.INBOX &&
-                location.pathname !== PATHS.PROJECT(project?.$id) && (
-                  <div className='grid grid-cols-[minmax(0,180px),max-content] items-center gap-1 text-xs text-muted-foreground ms-auto'>
-                    <div className='truncate text-right'>
-                      {task.project?.name || 'Inbox'}
-                    </div>
-
-                    {task.project ? (
-                      <Hash
-                        size={14}
-                        color={task.project.color_hex}
-                      />
-                    ) : (
-                      <Inbox
-                        size={14}
-                        className='text-muted-foreground'
-                      />
-                    )}
-                  </div>
-                )}
-            </CardFooter>
-          </Card>
-
-          <div className='absolute top-1.5 right-0 bg-background ps-1 shadow-[-10px_0_5px_hsl(var(--background))] flex items-center gap-1 opacity-0 group-hover/card:opacity-100 focus-within:opacity-100 max-md:opacity-100'>
-            {!task.completed && (
-              <Tooltip>
-                <TooltipTrigger asChild>
-                  <Button
-                    variant='ghost'
-                    size='icon'
-                    className='w-6 h-6 text-muted-foreground'
-                    aria-label='Edit task'
-                    onClick={() => setTaskFormShow(true)}
-                  >
-                    <Edit />
-                  </Button>
-                </TooltipTrigger>
-
-                <TooltipContent>Edit task</TooltipContent>
-              </Tooltip>
-            )}
-
-            <AlertDialog>
-              <Tooltip>
-                <TooltipTrigger asChild>
-                  <AlertDialogTrigger asChild>
-                    <Button
-                      variant='ghost'
-                      size='icon'
-                      className='w-6 h-6 text-muted-foreground'
-                      aria-label='Delete task'
-                    >
-                      <Trash2 />
-                    </Button>
-                  </AlertDialogTrigger>
-                </TooltipTrigger>
-
-                <TooltipContent>Delete task</TooltipContent>
-              </Tooltip>
-
-              <AlertDialogContent>
-                <AlertDialogHeader>
-                  <AlertDialogTitle>Delete task?</AlertDialogTitle>
-
-                  <AlertDialogDescription>
-                    The <strong>{truncateString(task.content, 48)}</strong> task
-                    will be permanently deleted.
-                  </AlertDialogDescription>
-                </AlertDialogHeader>
-
-                <AlertDialogFooter>
-                  <AlertDialogCancel>Cancel</AlertDialogCancel>
-
-                  <AlertDialogAction
-                    onClick={() => {
-                      fetcher.submit(JSON.stringify({ id: task.id }), {
-                        action: PATHS.APP,
-                        method: 'DELETE',
-                        encType: 'application/json',
-                      });
-                    }}
-                  >
-                    Delete
-                  </AlertDialogAction>
-                </AlertDialogFooter>
-              </AlertDialogContent>
-            </AlertDialog>
-          </div>
-        </div>
-      )}
-
-      {taskFormShow && (
+      {!isEditing ? (
+        <TaskDisplay
+          task={task}
+          project={project}
+          onToggleComplete={handleToggleComplete}
+          onEdit={() => setIsEditing(true)}
+          onDelete={handleDelete}
+        />
+      ) : (
         <TaskForm
           className='my-1'
           defaultFormData={{
@@ -245,16 +88,8 @@ export const TaskCard = ({
             projectId: '9249dbb79876',
           }}
           mode='edit'
-          onCancel={() => setTaskFormShow(false)}
-          onSubmit={(formData) => {
-            fetcher.submit(JSON.stringify(formData), {
-              action: PATHS.APP,
-              method: 'PUT',
-              encType: 'application/json',
-            });
-
-            setTaskFormShow(false);
-          }}
+          onCancel={() => setIsEditing(false)}
+          onSubmit={handleSubmitEdit}
         />
       )}
     </>

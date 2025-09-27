@@ -1,7 +1,7 @@
 import { heroBannerLg, heroBannerSm } from '@/assets';
 import { Head } from '@/components/Head';
 import { Button } from '@/components/ui/button';
-import { PATHS } from '@/constants';
+import { ROUTES } from '@/constants';
 import { Link } from 'react-router';
 
 const HomePage = () => {
@@ -29,7 +29,7 @@ const HomePage = () => {
               asChild
               size='lg'
             >
-              <Link to={PATHS.REGISTER}>Start for free</Link>
+              <Link to={ROUTES.REGISTER}>Start for free</Link>
             </Button>
           </div>
 

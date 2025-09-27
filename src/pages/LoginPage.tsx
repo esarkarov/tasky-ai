@@ -1,6 +1,6 @@
 import { SignIn } from '@clerk/clerk-react';
 import { Head } from '@/components/Head';
-import { PATHS } from '@/constants';
+import { ROUTES } from '@/constants';
 
 const LoginPage = () => {
   return (
@@ -9,7 +9,7 @@ const LoginPage = () => {
 
       <section>
         <div className='container flex justify-center'>
-          <SignIn signUpUrl={PATHS.REGISTER} />
+          <SignIn signUpUrl={ROUTES.REGISTER} />
         </div>
       </section>
     </>

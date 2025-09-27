@@ -10,8 +10,9 @@ import {
   startOfToday,
 } from 'date-fns';
 import { redirect } from 'react-router';
-import { PATHS, RELATIVE_DAYS } from '@/constants';
+import { ROUTES, RELATIVE_DAYS } from '@/constants';
 import { env } from '@/config/env';
+import { ITaskCounts } from '@/interfaces';
 
 export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs));
@@ -54,6 +55,20 @@ export function getTaskDueDateColorClass(
   }
 }
 
+export const getBadgeCount = (
+  href: string,
+  taskCounts: ITaskCounts,
+): number | undefined => {
+  switch (href) {
+    case ROUTES.INBOX:
+      return taskCounts?.inboxTasks;
+    case ROUTES.TODAY:
+      return taskCounts?.todayTasks;
+    default:
+      return undefined;
+  }
+};
+
 export function generateID(): string {
   return Math.random().toString(36).slice(8) + Date.now().toString(36);
 }
@@ -62,7 +77,7 @@ export function getUserId(): string {
   const clerkUserId = localStorage.getItem(env.clerkUserStorageKey);
 
   if (!clerkUserId) {
-    redirect(PATHS.AUTH_SYNC);
+    redirect(ROUTES.AUTH_SYNC);
     return '';
   }
 

@@ -1,4 +1,5 @@
 import { env } from '@/config/env';
+import { HTTP_METHODS } from '@/constants';
 import { ITask } from '@/interfaces';
 import { databases } from '@/lib/appwrite';
 import { generateID, getUserId } from '@/lib/utils';
@@ -51,15 +52,15 @@ const deleteTask = async (data: ITask) => {
 const taskAction: ActionFunction = async ({ request }) => {
   const data = (await request.json()) as ITask;
 
-  if (request.method === 'POST') {
+  if (request.method === HTTP_METHODS.POST) {
     return await createTask(data);
   }
 
-  if (request.method === 'PUT') {
+  if (request.method === HTTP_METHODS.PUT) {
     return await updateTask(data);
   }
 
-  if (request.method === 'DELETE') {
+  if (request.method === HTTP_METHODS.DELETE) {
     return await deleteTask(data);
   }
 };

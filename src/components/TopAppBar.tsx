@@ -5,6 +5,7 @@ import {
   TooltipContent,
   TooltipTrigger,
 } from '@/components/ui/tooltip';
+import { SCROLL_THRESHOLD } from '@/constants';
 import { cn } from '@/lib/utils';
 import { useEffect, useState } from 'react';
 
@@ -17,7 +18,7 @@ export const TopAppBar = ({ title, taskCount }: TopAppBarProps) => {
   const [showTitle, setShowTitle] = useState<boolean>(false);
 
   useEffect(() => {
-    const listener = () => setShowTitle(window.scrollY > 70);
+    const listener = () => setShowTitle(window.scrollY > SCROLL_THRESHOLD);
 
     listener();
     window.addEventListener('scroll', listener);
