@@ -3,20 +3,20 @@ import { createElement, lazy } from 'react';
 import { RouteObject } from 'react-router';
 
 export const HomePage = lazy(() =>
-  import('@/pages/HomePage').then((module) => ({ default: module.default })),
+  import('@/pages/HomePage').then((module) => ({ default: module.default }))
 );
 export const LoginPage = lazy(() =>
-  import('@/pages/LoginPage').then((module) => ({ default: module.default })),
+  import('@/pages/LoginPage').then((module) => ({ default: module.default }))
 );
 export const RegisterPage = lazy(() =>
   import('@/pages/RegisterPage').then((module) => ({
     default: module.default,
-  })),
+  }))
 );
 export const AuthSyncPage = lazy(() =>
   import('@/pages/AuthSyncPage').then((module) => ({
     default: module.default,
-  })),
+  }))
 );
 
 export const publicRoutes: RouteObject[] = [

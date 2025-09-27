@@ -16,30 +16,26 @@ export const TaskMetadata = ({ task, project }: TaskMetadataProps) => {
 
   const showDueDate = task.due_date && location.pathname !== ROUTES.TODAY;
   const showProject =
-    location.pathname !== ROUTES.INBOX &&
-    location.pathname !== ROUTES.PROJECT(project?.$id);
+    location.pathname !== ROUTES.INBOX && location.pathname !== ROUTES.PROJECT(project?.$id);
 
   if (!showDueDate && !showProject) return null;
 
   return (
-    <CardFooter className='p-0 flex gap-4'>
+    <CardFooter className="p-0 flex gap-4">
       {showDueDate && (
         <div
           className={cn(
             'flex items-center gap-1 text-xs text-muted-foreground',
-            getTaskDueDateColorClass(task.due_date, task.completed),
-          )}
-        >
+            getTaskDueDateColorClass(task.due_date, task.completed)
+          )}>
           <CalendarDays size={14} />
           {formatCustomDate(task.due_date as Date)}
         </div>
       )}
 
       {showProject && (
-        <div className='grid grid-cols-[minmax(0,180px),max-content] items-center gap-1 text-xs text-muted-foreground ms-auto'>
-          <div className='truncate text-right'>
-            {task.project?.name || 'Inbox'}
-          </div>
+        <div className="grid grid-cols-[minmax(0,180px),max-content] items-center gap-1 text-xs text-muted-foreground ms-auto">
+          <div className="truncate text-right">{task.project?.name || 'Inbox'}</div>
           {task.project ? (
             <Hash
               size={14}
@@ -48,7 +44,7 @@ export const TaskMetadata = ({ task, project }: TaskMetadataProps) => {
           ) : (
             <Inbox
               size={14}
-              className='text-muted-foreground'
+              className="text-muted-foreground"
             />
           )}
         </div>

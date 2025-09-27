@@ -14,10 +14,10 @@ const UpcomingPage = () => {
 
   return (
     <>
-      <Head title='Tasky AI | Upcoming' />
+      <Head title="Tasky AI | Upcoming" />
 
       <TopAppBar
-        title='Upcoming'
+        title="Upcoming"
         taskCount={tasks.total}
       />
 
@@ -26,27 +26,25 @@ const UpcomingPage = () => {
           <PageTitle>Upcoming</PageTitle>
 
           {tasks.total > 0 && (
-            <div className='flex items-center gap-1.5 text-sm text-muted-foreground'>
+            <div className="flex items-center gap-1.5 text-sm text-muted-foreground">
               <CheckCircle2 size={16} /> {tasks.total} tasks
             </div>
           )}
         </PageHeader>
 
         <PageList>
-          {tasks?.documents.map(
-            ({ $id, content, completed, due_date, project }) => (
-              <TaskCard
-                key={$id}
-                id={$id}
-                content={content}
-                completed={completed}
-                dueDate={due_date}
-                project={project}
-              />
-            ),
-          )}
+          {tasks?.documents.map(({ $id, content, completed, due_date, project }) => (
+            <TaskCard
+              key={$id}
+              id={$id}
+              content={content}
+              completed={completed}
+              dueDate={due_date}
+              project={project}
+            />
+          ))}
 
-          {!tasks.total && <TaskEmptyState type='upcoming' />}
+          {!tasks.total && <TaskEmptyState type="upcoming" />}
         </PageList>
       </Page>
     </>

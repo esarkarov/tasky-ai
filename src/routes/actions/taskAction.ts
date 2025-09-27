@@ -7,12 +7,10 @@ import { ActionFunction } from 'react-router';
 
 const createTask = async (data: ITask) => {
   try {
-    return await databases.createDocument(
-      env.appwriteDatabaseId,
-      'tasks',
-      generateID(),
-      { ...data, userId: getUserId() },
-    );
+    return await databases.createDocument(env.appwriteDatabaseId, 'tasks', generateID(), {
+      ...data,
+      userId: getUserId(),
+    });
   } catch (err) {
     console.log(err);
   }
@@ -26,12 +24,7 @@ const updateTask = async (data: ITask) => {
   delete data.id;
 
   try {
-    return await databases.updateDocument(
-      env.appwriteDatabaseId,
-      'tasks',
-      documentId,
-      data,
-    );
+    return await databases.updateDocument(env.appwriteDatabaseId, 'tasks', documentId, data);
   } catch (err) {
     console.log(err);
   }

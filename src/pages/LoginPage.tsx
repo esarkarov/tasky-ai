@@ -5,10 +5,10 @@ import { ROUTES } from '@/constants';
 const LoginPage = () => {
   return (
     <>
-      <Head title='Tasky AI | Log In' />
+      <Head title="Tasky AI | Log In" />
 
       <section>
-        <div className='container flex justify-center'>
+        <div className="container flex justify-center">
           <SignIn signUpUrl={ROUTES.REGISTER} />
         </div>
       </section>

@@ -9,18 +9,17 @@ export const Header = () => {
   const isRegister = location.pathname == ROUTES.REGISTER;
 
   return (
-    <header className='fixed z-40 top-0 left-0 w-full p-4'>
-      <div className='container h-16 border backdrop-blur-3xl rounded-xl flex justify-between items-center'>
+    <header className="fixed z-40 top-0 left-0 w-full p-4">
+      <div className="container h-16 border backdrop-blur-3xl rounded-xl flex justify-between items-center">
         <Link to={ROUTES.HOME}>
           <Logo />
         </Link>
 
-        <div className='flex items-center gap-2'>
+        <div className="flex items-center gap-2">
           {!isLogin && (
             <Button
               asChild
-              variant='ghost'
-            >
+              variant="ghost">
               <Link to={ROUTES.LOGIN}>Sign in</Link>
             </Button>
           )}

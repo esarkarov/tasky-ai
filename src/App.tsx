@@ -25,8 +25,7 @@ const App = () => {
           colorPrimary: 'hsl(20.5 90.2% 48.2%)',
           colorTextOnPrimaryBackground: 'hsl(60 9.1% 97.8%)',
         },
-      }}
-    >
+      }}>
       <RouterProvider router={router} />
     </ClerkProvider>
   );

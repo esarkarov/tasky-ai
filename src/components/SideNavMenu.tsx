@@ -17,17 +17,13 @@ interface SideNavMenuProps {
   onItemClick: () => void;
 }
 
-export const SideNavMenu = ({
-  currentPath,
-  taskCounts,
-  onItemClick,
-}: SideNavMenuProps) => (
+export const SideNavMenu = ({ currentPath, taskCounts, onItemClick }: SideNavMenuProps) => (
   <SidebarGroup>
     <SidebarGroupContent>
       <SidebarMenu>
         <SidebarMenuItem>
           <TaskFormDialog>
-            <SidebarMenuButton className='!text-primary'>
+            <SidebarMenuButton className="!text-primary">
               <CirclePlus />
               Add task
             </SidebarMenuButton>

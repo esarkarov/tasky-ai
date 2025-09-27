@@ -38,25 +38,23 @@ export const TaskFormDialog: React.FC<PropsWithChildren> = ({ children }) => {
 
       setIsOpen(false);
     },
-    [fetcher],
+    [fetcher]
   );
 
   return (
     <Dialog
       open={isOpen}
-      onOpenChange={setIsOpen}
-    >
+      onOpenChange={setIsOpen}>
       <DialogTrigger asChild>{children}</DialogTrigger>
 
-      <DialogContent className='p-0 border-0 !rounded-xl'>
+      <DialogContent className="p-0 border-0 !rounded-xl">
         <TaskForm
           defaultFormData={{
             content: '',
-            due_date:
-              location.pathname === ROUTES.TODAY ? startOfToday() : null,
+            due_date: location.pathname === ROUTES.TODAY ? startOfToday() : null,
             projectId: null,
           }}
-          mode='create'
+          mode="create"
           onCancel={() => setIsOpen(false)}
           onSubmit={handleSubmitCreate}
         />

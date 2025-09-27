@@ -27,14 +27,14 @@ const InboxPage = () => {
         encType: 'application/json',
       });
     },
-    [fetcher],
+    [fetcher]
   );
 
   return (
     <>
-      <Head title='Tasky AI | Inbox' />
+      <Head title="Tasky AI | Inbox" />
 
-      <TopAppBar title='Inbox' />
+      <TopAppBar title="Inbox" />
 
       <Page>
         <PageHeader>
@@ -42,31 +42,27 @@ const InboxPage = () => {
         </PageHeader>
 
         <PageList>
-          {tasks?.documents.map(
-            ({ $id, content, completed, due_date, project }) => (
-              <TaskCard
-                key={$id}
-                id={$id}
-                content={content}
-                completed={completed}
-                dueDate={due_date}
-                project={project}
-              />
-            ),
-          )}
+          {tasks?.documents.map(({ $id, content, completed, due_date, project }) => (
+            <TaskCard
+              key={$id}
+              id={$id}
+              content={content}
+              completed={completed}
+              dueDate={due_date}
+              project={project}
+            />
+          ))}
 
           {fetcher.state !== 'idle' && <TaskCardSkeleton />}
 
-          {!isFormOpen && (
-            <TaskCreateButton onClick={() => setIsFormOpen(true)} />
-          )}
+          {!isFormOpen && <TaskCreateButton onClick={() => setIsFormOpen(true)} />}
 
-          {!isFormOpen && <TaskEmptyState type='inbox' />}
+          {!isFormOpen && <TaskEmptyState type="inbox" />}
 
           {isFormOpen && (
             <TaskForm
-              className='mt-1'
-              mode='create'
+              className="mt-1"
+              mode="create"
               onCancel={() => setIsFormOpen(false)}
               onSubmit={handleSubmitCreate}
             />

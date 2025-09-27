@@ -22,17 +22,16 @@ interface TaskActionsProps {
 }
 
 export const TaskActions = ({ task, onEdit, onDelete }: TaskActionsProps) => (
-  <div className='absolute top-1.5 right-0 bg-background ps-1 shadow-[-10px_0_5px_hsl(var(--background))] flex items-center gap-1 opacity-0 group-hover/card:opacity-100 focus-within:opacity-100 max-md:opacity-100'>
+  <div className="absolute top-1.5 right-0 bg-background ps-1 shadow-[-10px_0_5px_hsl(var(--background))] flex items-center gap-1 opacity-0 group-hover/card:opacity-100 focus-within:opacity-100 max-md:opacity-100">
     {!task.completed && (
       <Tooltip>
         <TooltipTrigger asChild>
           <Button
-            variant='ghost'
-            size='icon'
-            className='w-6 h-6 text-muted-foreground'
-            aria-label='Edit task'
-            onClick={onEdit}
-          >
+            variant="ghost"
+            size="icon"
+            className="w-6 h-6 text-muted-foreground"
+            aria-label="Edit task"
+            onClick={onEdit}>
             <Edit />
           </Button>
         </TooltipTrigger>
@@ -45,11 +44,10 @@ export const TaskActions = ({ task, onEdit, onDelete }: TaskActionsProps) => (
         <TooltipTrigger asChild>
           <AlertDialogTrigger asChild>
             <Button
-              variant='ghost'
-              size='icon'
-              className='w-6 h-6 text-muted-foreground'
-              aria-label='Delete task'
-            >
+              variant="ghost"
+              size="icon"
+              className="w-6 h-6 text-muted-foreground"
+              aria-label="Delete task">
               <Trash2 />
             </Button>
           </AlertDialogTrigger>
@@ -61,8 +59,8 @@ export const TaskActions = ({ task, onEdit, onDelete }: TaskActionsProps) => (
         <AlertDialogHeader>
           <AlertDialogTitle>Delete task?</AlertDialogTitle>
           <AlertDialogDescription>
-            The <strong>{truncateString(task.content, 48)}</strong> task will be
-            permanently deleted.
+            The <strong>{truncateString(task.content, 48)}</strong> task will be permanently
+            deleted.
           </AlertDialogDescription>
         </AlertDialogHeader>
         <AlertDialogFooter>

@@ -95,8 +95,7 @@ export const EMPTY_STATES: Record<TEmptyStateType, IEmptyStateContent> = {
       height: 260,
     },
     title: 'What do you need to get done today?',
-    description:
-      'By default, tasks added here will be due today. Click + to add a task.',
+    description: 'By default, tasks added here will be due today. Click + to add a task.',
   },
   inbox: {
     img: {
@@ -105,8 +104,7 @@ export const EMPTY_STATES: Record<TEmptyStateType, IEmptyStateContent> = {
       height: 260,
     },
     title: 'What’s on your mind?',
-    description:
-      'Capture tasks that don’t have a specific category. Click + to add a task.',
+    description: 'Capture tasks that don’t have a specific category. Click + to add a task.',
   },
   upcoming: {
     img: {
@@ -115,8 +113,7 @@ export const EMPTY_STATES: Record<TEmptyStateType, IEmptyStateContent> = {
       height: 260,
     },
     title: 'Plan ahead with ease!',
-    description:
-      'Tasks added here will be due in the future. Click + to schedule a task.',
+    description: 'Tasks added here will be due in the future. Click + to schedule a task.',
   },
   completed: {
     img: {
@@ -125,8 +122,7 @@ export const EMPTY_STATES: Record<TEmptyStateType, IEmptyStateContent> = {
       height: 260,
     },
     title: 'You’ve been productive!',
-    description:
-      'All the tasks you’ve completed will appear here. Keep up the great work!',
+    description: 'All the tasks you’ve completed will appear here. Keep up the great work!',
   },
   project: {
     img: {
@@ -135,8 +131,7 @@ export const EMPTY_STATES: Record<TEmptyStateType, IEmptyStateContent> = {
       height: 260,
     },
     title: 'Let’s build something amazing!',
-    description:
-      'Add tasks specific to this project. Click + to start planning.',
+    description: 'Add tasks specific to this project. Click + to start planning.',
   },
 };
 

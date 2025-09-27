@@ -21,21 +21,20 @@ export const TaskDisplay = ({
   onEdit,
   onDelete,
 }: TaskDisplayProps) => (
-  <div className='group/card relative grid grid-cols-[max-content,minmax(0,1fr)] gap-3 border-b'>
+  <div className="group/card relative grid grid-cols-[max-content,minmax(0,1fr)] gap-3 border-b">
     <TaskCompletionButton
       task={task}
       onToggleComplete={onToggleComplete}
     />
 
-    <Card className='rounded-none py-2 space-y-1.5 border-none'>
-      <CardContent className='p-0'>
+    <Card className="rounded-none py-2 space-y-1.5 border-none">
+      <CardContent className="p-0">
         <p
-          id='task-content'
+          id="task-content"
           className={cn(
             'text-sm max-md:me-16',
-            task.completed && 'text-muted-foreground line-through',
-          )}
-        >
+            task.completed && 'text-muted-foreground line-through'
+          )}>
           {task.content}
         </p>
       </CardContent>

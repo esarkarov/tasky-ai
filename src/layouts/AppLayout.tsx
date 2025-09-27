@@ -15,16 +15,10 @@ const AppLayout = () => {
       <SidebarProvider>
         <TooltipProvider
           delayDuration={TOOLTIP_DELAY}
-          disableHoverableContent
-        >
+          disableHoverableContent>
           <AppSidebar />
 
-          <main
-            className={cn(
-              'flex-1',
-              isLoading && 'opacity-50 pointer-events-none',
-            )}
-          >
+          <main className={cn('flex-1', isLoading && 'opacity-50 pointer-events-none')}>
             <Outlet />
           </main>
         </TooltipProvider>

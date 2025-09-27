@@ -9,7 +9,7 @@ import { appRoutes } from './modules/appRoutes';
 import { publicRoutes } from './modules/publicRoutes';
 
 export const ErrorPage = lazy(() =>
-  import('@/pages/ErrorPage').then((module) => ({ default: module.default })),
+  import('@/pages/ErrorPage').then((module) => ({ default: module.default }))
 );
 
 const router = createBrowserRouter([

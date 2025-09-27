@@ -1,10 +1,6 @@
 import { SIDEBAR_LINKS } from '@/constants';
 import { ITaskCounts } from '@/interfaces';
-import {
-  SidebarMenuBadge,
-  SidebarMenuButton,
-  SidebarMenuItem,
-} from '@/components/ui/sidebar';
+import { SidebarMenuBadge, SidebarMenuButton, SidebarMenuItem } from '@/components/ui/sidebar';
 import { Link } from 'react-router';
 import { getBadgeCount } from '@/lib/utils';
 
@@ -15,12 +11,7 @@ interface SideNavItemProps {
   onItemClick: () => void;
 }
 
-export const SideNavItem = ({
-  item,
-  isActive,
-  taskCounts,
-  onItemClick,
-}: SideNavItemProps) => {
+export const SideNavItem = ({ item, isActive, taskCounts, onItemClick }: SideNavItemProps) => {
   const badgeCount = getBadgeCount(item.href, taskCounts);
   const showBadge = Boolean(badgeCount && badgeCount > 0);
 
@@ -29,8 +20,7 @@ export const SideNavItem = ({
       <SidebarMenuButton
         asChild
         isActive={isActive}
-        onClick={onItemClick}
-      >
+        onClick={onItemClick}>
         <Link to={item.href}>
           <item.icon />
           <span>{item.label}</span>

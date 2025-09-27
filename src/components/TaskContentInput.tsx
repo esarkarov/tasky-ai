@@ -6,11 +6,7 @@ interface TaskContentInputProps {
   onSubmit: () => void;
 }
 
-export const TaskContentInput = ({
-  value,
-  onChange,
-  onSubmit,
-}: TaskContentInputProps) => {
+export const TaskContentInput = ({ value, onChange, onSubmit }: TaskContentInputProps) => {
   const handleKeyDown = (e: React.KeyboardEvent) => {
     if (e.key === 'Enter') {
       e.preventDefault();
@@ -20,8 +16,8 @@ export const TaskContentInput = ({
 
   return (
     <Textarea
-      className='!border-0 !ring-0 mb-2 p-1'
-      placeholder='After finishing the project, Take a tour'
+      className="!border-0 !ring-0 mb-2 p-1"
+      placeholder="After finishing the project, Take a tour"
       autoFocus
       value={value}
       onInput={(e) => onChange(e.currentTarget.value)}

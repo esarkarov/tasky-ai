@@ -29,8 +29,7 @@ export const AppSidebar = () => {
       <SidebarHeader>
         <Link
           to={ROUTES.INBOX}
-          className='p-2'
-        >
+          className="p-2">
           <Logo />
         </Link>
       </SidebarHeader>

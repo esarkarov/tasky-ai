@@ -13,9 +13,9 @@ const CompletedPage = () => {
 
   return (
     <>
-      <Head title='Completed – Tasky AI' />
+      <Head title="Completed – Tasky AI" />
 
-      <TopAppBar title='Completed' />
+      <TopAppBar title="Completed" />
 
       <Page>
         <PageHeader>
@@ -23,20 +23,18 @@ const CompletedPage = () => {
         </PageHeader>
 
         <PageList>
-          {tasks?.documents.map(
-            ({ $id, content, completed, due_date, project }) => (
-              <TaskCard
-                key={$id}
-                id={$id}
-                content={content}
-                completed={completed}
-                dueDate={due_date}
-                project={project}
-              />
-            ),
-          )}
+          {tasks?.documents.map(({ $id, content, completed, due_date, project }) => (
+            <TaskCard
+              key={$id}
+              id={$id}
+              content={content}
+              completed={completed}
+              dueDate={due_date}
+              project={project}
+            />
+          ))}
 
-          {!tasks.total && <TaskEmptyState type='completed' />}
+          {!tasks.total && <TaskEmptyState type="completed" />}
         </PageList>
       </Page>
     </>

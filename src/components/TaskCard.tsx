@@ -14,13 +14,7 @@ interface TaskCardProps {
   project: Models.Document | null;
 }
 
-export const TaskCard = ({
-  id,
-  content,
-  completed,
-  dueDate,
-  project,
-}: TaskCardProps) => {
+export const TaskCard = ({ id, content, completed, dueDate, project }: TaskCardProps) => {
   const fetcher = useFetcher();
   const [isEditing, setIsEditing] = useState<boolean>(false);
 
@@ -33,21 +27,18 @@ export const TaskCard = ({
       due_date: dueDate,
       project,
     },
-    fetcherTask,
+    fetcherTask
   );
 
   const handleToggleComplete = useCallback(
     async (newCompletedState: boolean) => {
-      await fetcher.submit(
-        JSON.stringify({ id: task.id, completed: newCompletedState }),
-        {
-          action: ROUTES.APP,
-          method: HTTP_METHODS.PUT,
-          encType: 'application/json',
-        },
-      );
+      await fetcher.submit(JSON.stringify({ id: task.id, completed: newCompletedState }), {
+        action: ROUTES.APP,
+        method: HTTP_METHODS.PUT,
+        encType: 'application/json',
+      });
     },
-    [fetcher, task.id],
+    [fetcher, task.id]
   );
 
   const handleSubmitEdit = useCallback(
@@ -59,7 +50,7 @@ export const TaskCard = ({
       });
       setIsEditing(false);
     },
-    [fetcher],
+    [fetcher]
   );
 
   const handleDelete = useCallback(() => {
@@ -82,12 +73,12 @@ export const TaskCard = ({
         />
       ) : (
         <TaskForm
-          className='my-1'
+          className="my-1"
           defaultFormData={{
             ...task,
             projectId: '9249dbb79876',
           }}
-          mode='edit'
+          mode="edit"
           onCancel={() => setIsEditing(false)}
           onSubmit={handleSubmitEdit}
         />

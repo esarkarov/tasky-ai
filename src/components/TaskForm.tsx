@@ -80,7 +80,7 @@ export const TaskForm = ({
 
   return (
     <Card className={cn('focus-within:border-foreground/30', className)}>
-      <CardContent className='p-2'>
+      <CardContent className="p-2">
         <TaskContentInput
           value={taskContent}
           onChange={setTaskContent}
@@ -96,7 +96,7 @@ export const TaskForm = ({
 
       <Separator />
 
-      <CardFooter className='grid grid-cols-[minmax(0,1fr),max-content] gap-2 p-2'>
+      <CardFooter className="grid grid-cols-[minmax(0,1fr),max-content] gap-2 p-2">
         <ProjectSelector projectInfo={projectInfo} />
 
         <TaskFormActions

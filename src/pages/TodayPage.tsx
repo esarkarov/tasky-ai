@@ -29,15 +29,15 @@ const TodayPage = () => {
         encType: 'application/json',
       });
     },
-    [fetcher],
+    [fetcher]
   );
 
   return (
     <>
-      <Head title='Tasky AI | Today' />
+      <Head title="Tasky AI | Today" />
 
       <TopAppBar
-        title='Today'
+        title="Today"
         taskCount={tasks.total}
       />
 
@@ -46,38 +46,34 @@ const TodayPage = () => {
           <PageTitle>Today</PageTitle>
 
           {tasks.total > 0 && (
-            <div className='flex items-center gap-1.5 text-sm text-muted-foreground'>
+            <div className="flex items-center gap-1.5 text-sm text-muted-foreground">
               <CheckCircle2 size={16} /> {tasks.total} tasks
             </div>
           )}
         </PageHeader>
 
         <PageList>
-          {tasks.documents.map(
-            ({ $id, content, completed, due_date, project }) => (
-              <TaskCard
-                key={$id}
-                id={$id}
-                content={content}
-                completed={completed}
-                dueDate={due_date}
-                project={project}
-              />
-            ),
-          )}
+          {tasks.documents.map(({ $id, content, completed, due_date, project }) => (
+            <TaskCard
+              key={$id}
+              id={$id}
+              content={content}
+              completed={completed}
+              dueDate={due_date}
+              project={project}
+            />
+          ))}
 
           {fetcher.state !== 'idle' && <TaskCardSkeleton />}
 
-          {!isFormOpen && (
-            <TaskCreateButton onClick={() => setIsFormOpen(true)} />
-          )}
+          {!isFormOpen && <TaskCreateButton onClick={() => setIsFormOpen(true)} />}
 
           {!tasks.total && !isFormOpen && <TaskEmptyState />}
 
           {isFormOpen && (
             <TaskForm
-              className='mt-1'
-              mode='create'
+              className="mt-1"
+              mode="create"
               defaultFormData={{
                 content: '',
                 due_date: startOfToday(),

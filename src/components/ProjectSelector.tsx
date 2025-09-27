@@ -1,9 +1,5 @@
 import { useState } from 'react';
-import {
-  Popover,
-  PopoverContent,
-  PopoverTrigger,
-} from '@/components/ui/popover';
+import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { Button } from '@/components/ui/button';
 import { ChevronDown, Hash, Inbox } from 'lucide-react';
 import {
@@ -27,27 +23,24 @@ export const ProjectSelector = ({ projectInfo }: ProjectSelectorProps) => {
     <Popover
       open={isOpen}
       onOpenChange={setIsOpen}
-      modal
-    >
+      modal>
       <PopoverTrigger asChild>
         <Button
-          variant='ghost'
-          role='combobox'
+          variant="ghost"
+          role="combobox"
           aria-expanded={isOpen}
-          className='max-w-max'
-        >
+          className="max-w-max">
           {projectInfo.name ? <Hash color={projectInfo.colorHex} /> : <Inbox />}
-          <span className='truncate'>{projectInfo.name || 'Inbox'}</span>
+          <span className="truncate">{projectInfo.name || 'Inbox'}</span>
           <ChevronDown />
         </Button>
       </PopoverTrigger>
 
       <PopoverContent
-        className='w-[240px] p-0'
-        align='start'
-      >
+        className="w-[240px] p-0"
+        align="start">
         <Command>
-          <CommandInput placeholder='Search project...' />
+          <CommandInput placeholder="Search project..." />
           <CommandList>
             <ScrollArea>
               <CommandEmpty>No project found.</CommandEmpty>

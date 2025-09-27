@@ -40,7 +40,7 @@ export function formatCustomDate(date: string | number | Date): string {
 
 export function getTaskDueDateColorClass(
   dueDate: Date | null,
-  completed?: boolean,
+  completed?: boolean
 ): string | undefined {
   if (dueDate === null || completed === undefined) return;
 
@@ -55,10 +55,7 @@ export function getTaskDueDateColorClass(
   }
 }
 
-export const getBadgeCount = (
-  href: string,
-  taskCounts: ITaskCounts,
-): number | undefined => {
+export const getBadgeCount = (href: string, taskCounts: ITaskCounts): number | undefined => {
   switch (href) {
     case ROUTES.INBOX:
       return taskCounts?.inboxTasks;
