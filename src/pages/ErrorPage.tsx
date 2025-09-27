@@ -1,10 +1,10 @@
-import { isRouteErrorResponse, useRouteError, Link } from 'react-router';
-import { Button } from '@/components/ui/button';
-import { Header } from '@/components/Header';
-import { Footer } from '@/components/Footer';
 import { pageNotFound } from '@/assets';
+import { Footer } from '@/components/layout/Footer';
+import { Header } from '@/components/layout/Header';
+import { Head } from '@/components/shared/Head';
+import { Button } from '@/components/ui/button';
 import { ROUTES } from '@/constants';
-import { Head } from '@/components/Head';
+import { isRouteErrorResponse, Link, useRouteError } from 'react-router';
 
 const ErrorPage = () => {
   const error = useRouteError();

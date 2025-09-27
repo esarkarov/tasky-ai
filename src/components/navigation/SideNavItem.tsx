@@ -1,8 +1,8 @@
+import { SidebarMenuBadge, SidebarMenuButton, SidebarMenuItem } from '@/components/ui/sidebar';
 import { SIDEBAR_LINKS } from '@/constants';
 import { ITaskCounts } from '@/interfaces';
-import { SidebarMenuBadge, SidebarMenuButton, SidebarMenuItem } from '@/components/ui/sidebar';
-import { Link } from 'react-router';
 import { getBadgeCount } from '@/lib/utils';
+import { Link } from 'react-router';
 
 interface SideNavItemProps {
   item: (typeof SIDEBAR_LINKS)[number];

@@ -1,4 +1,6 @@
-import { Logo } from '@/components/Logo';
+import { SideNavMenu } from '@/components/navigation/SideNavMenu';
+import { ProjectsSection } from '@/components/projects/ProjectsSection';
+import { Logo } from '@/components/shared/Logo';
 import {
   Sidebar,
   SidebarContent,
@@ -8,10 +10,8 @@ import {
 } from '@/components/ui/sidebar';
 import { ROUTES } from '@/constants';
 import { IAppLoaderData } from '@/interfaces';
-import { Link, useLoaderData, useLocation } from 'react-router';
-import { ProjectsSection } from './ProjectsSection';
-import { SideNavMenu } from './SideNavMenu';
 import { UserButton } from '@clerk/clerk-react';
+import { Link, useLoaderData, useLocation } from 'react-router';
 
 export const AppSidebar = () => {
   const location = useLocation();

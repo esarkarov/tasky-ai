@@ -1,16 +1,16 @@
-import { useCallback, useEffect, useState } from 'react';
+import { ProjectSelector } from '@/components/projects/ProjectSelector';
+import { DueDateSelector } from '@/components/tasks/DueDateSelector';
+import { TaskContentInput } from '@/components/tasks/TaskContentInput';
+import { TaskFormActions } from '@/components/tasks/TaskFormActions';
 import { Card, CardContent, CardFooter } from '@/components/ui/card';
-import { IProjectInfo, ITaskForm } from '@/interfaces';
-import { DEFAULT_FORM_DATA } from '@/constants';
 import { Separator } from '@/components/ui/separator';
+import { DEFAULT_FORM_DATA } from '@/constants';
+import { IProjectInfo, ITaskForm } from '@/interfaces';
 import { cn } from '@/lib/utils';
 import { TTaskMode } from '@/types';
-import { DueDateSelector } from './DueDateSelector';
-import { ProjectSelector } from './ProjectSelector';
-import { TaskContentInput } from './TaskContentInput';
-import { TaskFormActions } from './TaskFormActions';
-import type { ClassValue } from 'clsx';
 import * as chrono from 'chrono-node';
+import type { ClassValue } from 'clsx';
+import { useCallback, useEffect, useState } from 'react';
 
 interface TaskFormProps {
   defaultFormData?: ITaskForm;

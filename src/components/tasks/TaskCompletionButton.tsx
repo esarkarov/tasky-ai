@@ -1,7 +1,7 @@
+import { Button } from '@/components/ui/button';
+import { ToastAction } from '@/components/ui/toast';
 import { useToast } from '@/hooks/use-toast';
 import { ITask } from '@/interfaces';
-import { ToastAction } from './ui/toast';
-import { Button } from './ui/button';
 import { cn } from '@/lib/utils';
 import { Check } from 'lucide-react';
 

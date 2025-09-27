@@ -1,4 +1,4 @@
-import { Keyboard } from '@/components/Keyboard';
+import { Keyboard } from '@/components/shared/Keyboard';
 import { SidebarTrigger } from '@/components/ui/sidebar';
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
 import { SCROLL_THRESHOLD } from '@/constants';

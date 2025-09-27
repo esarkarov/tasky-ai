@@ -1,9 +1,9 @@
-import { databases, Query } from '@/lib/appwrite';
-import { redirect } from 'react-router';
-import { getUserId } from '@/lib/utils';
 import { env } from '@/config/env';
 import { ROUTES } from '@/constants';
+import { databases, Query } from '@/lib/appwrite';
+import { getUserId } from '@/lib/utils';
 import type { LoaderFunction } from 'react-router';
+import { redirect } from 'react-router';
 
 const getProjects = async () => {
   try {

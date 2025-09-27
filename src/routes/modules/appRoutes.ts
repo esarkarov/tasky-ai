@@ -1,10 +1,10 @@
 import { ROUTES } from '@/constants';
+import completedLoader from '@/routes/loaders/completedLoader';
+import inboxLoader from '@/routes/loaders/inboxLoader';
+import todayLoader from '@/routes/loaders/todayLoader';
+import upcomingLoader from '@/routes/loaders/upcomingLoader';
 import { createElement, lazy } from 'react';
 import { RouteObject } from 'react-router';
-import inboxLoader from '../loaders/inboxLoader';
-import todayLoader from '../loaders/todayLoader';
-import upcomingLoader from '../loaders/upcomingLoader';
-import completedLoader from '../loaders/completedLoader';
 
 export const InboxPage = lazy(() =>
   import('@/pages/InboxPage').then((module) => ({ default: module.default }))

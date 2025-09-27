@@ -1,4 +1,4 @@
-import { Head } from '@/components/Head';
+import { Head } from '@/components/shared/Head';
 import { ROUTES } from '@/constants';
 import { SignUp } from '@clerk/clerk-react';
 

@@ -1,6 +1,6 @@
-import { SignIn } from '@clerk/clerk-react';
-import { Head } from '@/components/Head';
+import { Head } from '@/components/shared/Head';
 import { ROUTES } from '@/constants';
+import { SignIn } from '@clerk/clerk-react';
 
 const LoginPage = () => {
   return (

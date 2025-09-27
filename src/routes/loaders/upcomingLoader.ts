@@ -1,8 +1,8 @@
-import { databases, Query } from '@/lib/appwrite';
-import { startOfToday } from 'date-fns';
-import { getUserId } from '@/lib/utils';
-import type { LoaderFunction } from 'react-router';
 import { env } from '@/config/env';
+import { databases, Query } from '@/lib/appwrite';
+import { getUserId } from '@/lib/utils';
+import { startOfToday } from 'date-fns';
+import type { LoaderFunction } from 'react-router';
 
 const getTasks = async () => {
   try {

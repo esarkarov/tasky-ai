@@ -1,8 +1,8 @@
+import { CardFooter } from '@/components/ui/card';
 import { ROUTES } from '@/constants';
 import { ITask } from '@/interfaces';
-import { Models } from 'appwrite';
-import { CardFooter } from './ui/card';
 import { cn, formatCustomDate, getTaskDueDateColorClass } from '@/lib/utils';
+import { Models } from 'appwrite';
 import { CalendarDays, Hash, Inbox } from 'lucide-react';
 import { useLocation } from 'react-router';
 

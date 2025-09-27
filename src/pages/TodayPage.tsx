@@ -1,18 +1,18 @@
+import { Page, PageHeader, PageList, PageTitle } from '@/components/layout/Page';
+import { TopAppBar } from '@/components/navigation/TopAppBar';
+import { Head } from '@/components/shared/Head';
+import { TaskCard } from '@/components/tasks/TaskCard';
+import { TaskCardSkeleton } from '@/components/tasks/TaskCardSkeleton';
+import { TaskCreateButton } from '@/components/tasks/TaskCreateButton';
+import { TaskEmptyState } from '@/components/tasks/TaskEmptyState';
+import { TaskForm } from '@/components/tasks/TaskForm';
+import { HTTP_METHODS, ROUTES } from '@/constants';
+import { ITaskForm } from '@/interfaces';
+import type { Models } from 'appwrite';
+import { startOfToday } from 'date-fns';
+import { CheckCircle2 } from 'lucide-react';
 import { useCallback, useState } from 'react';
 import { useFetcher, useLoaderData } from 'react-router';
-import { startOfToday } from 'date-fns';
-import { Head } from '@/components/Head';
-import { TopAppBar } from '@/components/TopAppBar';
-import { Page, PageHeader, PageTitle, PageList } from '@/components/Page';
-import { TaskCreateButton } from '@/components/TaskCreateButton';
-import { TaskEmptyState } from '@/components/TaskEmptyState';
-import { TaskForm } from '@/components/TaskForm';
-import { TaskCard } from '@/components/TaskCard';
-import { TaskCardSkeleton } from '@/components/TaskCardSkeleton';
-import { CheckCircle2 } from 'lucide-react';
-import { HTTP_METHODS, ROUTES } from '@/constants';
-import type { Models } from 'appwrite';
-import { ITaskForm } from '@/interfaces';
 
 const TodayPage = () => {
   const fetcher = useFetcher();

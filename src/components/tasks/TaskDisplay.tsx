@@ -1,9 +1,9 @@
+import { TaskActions } from '@/components/tasks/TaskActions';
+import { TaskCompletionButton } from '@/components/tasks/TaskCompletionButton';
+import { TaskMetadata } from '@/components/tasks/TaskMetaData';
+import { Card, CardContent } from '@/components/ui/card';
 import { ITask } from '@/interfaces';
-import { Card, CardContent } from './ui/card';
-import { TaskMetadata } from './TaskMetaData';
-import { TaskActions } from './TaskActions';
 import { cn } from '@/lib/utils';
-import { TaskCompletionButton } from './TaskCompletionButton';
 import { Models } from 'appwrite';
 
 interface TaskDisplayProps {

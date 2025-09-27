@@ -1,6 +1,6 @@
-import { Footer } from '@/components/Footer';
-import { Header } from '@/components/Header';
-import { Loader } from '@/components/Loader';
+import { Footer } from '@/components/layout/Footer';
+import { Header } from '@/components/layout/Header';
+import { Loader } from '@/components/shared/Loader';
 import { Outlet, useNavigation } from 'react-router';
 
 const RootLayout = () => {

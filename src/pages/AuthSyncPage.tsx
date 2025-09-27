@@ -1,8 +1,8 @@
-import { useNavigate } from 'react-router';
-import { useEffect } from 'react';
-import { useAuth } from '@clerk/clerk-react';
-import { ROUTES } from '@/constants';
 import { env } from '@/config/env';
+import { ROUTES } from '@/constants';
+import { useAuth } from '@clerk/clerk-react';
+import { useEffect } from 'react';
+import { useNavigate } from 'react-router';
 
 const AuthSyncPage = () => {
   const navigate = useNavigate();

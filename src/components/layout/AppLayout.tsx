@@ -1,10 +1,10 @@
-import { cn } from '@/lib/utils';
-import { Outlet, useNavigation } from 'react-router';
+import { AppSidebar } from '@/components/layout/AppSidebar';
 import { SidebarProvider } from '@/components/ui/sidebar';
 import { Toaster } from '@/components/ui/toaster';
 import { TooltipProvider } from '@/components/ui/tooltip';
-import { AppSidebar } from '@/components/AppSidebar';
 import { TOOLTIP_DELAY } from '@/constants';
+import { cn } from '@/lib/utils';
+import { Outlet, useNavigation } from 'react-router';
 
 const AppLayout = () => {
   const navigation = useNavigation();

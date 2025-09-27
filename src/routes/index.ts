@@ -1,12 +1,12 @@
+import AppLayout from '@/components/layout/AppLayout';
+import RootLayout from '@/components/layout/RootLayout';
 import { ROUTES } from '@/constants';
-import AppLayout from '@/layouts/AppLayout';
-import RootLayout from '@/layouts/RootLayout';
+import taskAction from '@/routes/actions/taskAction';
+import appLoader from '@/routes/loaders/appLoader';
+import { appRoutes } from '@/routes/modules/appRoutes';
+import { publicRoutes } from '@/routes/modules/publicRoutes';
 import { createElement, lazy } from 'react';
 import { createBrowserRouter } from 'react-router';
-import taskAction from './actions/taskAction';
-import appLoader from './loaders/appLoader';
-import { appRoutes } from './modules/appRoutes';
-import { publicRoutes } from './modules/publicRoutes';
 
 export const ErrorPage = lazy(() =>
   import('@/pages/ErrorPage').then((module) => ({ default: module.default }))

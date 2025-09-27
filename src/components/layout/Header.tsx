@@ -1,4 +1,4 @@
-import { Logo } from '@/components/Logo';
+import { Logo } from '@/components/shared/Logo';
 import { Button } from '@/components/ui/button';
 import { ROUTES } from '@/constants';
 import { Link, useLocation } from 'react-router';

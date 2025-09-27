@@ -1,10 +1,10 @@
-import { useLoaderData } from 'react-router';
-import { Head } from '@/components/Head';
-import { TopAppBar } from '@/components/TopAppBar';
-import { Page, PageHeader, PageTitle, PageList } from '@/components/Page';
-import { TaskEmptyState } from '@/components/TaskEmptyState';
-import { TaskCard } from '@/components/TaskCard';
+import { Page, PageHeader, PageList, PageTitle } from '@/components/layout/Page';
+import { TopAppBar } from '@/components/navigation/TopAppBar';
+import { Head } from '@/components/shared/Head';
+import { TaskCard } from '@/components/tasks/TaskCard';
+import { TaskEmptyState } from '@/components/tasks/TaskEmptyState';
 import type { Models } from 'appwrite';
+import { useLoaderData } from 'react-router';
 
 const CompletedPage = () => {
   const { tasks } = useLoaderData<{

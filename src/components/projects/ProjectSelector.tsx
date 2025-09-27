@@ -1,7 +1,4 @@
-import { useState } from 'react';
-import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { Button } from '@/components/ui/button';
-import { ChevronDown, Hash, Inbox } from 'lucide-react';
 import {
   Command,
   CommandEmpty,
@@ -9,8 +6,11 @@ import {
   CommandInput,
   CommandList,
 } from '@/components/ui/command';
+import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { IProjectInfo } from '@/interfaces';
+import { ChevronDown, Hash, Inbox } from 'lucide-react';
+import { useState } from 'react';
 
 interface ProjectSelectorProps {
   projectInfo: IProjectInfo;

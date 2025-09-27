@@ -1,4 +1,5 @@
-import { ITaskCounts } from '@/interfaces';
+import { SideNavItem } from '@/components/navigation/SideNavItem';
+import { TaskFormDialog } from '@/components/tasks/TaskFormDialog';
 import {
   SidebarGroup,
   SidebarGroupContent,
@@ -7,9 +8,8 @@ import {
   SidebarMenuItem,
 } from '@/components/ui/sidebar';
 import { SIDEBAR_LINKS } from '@/constants';
-import { TaskFormDialog } from './TaskFormDialog';
+import { ITaskCounts } from '@/interfaces';
 import { CirclePlus } from 'lucide-react';
-import { SideNavItem } from './SideNavItem';
 
 interface SideNavMenuProps {
   currentPath: string;

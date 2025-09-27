@@ -1,4 +1,4 @@
-import { TaskForm } from '@/components/TaskForm';
+import { TaskForm } from '@/components/tasks/TaskForm';
 import { HTTP_METHODS, ROUTES } from '@/constants';
 import { ITask, ITaskForm } from '@/interfaces';
 import type { Models } from 'appwrite';

@@ -1,4 +1,3 @@
-import { Edit, Trash2 } from 'lucide-react';
 import {
   AlertDialog,
   AlertDialogAction,
@@ -9,11 +8,12 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
   AlertDialogTrigger,
-} from './ui/alert-dialog';
-import { Button } from './ui/button';
-import { Tooltip, TooltipContent, TooltipTrigger } from './ui/tooltip';
-import { truncateString } from '@/lib/utils';
+} from '@/components/ui/alert-dialog';
+import { Button } from '@/components/ui/button';
+import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
 import { ITask } from '@/interfaces';
+import { truncateString } from '@/lib/utils';
+import { Edit, Trash2 } from 'lucide-react';
 
 interface TaskActionsProps {
   task: ITask;
