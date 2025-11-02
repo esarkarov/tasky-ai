@@ -1,5 +1,5 @@
 'use client';
-import { Head } from '@/components/atoms/Head';
+import { Head } from '@/components/atoms/Head/Head';
 import { Button } from '@/components/ui/button';
 import { ROUTES } from '@/constants/routes';
 import { useAuth } from '@clerk/clerk-react';

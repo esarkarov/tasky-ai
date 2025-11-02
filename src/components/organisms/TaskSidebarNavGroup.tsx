@@ -1,4 +1,4 @@
-import { NavList } from '@/components/atoms/List';
+import { NavList } from '@/components/atoms/List/List';
 import { TaskSidebarNavLink } from '@/components/molecules/TaskSidebarNavLink';
 import { TaskFormDialog } from '@/components/organisms/TaskFormDialog';
 import {

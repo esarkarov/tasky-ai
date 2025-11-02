@@ -26,24 +26,24 @@ vi.mock('react-router', async () => {
   };
 });
 
-describe('RootTemplate', () => {
-  const renderComponent = () => {
-    return render(
-      <MemoryRouter>
-        <RootTemplate />
-      </MemoryRouter>
-    );
-  };
-  const setupNavigation = (state: NavigationState, formData: FormData | null = null) => {
-    mockUseNavigation.mockReturnValue({ state, formData });
-  };
+const renderComponent = () => {
+  return render(
+    <MemoryRouter>
+      <RootTemplate />
+    </MemoryRouter>
+  );
+};
+const setupNavigation = (state: NavigationState, formData: FormData | null = null) => {
+  mockUseNavigation.mockReturnValue({ state, formData });
+};
 
+describe('RootTemplate', () => {
   beforeEach(() => {
     vi.clearAllMocks();
     setupNavigation('idle');
   });
 
-  describe('Layout Structure', () => {
+  describe('layout structure', () => {
     it('should render all main layout components', () => {
       renderComponent();
 
@@ -61,7 +61,7 @@ describe('RootTemplate', () => {
     });
   });
 
-  describe('Loading State', () => {
+  describe('loading state', () => {
     it('should hide loader when idle', () => {
       setupNavigation('idle');
 
@@ -87,7 +87,7 @@ describe('RootTemplate', () => {
     });
   });
 
-  describe('Accessibility', () => {
+  describe('accessibility', () => {
     it('should configure main landmark with proper attributes', () => {
       renderComponent();
 
@@ -124,7 +124,7 @@ describe('RootTemplate', () => {
     });
   });
 
-  describe('Navigation State', () => {
+  describe('navigation state', () => {
     it.each([
       { state: 'idle' as const, shouldShowLoader: false, ariaBusy: 'false' },
       { state: 'loading' as const, shouldShowLoader: true, ariaBusy: 'true' },

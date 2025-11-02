@@ -43,11 +43,11 @@ const createMockTask = (overrides: Partial<TaskEntity> = {}): TaskEntity => ({
 });
 
 const createMockTasks = (
-  docs: TasksResponse['documents'] = [createMockTask()],
-  total = docs.length
+  documents: TasksResponse['documents'] = [createMockTask()],
+  total = documents.length
 ): TasksResponse => ({
   total,
-  documents: docs,
+  documents,
 });
 
 const createMockProject = (overrides: Partial<ProjectListItem> = {}): ProjectEntity => ({
@@ -151,7 +151,7 @@ describe('tasksCompletedLoader', () => {
     });
   });
 
-  describe('data structure validation', () => {
+  describe('data validation', () => {
     it('returns shape conforming to TasksLoaderData', async () => {
       const tasks = createMockTasks();
       const projects = createMockProjects();

@@ -1,4 +1,4 @@
-import { EditTaskButton } from '@/components/atoms/EditTaskButton';
+import { EditTaskButton } from '@/components/atoms/EditTaskButton/EditTaskButton';
 import { ConfirmationDialog } from '@/components/molecules/ConfirmationDialog';
 import { useTaskOperations } from '@/hooks/use-task-operations';
 import { TaskEntity } from '@/types/tasks.types';

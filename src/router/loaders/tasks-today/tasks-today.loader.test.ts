@@ -1,10 +1,10 @@
-import { describe, it, expect, vi, beforeEach } from 'vitest';
-import { tasksTodayLoader } from './tasks-today.loader';
-import { taskService } from '@/services/task/task.service';
 import { projectService } from '@/services/project/project.service';
-import type { TasksResponse, TaskEntity } from '@/types/tasks.types';
-import type { ProjectsListResponse, ProjectListItem, ProjectEntity } from '@/types/projects.types';
+import { taskService } from '@/services/task/task.service';
 import type { ProjectTaskLoaderData, TasksLoaderData } from '@/types/loaders.types';
+import type { ProjectEntity, ProjectListItem, ProjectsListResponse } from '@/types/projects.types';
+import type { TaskEntity, TasksResponse } from '@/types/tasks.types';
+import { beforeEach, describe, expect, it, vi } from 'vitest';
+import { tasksTodayLoader } from './tasks-today.loader';
 
 vi.mock('@/services/task/task.service', () => ({
   taskService: {
@@ -42,9 +42,9 @@ const createMockTask = (overrides: Partial<TaskEntity> = {}): TaskEntity => ({
   ...overrides,
 });
 
-const createMockTasks = (docs: TaskEntity[] = [createMockTask()]): TasksResponse => ({
-  total: docs.length,
-  documents: docs,
+const createMockTasks = (documents: TaskEntity[] = [createMockTask()]): TasksResponse => ({
+  total: documents.length,
+  documents,
 });
 
 const createMockProject = (overrides: Partial<ProjectListItem> = {}): ProjectEntity => ({
@@ -62,9 +62,9 @@ const createMockProject = (overrides: Partial<ProjectListItem> = {}): ProjectEnt
   ...overrides,
 });
 
-const createMockProjects = (docs: ProjectListItem[] = [createMockProject()]): ProjectsListResponse => ({
-  total: docs.length,
-  documents: docs,
+const createMockProjects = (documents: ProjectListItem[] = [createMockProject()]): ProjectsListResponse => ({
+  total: documents.length,
+  documents,
 });
 
 beforeEach(() => {

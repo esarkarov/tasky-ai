@@ -1,7 +1,7 @@
 import { ProjectEntity, ProjectsListResponse } from '@/types/projects.types';
 import { TaskCounts, TasksResponse } from '@/types/tasks.types';
 
-export interface AppLoaderData {
+export interface SidebarLoaderData {
   projects: ProjectsListResponse;
   taskCounts: TaskCounts;
 }

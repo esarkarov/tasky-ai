@@ -9,9 +9,7 @@ interface CompleteTaskButtonProps {
 }
 
 export const CompleteTaskButton = ({ taskId, completed }: CompleteTaskButtonProps) => {
-  const { toggleTaskComplete } = useTaskOperations({
-    enableUndo: true,
-  });
+  const { toggleTaskComplete } = useTaskOperations();
 
   return (
     <Button

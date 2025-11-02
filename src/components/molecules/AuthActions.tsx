@@ -1,4 +1,4 @@
-import { UserChip } from '@/components/atoms/UserChip';
+import { UserChip } from '@/components/atoms/UserChip/UserChip';
 import { Button } from '@/components/ui/button';
 import { ROUTES } from '@/constants/routes';
 import { useAuth } from '@clerk/clerk-react';

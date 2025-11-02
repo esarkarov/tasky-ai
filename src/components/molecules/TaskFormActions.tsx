@@ -1,5 +1,5 @@
-import { CancelTaskButton } from '@/components/atoms/CancelTaskButton';
-import { SubmitTaskButton } from '@/components/atoms/SubmitTaskButton';
+import { CancelTaskButton } from '@/components/atoms/CancelTaskButton/CancelTaskButton';
+import { SubmitTaskButton } from '@/components/atoms/SubmitTaskButton/SubmitTaskButton';
 import { CrudMode } from '@/types/shared.types';
 
 interface TaskFormActionsProps {

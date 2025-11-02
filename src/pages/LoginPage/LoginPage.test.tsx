@@ -2,7 +2,7 @@ import { render, screen } from '@testing-library/react';
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { LoginPage } from './LoginPage';
 
-vi.mock('@/components/atoms/Head', () => ({
+vi.mock('@/components/atoms/Head/Head', () => ({
   Head: ({ title }: { title: string }) => <title data-testid="meta-title">{title}</title>,
 }));
 
@@ -27,7 +27,7 @@ describe('LoginPage', () => {
     render(<LoginPage />);
   });
 
-  describe('Basic Rendering', () => {
+  describe('basic rendering', () => {
     it('should render without crashing', () => {
       expect(screen.getByRole('main')).toBeInTheDocument();
     });
@@ -48,7 +48,7 @@ describe('LoginPage', () => {
     });
   });
 
-  describe('Component Configuration', () => {
+  describe('component configuration', () => {
     it('should pass correct fallbackRedirectUrl prop to SignIn', () => {
       expect(mockSignIn).toHaveBeenCalledWith(
         expect.objectContaining({
@@ -86,7 +86,7 @@ describe('LoginPage', () => {
     });
   });
 
-  describe('Accessibility', () => {
+  describe('accessibility', () => {
     it('should have main landmark with correct role', () => {
       const main = screen.getByRole('main');
       expect(main).toBeInTheDocument();
@@ -110,7 +110,7 @@ describe('LoginPage', () => {
     });
   });
 
-  describe('Component Structure', () => {
+  describe('component structure', () => {
     it('should render main element containing SignIn component', () => {
       const main = screen.getByRole('main');
       const signIn = screen.getByTestId('clerk-signin');
@@ -124,7 +124,7 @@ describe('LoginPage', () => {
     });
   });
 
-  describe('Routes Integration', () => {
+  describe('routes integration', () => {
     it('should use ROUTES constants for path configuration', () => {
       const signInProps = mockSignIn.mock.calls[0][0];
       expect(signInProps.signUpUrl).toBe('/register');

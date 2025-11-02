@@ -1,4 +1,4 @@
-import { KeyboardShortcut } from '@/components/atoms/KeyboardShortcut';
+import { KeyboardShortcut } from '@/components/atoms/KeyboardShortcut/KeyboardShortcut';
 import { SidebarTrigger } from '@/components/ui/sidebar';
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
 

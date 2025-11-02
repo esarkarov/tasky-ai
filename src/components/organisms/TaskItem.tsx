@@ -1,4 +1,4 @@
-import { CompleteTaskButton } from '@/components/atoms/CompleteTaskButton';
+import { CompleteTaskButton } from '@/components/atoms/CompleteTaskButton/CompleteTaskButton';
 import { TaskActions } from '@/components/molecules/TaskActions';
 import { TaskMeta } from '@/components/molecules/TaskMeta';
 import { Card, CardContent } from '@/components/ui/card';

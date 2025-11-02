@@ -2,13 +2,13 @@ import { render, screen } from '@testing-library/react';
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { RegisterPage } from './RegisterPage';
 
-vi.mock('@/components/atoms/Head', () => ({
+vi.mock('@/components/atoms/Head/Head', () => ({
   Head: ({ title }: { title: string }) => <title data-testid="meta-title">{title}</title>,
 }));
 
 vi.mock('@/constants/routes', () => ({
   ROUTES: {
-    TODAY: '/app/today',
+    TODAY: '/today',
     LOGIN: '/login',
   },
 }));
@@ -27,7 +27,7 @@ describe('RegisterPage', () => {
     render(<RegisterPage />);
   });
 
-  describe('Basic Rendering', () => {
+  describe('basic rendering', () => {
     it('should render without crashing', () => {
       expect(screen.getByRole('main')).toBeInTheDocument();
     });
@@ -48,11 +48,11 @@ describe('RegisterPage', () => {
     });
   });
 
-  describe('Component Configuration', () => {
+  describe('component configuration', () => {
     it('should pass correct fallbackRedirectUrl prop to SignUp', () => {
       expect(mockSignUp).toHaveBeenCalledWith(
         expect.objectContaining({
-          fallbackRedirectUrl: '/app/today',
+          fallbackRedirectUrl: '/today',
         })
       );
     });
@@ -86,7 +86,7 @@ describe('RegisterPage', () => {
     });
   });
 
-  describe('Accessibility', () => {
+  describe('accessibility', () => {
     it('should have main landmark with correct role', () => {
       const main = screen.getByRole('main');
       expect(main).toBeInTheDocument();
@@ -110,7 +110,7 @@ describe('RegisterPage', () => {
     });
   });
 
-  describe('Component Structure', () => {
+  describe('component structure', () => {
     it('should render main element containing SignUp component', () => {
       const main = screen.getByRole('main');
       const signUp = screen.getByTestId('clerk-signup');
@@ -124,11 +124,11 @@ describe('RegisterPage', () => {
     });
   });
 
-  describe('Routes Integration', () => {
+  describe('routes integration', () => {
     it('should use ROUTES constants for path configuration', () => {
       const signUpProps = mockSignUp.mock.calls[0][0];
       expect(signUpProps.signInUrl).toBe('/login');
-      expect(signUpProps.fallbackRedirectUrl).toBe('/app/today');
+      expect(signUpProps.fallbackRedirectUrl).toBe('/today');
     });
   });
 });

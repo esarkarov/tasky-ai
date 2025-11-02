@@ -7,7 +7,9 @@ import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { cn, getBadgeCount, getTaskDueDateColorClass } from './ui.utils';
 
 vi.mock('clsx');
-vi.mock('tailwind-merge');
+vi.mock('tailwind-merge', () => ({
+  twMerge: vi.fn(),
+}));
 vi.mock('date-fns', () => ({
   isBefore: vi.fn(),
   isToday: vi.fn(),

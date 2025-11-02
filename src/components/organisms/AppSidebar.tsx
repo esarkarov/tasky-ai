@@ -1,15 +1,15 @@
-import { Logo } from '@/components/atoms/Logo';
-import { UserChip } from '@/components/atoms/UserChip';
+import { Logo } from '@/components/atoms/Logo/Logo';
+import { UserChip } from '@/components/atoms/UserChip/UserChip';
 import { ProjectsSidebarSection } from '@/components/organisms/ProjectsSidebarSection';
 import { TaskSidebarNavGroup } from '@/components/organisms/TaskSidebarNavGroup';
 import { Sidebar, SidebarContent, SidebarFooter, SidebarHeader, useSidebar } from '@/components/ui/sidebar';
 import { ROUTES } from '@/constants/routes';
-import { AppLoaderData } from '@/types/loaders.types';
+import { SidebarLoaderData } from '@/types/loaders.types';
 import { Link, useLoaderData, useLocation } from 'react-router';
 
 export const AppSidebar = () => {
   const { pathname } = useLocation();
-  const { taskCounts } = useLoaderData<AppLoaderData>();
+  const { taskCounts } = useLoaderData<SidebarLoaderData>();
   const { isMobile, setOpenMobile } = useSidebar();
 
   const handleMobileNavigation = () => {

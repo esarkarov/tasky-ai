@@ -11,22 +11,22 @@ vi.mock('react-router', () => ({
   useLoaderData: vi.fn(),
 }));
 
-vi.mock('@/components/atoms/Head', () => ({
+vi.mock('@/components/atoms/Head/Head', () => ({
   Head: ({ title }: { title: string }) => <title>{title}</title>,
 }));
 
-vi.mock('@/components/atoms/Page', () => ({
+vi.mock('@/components/atoms/Page/Page', () => ({
   PageContainer: ({ children, ...props }: { children: React.ReactNode }) => <div {...props}>{children}</div>,
   PageHeader: ({ children }: { children: React.ReactNode }) => <header>{children}</header>,
   PageList: ({ children, ...props }: { children: React.ReactNode }) => <ul {...props}>{children}</ul>,
   PageTitle: ({ children }: { children: React.ReactNode }) => <h1 id="completed-page-title">{children}</h1>,
 }));
 
-vi.mock('@/components/atoms/List', () => ({
+vi.mock('@/components/atoms/List/List', () => ({
   ItemList: ({ children }: { children: React.ReactNode }) => <li>{children}</li>,
 }));
 
-vi.mock('@/components/atoms/TotalCounter', () => ({
+vi.mock('@/components/atoms/TotalCounter/TotalCounter', () => ({
   TotalCounter: ({ totalCount }: { totalCount: number }) => <span data-testid="total-counter">{totalCount}</span>,
 }));
 
@@ -65,7 +65,7 @@ vi.mock('@/components/organisms/EmptyStateMessage', () => ({
   ),
 }));
 
-vi.mock('@/components/atoms/LoadMoreButton', () => ({
+vi.mock('@/components/atoms/LoadMoreButton/LoadMoreButton', () => ({
   LoadMoreButton: ({ loading, onClick }: { loading: boolean; onClick: () => void }) => (
     <button
       data-testid="load-more-button"

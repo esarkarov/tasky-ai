@@ -35,7 +35,7 @@ const createMockProject = (overrides: Partial<ProjectEntity> = {}): ProjectEntit
   ...overrides,
 });
 
-const createMockProjectsList = (projects: ProjectEntity[] = [createMockProject()]): ProjectsListResponse => ({
+const createMockProjects = (projects: ProjectEntity[] = [createMockProject()]): ProjectsListResponse => ({
   total: projects.length,
   documents: projects,
 });
@@ -45,10 +45,10 @@ beforeEach(() => {
 });
 
 describe('projectDetailLoader', () => {
-  describe('Success cases', () => {
+  describe('success cases', () => {
     it('returns project and recent projects when projectId is valid', async () => {
       const project = createMockProject();
-      const projectsList = createMockProjectsList();
+      const projectsList = createMockProjects();
 
       mockProjectService.getProjectById.mockResolvedValue(project);
       mockProjectService.getRecentProjects.mockResolvedValue(projectsList);
@@ -62,7 +62,7 @@ describe('projectDetailLoader', () => {
 
     it('handles different project IDs correctly', async () => {
       const customProject = createMockProject({ $id: 'other-id', name: 'Custom' });
-      const projectsList = createMockProjectsList([customProject]);
+      const projectsList = createMockProjects([customProject]);
 
       mockProjectService.getProjectById.mockResolvedValue(customProject);
       mockProjectService.getRecentProjects.mockResolvedValue(projectsList);
@@ -76,7 +76,7 @@ describe('projectDetailLoader', () => {
 
     it('returns valid ProjectDetailLoaderData shape', async () => {
       const project = createMockProject();
-      const projects = createMockProjectsList([project]);
+      const projects = createMockProjects([project]);
 
       mockProjectService.getProjectById.mockResolvedValue(project);
       mockProjectService.getRecentProjects.mockResolvedValue(projects);
@@ -90,7 +90,7 @@ describe('projectDetailLoader', () => {
     });
   });
 
-  describe('Error handling', () => {
+  describe('error handling', () => {
     it('throws if projectId is missing', async () => {
       mockProjectService.getProjectById.mockRejectedValue(new Error('Project ID is required'));
 
@@ -99,7 +99,7 @@ describe('projectDetailLoader', () => {
 
     it('throws if getProjectById fails', async () => {
       mockProjectService.getProjectById.mockRejectedValue(new Error('Failed to fetch project'));
-      mockProjectService.getRecentProjects.mockResolvedValue(createMockProjectsList());
+      mockProjectService.getRecentProjects.mockResolvedValue(createMockProjects());
 
       await expect(projectDetailLoader(createLoaderArgs('invalid'))).rejects.toThrow('Failed to fetch project');
     });

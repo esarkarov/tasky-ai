@@ -1,4 +1,4 @@
-import { Loader } from '@/components/atoms/Loader';
+import { Loader } from '@/components/atoms/Loader/Loader';
 import { Toaster } from '@/components/ui/toaster';
 import { env } from '@/config/env.config';
 import { ROUTES } from '@/constants/routes';

@@ -4,7 +4,7 @@ import { RequireAuth } from './RequireAuth';
 import { MemoryRouter } from 'react-router';
 import { TIMING } from '@/constants/timing';
 
-vi.mock('@/components/atoms/Loader', () => ({
+vi.mock('@/components/atoms/Loader/Loader', () => ({
   Loader: () => <div data-testid="loader">Loading...</div>,
 }));
 
@@ -41,23 +41,23 @@ vi.mock('@/constants/timing', () => ({
   },
 }));
 
-describe('RequireAuth', () => {
-  const renderComponent = () => {
-    return render(
-      <MemoryRouter>
-        <RequireAuth />
-      </MemoryRouter>
-    );
-  };
-  const setupAuth = (isLoaded: boolean, isSignedIn: boolean) => {
-    mockUseAuth.mockReturnValue({ isLoaded, isSignedIn });
-  };
+const renderComponent = () => {
+  return render(
+    <MemoryRouter>
+      <RequireAuth />
+    </MemoryRouter>
+  );
+};
+const setupAuth = (isLoaded: boolean, isSignedIn: boolean) => {
+  mockUseAuth.mockReturnValue({ isLoaded, isSignedIn });
+};
 
+describe('RequireAuth', () => {
   beforeEach(() => {
     vi.clearAllMocks();
   });
 
-  describe('Loading State', () => {
+  describe('loading state', () => {
     it('should show loader while authentication is being checked', () => {
       setupAuth(false, false);
 
@@ -77,7 +77,7 @@ describe('RequireAuth', () => {
     });
   });
 
-  describe('Authenticated User', () => {
+  describe('authenticated user', () => {
     it('should render protected content when user is signed in', () => {
       setupAuth(true, true);
 
@@ -97,7 +97,7 @@ describe('RequireAuth', () => {
     });
   });
 
-  describe('Unauthenticated User', () => {
+  describe('unauthenticated user', () => {
     it('should redirect to login page when not signed in', async () => {
       setupAuth(true, false);
 
@@ -133,7 +133,7 @@ describe('RequireAuth', () => {
     });
   });
 
-  describe('Authentication State', () => {
+  describe('authentication state', () => {
     it('should transition from loading to authenticated', () => {
       setupAuth(false, false);
       const { rerender } = renderComponent();

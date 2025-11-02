@@ -1,4 +1,4 @@
-import { Head } from '@/components/atoms/Head';
+import { Head } from '@/components/atoms/Head/Head';
 import { Button } from '@/components/ui/button';
 import { ROUTES } from '@/constants/routes';
 import { isRouteErrorResponse, Link, useRouteError } from 'react-router';
@@ -12,7 +12,7 @@ export const ErrorPage = () => {
       <Head title="Tasky AI | Something went wrong" />
       <main
         role="main"
-        className="grow container flex flex-col justify-center items-center pt-32 pb-12"
+        className="grow container flex flex-col justify-center items-center pt-23 pb-12"
         aria-labelledby="error-page-title">
         <h1
           id="error-page-title"

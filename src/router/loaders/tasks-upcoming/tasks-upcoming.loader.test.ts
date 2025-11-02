@@ -1,11 +1,10 @@
-import { describe, it, expect, vi, beforeEach } from 'vitest';
-import { tasksUpcomingLoader } from './tasks-upcoming.loader';
-import { taskService } from '@/services/task/task.service';
 import { projectService } from '@/services/project/project.service';
-
-import type { TaskEntity, TasksResponse } from '@/types/tasks.types';
-import type { ProjectEntity, ProjectsListResponse } from '@/types/projects.types';
+import { taskService } from '@/services/task/task.service';
 import type { ProjectTaskLoaderData, TasksLoaderData } from '@/types/loaders.types';
+import type { ProjectEntity, ProjectsListResponse } from '@/types/projects.types';
+import type { TaskEntity, TasksResponse } from '@/types/tasks.types';
+import { beforeEach, describe, expect, it, vi } from 'vitest';
+import { tasksUpcomingLoader } from './tasks-upcoming.loader';
 
 vi.mock('@/services/task/task.service', () => ({
   taskService: {
@@ -58,14 +57,14 @@ const createMockProject = (overrides: Partial<ProjectEntity> = {}): ProjectEntit
   ...overrides,
 });
 
-const createMockTasksResponse = (docs: TaskEntity[] = [createMockTask()]): TasksResponse => ({
-  total: docs.length,
-  documents: docs,
+const createMockTasks = (documents: TaskEntity[] = [createMockTask()]): TasksResponse => ({
+  total: documents.length,
+  documents,
 });
 
-const createMockProjectsResponse = (docs: ProjectEntity[] = [createMockProject()]): ProjectsListResponse => ({
-  total: docs.length,
-  documents: docs,
+const createMockProjects = (documents: ProjectEntity[] = [createMockProject()]): ProjectsListResponse => ({
+  total: documents.length,
+  documents,
 });
 
 beforeEach(() => {
@@ -73,10 +72,10 @@ beforeEach(() => {
 });
 
 describe('tasksUpcomingLoader', () => {
-  describe('Success cases', () => {
+  describe('success cases', () => {
     it('returns upcoming tasks and recent projects', async () => {
-      const tasks = createMockTasksResponse();
-      const projects = createMockProjectsResponse();
+      const tasks = createMockTasks();
+      const projects = createMockProjects();
 
       mockTaskService.getUpcomingTasks.mockResolvedValue(tasks);
       mockProjectService.getRecentProjects.mockResolvedValue(projects);
@@ -90,8 +89,8 @@ describe('tasksUpcomingLoader', () => {
     });
 
     it('handles empty task and project responses', async () => {
-      const emptyTasks = createMockTasksResponse([]);
-      const emptyProjects = createMockProjectsResponse([]);
+      const emptyTasks = createMockTasks([]);
+      const emptyProjects = createMockProjects([]);
 
       mockTaskService.getUpcomingTasks.mockResolvedValue(emptyTasks);
       mockProjectService.getRecentProjects.mockResolvedValue(emptyProjects);
@@ -104,8 +103,8 @@ describe('tasksUpcomingLoader', () => {
 
     it('returns tasks with a valid future due date', async () => {
       const dueDate = new Date('2025-12-25');
-      const tasks = createMockTasksResponse([createMockTask({ due_date: dueDate })]);
-      const projects = createMockProjectsResponse();
+      const tasks = createMockTasks([createMockTask({ due_date: dueDate })]);
+      const projects = createMockProjects();
 
       mockTaskService.getUpcomingTasks.mockResolvedValue(tasks);
       mockProjectService.getRecentProjects.mockResolvedValue(projects);
@@ -117,8 +116,8 @@ describe('tasksUpcomingLoader', () => {
 
     it('returns tasks with linked project references', async () => {
       const project = createMockProject();
-      const tasks = createMockTasksResponse([createMockTask({ projectId: project })]);
-      const projects = createMockProjectsResponse([project]);
+      const tasks = createMockTasks([createMockTask({ projectId: project })]);
+      const projects = createMockProjects([project]);
 
       mockTaskService.getUpcomingTasks.mockResolvedValue(tasks);
       mockProjectService.getRecentProjects.mockResolvedValue(projects);
@@ -129,26 +128,41 @@ describe('tasksUpcomingLoader', () => {
     });
   });
 
-  describe('Failure cases', () => {
+  describe('empty state', () => {
+    it('returns empty task list when no upcoming tasks exist', async () => {
+      const tasks = createMockTasks([]);
+      const projects = createMockProjects();
+
+      mockTaskService.getUpcomingTasks.mockResolvedValue(tasks);
+      mockProjectService.getRecentProjects.mockResolvedValue(projects);
+
+      const result = (await tasksUpcomingLoader(createLoaderArgs())) as TasksLoaderData;
+
+      expect(result.tasks.total).toBe(0);
+      expect(result.tasks.documents).toHaveLength(0);
+    });
+  });
+
+  describe('failure cases', () => {
     it('throws if getUpcomingTasks fails', async () => {
       mockTaskService.getUpcomingTasks.mockRejectedValue(new Error('Task error'));
-      mockProjectService.getRecentProjects.mockResolvedValue(createMockProjectsResponse());
+      mockProjectService.getRecentProjects.mockResolvedValue(createMockProjects());
 
       await expect(tasksUpcomingLoader(createLoaderArgs())).rejects.toThrow('Task error');
     });
 
     it('throws if getRecentProjects fails', async () => {
-      mockTaskService.getUpcomingTasks.mockResolvedValue(createMockTasksResponse());
+      mockTaskService.getUpcomingTasks.mockResolvedValue(createMockTasks());
       mockProjectService.getRecentProjects.mockRejectedValue(new Error('Project error'));
 
       await expect(tasksUpcomingLoader(createLoaderArgs())).rejects.toThrow('Project error');
     });
   });
 
-  describe('Structure validation', () => {
+  describe('data validation', () => {
     it('returns valid TasksLoaderData shape', async () => {
-      const tasks = createMockTasksResponse();
-      const projects = createMockProjectsResponse();
+      const tasks = createMockTasks();
+      const projects = createMockProjects();
 
       mockTaskService.getUpcomingTasks.mockResolvedValue(tasks);
       mockProjectService.getRecentProjects.mockResolvedValue(projects);

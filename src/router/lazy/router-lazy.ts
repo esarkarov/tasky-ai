@@ -20,7 +20,7 @@ export const ProjectDetailPage = async () =>
 export const taskAction = async () => (await import('@/router/actions/task/task.action')).taskAction;
 export const projectAction = async () => (await import('@/router/actions/project/project.action')).projectAction;
 
-export const appLoader = async () => (await import('@/router/loaders/app/app.loader')).appLoader;
+export const sidebarLoader = async () => (await import('@/router/loaders/sidebar/sidebar.loader')).sidebarLoader;
 export const tasksCompletedLoader = async () =>
   (await import('@/router/loaders/tasks-completed/tasks-completed.loader')).tasksCompletedLoader;
 export const tasksInboxLoader = async () =>

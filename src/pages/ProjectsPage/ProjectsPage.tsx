@@ -1,6 +1,6 @@
-import { Head } from '@/components/atoms/Head';
-import { PageContainer, PageHeader, PageList, PageTitle } from '@/components/atoms/Page';
-import { TotalCounter } from '@/components/atoms/TotalCounter';
+import { Head } from '@/components/atoms/Head/Head';
+import { PageContainer, PageHeader, PageList, PageTitle } from '@/components/atoms/Page/Page';
+import { TotalCounter } from '@/components/atoms/TotalCounter/TotalCounter';
 import { ProjectSearchField } from '@/components/molecules/ProjectSearchField';
 import { ProjectCard } from '@/components/organisms/ProjectCard';
 import { ProjectFormDialog } from '@/components/organisms/ProjectFormDialog';
@@ -13,8 +13,8 @@ import { ProjectsLoaderData } from '@/types/loaders.types';
 import { FolderKanban, Plus } from 'lucide-react';
 import { useLoaderData } from 'react-router';
 import { useLoadMore } from '@/hooks/use-load-more';
-import { LoadMoreButton } from '@/components/atoms/LoadMoreButton';
-import { ItemList } from '@/components/atoms/List';
+import { LoadMoreButton } from '@/components/atoms/LoadMoreButton/LoadMoreButton';
+import { ItemList } from '@/components/atoms/List/List';
 
 export const ProjectsPage = () => {
   const { fetcher, searchStatus, handleSearchProjects } = useProjectOperations();

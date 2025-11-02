@@ -1,5 +1,5 @@
-import { ProjectBadge } from '@/components/atoms/ProjectBadge';
-import { TaskDueDate } from '@/components/atoms/TaskDueDate';
+import { ProjectBadge } from '@/components/atoms/ProjectBadge/ProjectBadge';
+import { TaskDueDate } from '@/components/atoms/TaskDueDate/TaskDueDate';
 import { CardFooter } from '@/components/ui/card';
 import { ROUTES } from '@/constants/routes';
 import { ProjectEntity } from '@/types/projects.types';

@@ -4,6 +4,7 @@ import { projectRepository } from '@/repositories/project/project.repository';
 import { getUserId } from '@/utils/auth/auth.utils';
 import { generateID } from '@/utils/text/text.utils';
 import { ProjectEntity, ProjectsListResponse, ProjectFormInput, ProjectListItem } from '@/types/projects.types';
+import { DEFAULT_FETCH_LIMIT } from '@/constants/validation';
 
 vi.mock('@/repositories/project/project.repository', () => ({
   projectRepository: {
@@ -19,6 +20,9 @@ vi.mock('@/utils/auth/auth.utils', () => ({
 }));
 vi.mock('@/utils/text/text.utils', () => ({
   generateID: vi.fn(),
+}));
+vi.mock('@/constants/validation', () => ({
+  DEFAULT_FETCH_LIMIT: 100,
 }));
 
 const mockedProjectRepository = vi.mocked(projectRepository);
@@ -120,8 +124,6 @@ describe('projectService', () => {
   });
 
   describe('getRecentProjects', () => {
-    const DEFAULT_LIMIT = 100;
-
     it('should return recent projects with default limit', async () => {
       const mockResponse = createMockProjectsResponse();
       mockedProjectRepository.listByUserId.mockResolvedValue(mockResponse);
@@ -129,7 +131,7 @@ describe('projectService', () => {
       const result = await projectService.getRecentProjects();
 
       expect(mockedGetUserId).toHaveBeenCalled();
-      expect(mockedProjectRepository.listByUserId).toHaveBeenCalledWith(MOCK_USER_ID, { limit: DEFAULT_LIMIT });
+      expect(mockedProjectRepository.listByUserId).toHaveBeenCalledWith(MOCK_USER_ID, { limit: DEFAULT_FETCH_LIMIT });
       expect(result).toEqual(mockResponse);
     });
 

@@ -17,7 +17,7 @@ vi.mock('react-router', async () => {
   };
 });
 
-vi.mock('@/components/atoms/Head', () => ({
+vi.mock('@/components/atoms/Head/Head', () => ({
   Head: ({ title }: { title: string }) => <title>{title}</title>,
 }));
 

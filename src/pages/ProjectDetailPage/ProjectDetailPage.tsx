@@ -1,9 +1,9 @@
-import { AddTaskButton } from '@/components/atoms/AddTaskButton';
-import { Head } from '@/components/atoms/Head';
-import { ItemList } from '@/components/atoms/List';
-import { LoadMoreButton } from '@/components/atoms/LoadMoreButton';
-import { PageContainer, PageHeader, PageList, PageTitle } from '@/components/atoms/Page';
-import { TotalCounter } from '@/components/atoms/TotalCounter';
+import { AddTaskButton } from '@/components/atoms/AddTaskButton/AddTaskButton';
+import { Head } from '@/components/atoms/Head/Head';
+import { ItemList } from '@/components/atoms/List/List';
+import { LoadMoreButton } from '@/components/atoms/LoadMoreButton/LoadMoreButton';
+import { PageContainer, PageHeader, PageList, PageTitle } from '@/components/atoms/Page/Page';
+import { TotalCounter } from '@/components/atoms/TotalCounter/TotalCounter';
 import { EmptyStateMessage } from '@/components/organisms/EmptyStateMessage';
 import { ProjectActionMenu } from '@/components/organisms/ProjectActionMenu';
 import { TaskCard } from '@/components/organisms/TaskCard';

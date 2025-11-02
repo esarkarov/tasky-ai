@@ -1,5 +1,5 @@
-import { CancelProjectButton } from '@/components/atoms/CancelProjectButton';
-import { SubmitProjectButton } from '@/components/atoms/SubmitProjectButton';
+import { CancelProjectButton } from '@/components/atoms/CancelProjectButton/CancelProjectButton';
+import { SubmitProjectButton } from '@/components/atoms/SubmitProjectButton/SubmitProjectButton';
 import { AITaskGenerator } from '@/components/molecules/AITaskGenerator';
 import { ColorPicker } from '@/components/molecules/ColorPicker';
 import { ProjectNameInput } from '@/components/molecules/ProjectNameInput';

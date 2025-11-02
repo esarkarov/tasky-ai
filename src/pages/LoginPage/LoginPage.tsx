@@ -1,4 +1,4 @@
-import { Head } from '@/components/atoms/Head';
+import { Head } from '@/components/atoms/Head/Head';
 import { ROUTES } from '@/constants/routes';
 import { SignIn } from '@clerk/clerk-react';
 

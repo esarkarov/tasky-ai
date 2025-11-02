@@ -1,9 +1,9 @@
-import { Loader } from '@/components/atoms/Loader';
+import { Loader } from '@/components/atoms/Loader/Loader';
 import { RedirectIfAuthenticated } from '@/components/guards/RedirectIfAuthenticated/RedirectIfAuthenticated';
 import { RequireAuth } from '@/components/guards/RequireAuth/RequireAuth';
 import { ROUTES } from '@/constants/routes';
 import { ErrorPage } from '@/pages/ErrorPage/ErrorPage';
-import { appLoader, AppTemplate, RootTemplate, taskAction } from '@/router/lazy/router-lazy';
+import { sidebarLoader, AppTemplate, RootTemplate, taskAction } from '@/router/lazy/router-lazy';
 import { protectedRoutes } from '@/router/routes/protected.routes';
 import { publicRoutes } from '@/router/routes/public.routes';
 import { createElement } from 'react';
@@ -31,7 +31,7 @@ export const router = createBrowserRouter([
     lazy: {
       element: AppTemplate,
       action: taskAction,
-      loader: appLoader,
+      loader: sidebarLoader,
     },
     children: [
       {

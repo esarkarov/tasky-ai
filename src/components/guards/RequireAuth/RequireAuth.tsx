@@ -1,4 +1,4 @@
-import { Loader } from '@/components/atoms/Loader';
+import { Loader } from '@/components/atoms/Loader/Loader';
 import { ROUTES } from '@/constants/routes';
 import { TIMING } from '@/constants/timing';
 import { useToast } from '@/hooks/use-toast';

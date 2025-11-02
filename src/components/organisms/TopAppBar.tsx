@@ -1,5 +1,5 @@
-import { AppBarTitle } from '@/components/atoms/AppBarTitle';
-import { ToggleSidebarButton } from '@/components/atoms/ToggleSidebarButton';
+import { AppBarTitle } from '@/components/atoms/AppBarTitle/AppBarTitle';
+import { ToggleSidebarButton } from '@/components/atoms/ToggleSidebarButton/ToggleSidebarButton';
 import { TIMING } from '@/constants/timing';
 import { cn } from '@/utils/ui/ui.utils';
 import { useEffect, useState } from 'react';

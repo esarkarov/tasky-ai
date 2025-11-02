@@ -1,4 +1,4 @@
-import { AddProjectButton } from '@/components/atoms/AddProjectButton';
+import { AddProjectButton } from '@/components/atoms/AddProjectButton/AddProjectButton';
 import { ProjectsSidebarLabel } from '@/components/molecules/ProjectsSidebarLabel';
 import { ProjectsSidebarList } from '@/components/organisms/ProjectsSidebarList';
 import { Collapsible } from '@/components/ui/collapsible';

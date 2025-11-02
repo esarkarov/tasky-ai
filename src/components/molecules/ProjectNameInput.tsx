@@ -1,4 +1,4 @@
-import { InputValueCount } from '@/components/atoms/InputValueCount';
+import { InputValueCount } from '@/components/atoms/InputValueCount/InputValueCount';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { MAX_NAME_LENGTH } from '@/constants/validation';

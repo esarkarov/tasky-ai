@@ -1,5 +1,5 @@
-import { AllProjectsButton } from '@/components/atoms/AllProjectsButton';
-import { NavList } from '@/components/atoms/List';
+import { AllProjectsButton } from '@/components/atoms/AllProjectsButton/AllProjectsButton';
+import { NavList } from '@/components/atoms/List/List';
 import { ProjectSidebarNavItem } from '@/components/molecules/ProjectSidebarNavItem';
 import { CollapsibleContent } from '@/components/ui/collapsible';
 import { SidebarGroupContent, SidebarMenu, SidebarMenuItem } from '@/components/ui/sidebar';

@@ -1,4 +1,4 @@
-import { SelectableCommandItem } from '@/components/atoms/SelectableCommandItem';
+import { SelectableCommandItem } from '@/components/atoms/SelectableCommandItem/SelectableCommandItem';
 import { Button } from '@/components/ui/button';
 import { Command, CommandEmpty, CommandGroup, CommandInput, CommandList } from '@/components/ui/command';
 import { Label } from '@/components/ui/label';

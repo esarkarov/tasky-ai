@@ -72,7 +72,7 @@ beforeEach(() => {
 });
 
 describe('tasksInboxLoader', () => {
-  describe('Success cases', () => {
+  describe('success cases', () => {
     it('returns inbox tasks and recent projects', async () => {
       const tasks = createMockTasks([
         createMockTask({ content: 'Inbox 1' }),
@@ -120,7 +120,7 @@ describe('tasksInboxLoader', () => {
     });
   });
 
-  describe('Empty state', () => {
+  describe('empty state', () => {
     it('returns empty tasks and projects arrays', async () => {
       const tasks = createMockTasks([]);
       const projects = createMockProjects([]);
@@ -135,7 +135,7 @@ describe('tasksInboxLoader', () => {
     });
   });
 
-  describe('Error handling', () => {
+  describe('error handling', () => {
     it('throws if task service fails', async () => {
       mockTaskService.getInboxTasks.mockRejectedValue(new Error('Task service error'));
       mockProjectService.getRecentProjects.mockResolvedValue(createMockProjects());
@@ -151,7 +151,7 @@ describe('tasksInboxLoader', () => {
     });
   });
 
-  describe('Data format validation', () => {
+  describe('data validation', () => {
     it('returns a valid TasksLoaderData shape', async () => {
       const tasks = createMockTasks();
       const projects = createMockProjects();
@@ -165,21 +165,6 @@ describe('tasksInboxLoader', () => {
       expect(result).toHaveProperty('projects');
       expect(Array.isArray(result.tasks.documents)).toBe(true);
       expect(Array.isArray(result.projects.documents)).toBe(true);
-    });
-  });
-
-  describe('Loader behavior', () => {
-    it('does not rely on loader args', async () => {
-      const tasks = createMockTasks([]);
-      const projects = createMockProjects([]);
-
-      mockTaskService.getInboxTasks.mockResolvedValue(tasks);
-      mockProjectService.getRecentProjects.mockResolvedValue(projects);
-
-      const result = (await tasksInboxLoader(createLoaderArgs())) as ProjectTaskLoaderData;
-
-      expect(result.tasks.total).toBe(0);
-      expect(result.projects.total).toBe(0);
     });
   });
 });

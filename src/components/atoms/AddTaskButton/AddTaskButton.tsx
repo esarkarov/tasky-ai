@@ -7,7 +7,7 @@ export const AddTaskButton = (props: AddTaskButtonProps) => {
   return (
     <Button
       variant="link"
-      className="mb-4 w-full justify-start px-0"
+      className="mb-4 justify-start px-0"
       aria-label="Add task"
       {...props}>
       <CirclePlus

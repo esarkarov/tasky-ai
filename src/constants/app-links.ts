@@ -9,7 +9,7 @@ export const SOCIAL_LINKS = [
     href: 'https://github.com/esarkarov',
     label: 'GitHub',
   },
-] as const;
+];
 
 export const TASK_SIDEBAR_LINKS = [
   {

@@ -1,5 +1,5 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
-import { appLoader } from './app.loader';
+import { sidebarLoader } from './sidebar.loader';
 import { projectService } from '@/services/project/project.service';
 import { taskService } from '@/services/task/task.service';
 import type { ProjectsListResponse, ProjectListItem } from '@/types/projects.types';
@@ -19,6 +19,12 @@ vi.mock('@/services/task/task.service', () => ({
 
 const mockProjectService = vi.mocked(projectService);
 const mockTaskService = vi.mocked(taskService);
+
+const createLoaderArgs = () => ({
+  request: new Request('http://localhost'),
+  params: {},
+  context: {},
+});
 
 const createMockProject = (overrides: Partial<ProjectListItem> = {}): ProjectListItem => ({
   $id: 'project-1',
@@ -43,12 +49,6 @@ const createMockTaskCounts = (today = 3, inbox = 1): TaskCounts => ({
   inboxTasks: inbox,
 });
 
-const createLoaderArgs = () => ({
-  request: new Request('http://localhost'),
-  params: {},
-  context: {},
-});
-
 beforeEach(() => {
   vi.clearAllMocks();
 });
@@ -61,7 +61,7 @@ describe('appLoader', () => {
     mockProjectService.getRecentProjects.mockResolvedValue(mockProjects);
     mockTaskService.getTaskCounts.mockResolvedValue(mockTaskCounts);
 
-    const result = await appLoader(createLoaderArgs());
+    const result = await sidebarLoader(createLoaderArgs());
 
     expect(mockProjectService.getRecentProjects).toHaveBeenCalledOnce();
     expect(mockTaskService.getTaskCounts).toHaveBeenCalledOnce();
@@ -75,7 +75,7 @@ describe('appLoader', () => {
     mockProjectService.getRecentProjects.mockResolvedValue(emptyProjects);
     mockTaskService.getTaskCounts.mockResolvedValue(zeroTaskCounts);
 
-    const result = await appLoader(createLoaderArgs());
+    const result = await sidebarLoader(createLoaderArgs());
 
     expect(result).toEqual({ projects: emptyProjects, taskCounts: zeroTaskCounts });
   });
@@ -85,7 +85,7 @@ describe('appLoader', () => {
       const error = new Error('Failed to fetch projects');
       mockProjectService.getRecentProjects.mockRejectedValue(error);
 
-      await expect(appLoader(createLoaderArgs())).rejects.toThrow('Failed to fetch projects');
+      await expect(sidebarLoader(createLoaderArgs())).rejects.toThrow('Failed to fetch projects');
     });
 
     it('throws if taskService fails', async () => {
@@ -93,14 +93,14 @@ describe('appLoader', () => {
       mockProjectService.getRecentProjects.mockResolvedValue(projects);
       mockTaskService.getTaskCounts.mockRejectedValue(new Error('Failed to fetch tasks'));
 
-      await expect(appLoader(createLoaderArgs())).rejects.toThrow('Failed to fetch tasks');
+      await expect(sidebarLoader(createLoaderArgs())).rejects.toThrow('Failed to fetch tasks');
     });
 
     it('throws the first error if both services fail', async () => {
       mockProjectService.getRecentProjects.mockRejectedValue(new Error('Project error'));
       mockTaskService.getTaskCounts.mockRejectedValue(new Error('Task error'));
 
-      await expect(appLoader(createLoaderArgs())).rejects.toThrow('Project error');
+      await expect(sidebarLoader(createLoaderArgs())).rejects.toThrow('Project error');
     });
   });
 
@@ -114,7 +114,7 @@ describe('appLoader', () => {
     mockProjectService.getRecentProjects.mockResolvedValue(projects);
     mockTaskService.getTaskCounts.mockResolvedValue(taskCounts);
 
-    const result = await appLoader(createLoaderArgs());
+    const result = await sidebarLoader(createLoaderArgs());
 
     expect(getRecentProjectsSpy).toHaveBeenCalledOnce();
     expect(getTaskCountsSpy).toHaveBeenCalledOnce();

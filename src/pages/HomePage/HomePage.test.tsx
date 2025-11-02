@@ -10,7 +10,7 @@ vi.mock('@clerk/clerk-react', () => ({
   useAuth: () => mockUseAuth(),
 }));
 
-vi.mock('@/components/atoms/Head', () => ({
+vi.mock('@/components/atoms/Head/Head', () => ({
   Head: ({ title }: { title: string }) => <title data-testid="meta-title">{title}</title>,
 }));
 
