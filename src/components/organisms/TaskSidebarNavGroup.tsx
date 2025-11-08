@@ -1,5 +1,5 @@
 import { NavList } from '@/components/atoms/List/List';
-import { TaskSidebarNavLink } from '@/components/molecules/TaskSidebarNavLink';
+import { TaskSidebarNavLink } from '@/components/molecules/TaskSidebarNavLink/TaskSidebarNavLink';
 import { TaskFormDialog } from '@/components/organisms/TaskFormDialog';
 import {
   SidebarGroup,

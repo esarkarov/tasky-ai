@@ -1,4 +1,4 @@
-import { ProjectSidebarNavLink } from '@/components/molecules/ProjectSidebarNavLink';
+import { ProjectSidebarNavLink } from '@/components/molecules/ProjectSidebarNavLink/ProjectSidebarNavLink';
 import { ProjectActionMenu } from '@/components/organisms/ProjectActionMenu';
 import { SidebarMenuAction, SidebarMenuItem } from '@/components/ui/sidebar';
 import { ProjectListItem } from '@/types/projects.types';

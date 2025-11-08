@@ -18,16 +18,17 @@ export const AIPromptInput = ({ value, onChange }: AIPromptInputProps) => {
       </Label>
       <Textarea
         id="ai_prompt"
-        autoFocus
         placeholder="Tell me about your project. What do you want to accomplish?"
         className="border-none my-2 focus-visible:ring-2 focus-visible:ring-ring"
         value={value}
+        maxLength={MAX_PROMPT_LENGTH}
         onChange={(e) => onChange(e.currentTarget.value)}
         aria-describedby="ai-task-generator-description"
-        aria-invalid={prompt.length > MAX_PROMPT_LENGTH}
+        aria-invalid={value.length > MAX_PROMPT_LENGTH}
+        autoFocus
       />
       <InputValueCount
-        valueLength={prompt.length}
+        valueLength={value.length}
         maxLength={MAX_PROMPT_LENGTH}
       />
     </div>

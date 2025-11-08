@@ -1,4 +1,4 @@
-import { ConfirmationDialog } from '@/components/molecules/ConfirmationDialog';
+import { ConfirmationDialog } from '@/components/molecules/ConfirmationDialog/ConfirmationDialog';
 import { ProjectFormDialog } from '@/components/organisms/ProjectFormDialog';
 import { Button } from '@/components/ui/button';
 import {

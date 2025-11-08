@@ -40,17 +40,20 @@ export const ConfirmationDialog = ({
 
   const isIconVariant = variant === 'icon';
   const isPending = isDeleting || formState;
+  const isDisabled = isDeleting || formState || disabled;
   const description = `The '${truncateString(label, 48)}' will be permanently deleted.`;
 
   const handleClick = useCallback(async () => {
-    if (!isPending) {
-      setIsDeleting(true);
-      try {
-        await handleDelete(id);
-        setOpen(false);
-      } finally {
-        setIsDeleting(false);
-      }
+    if (isPending) return;
+
+    setIsDeleting(true);
+    try {
+      await handleDelete(id);
+      setOpen(false);
+    } catch (error) {
+      console.error('Delete failed', error);
+    } finally {
+      setIsDeleting(false);
     }
   }, [isPending, handleDelete, id]);
 
@@ -60,7 +63,7 @@ export const ConfirmationDialog = ({
       size="icon"
       className="h-6 w-6 text-muted-foreground"
       aria-label="Delete"
-      disabled={disabled || isDeleting}>
+      disabled={isDisabled}>
       <Trash2 aria-hidden="true" />
     </Button>
   ) : (
@@ -69,7 +72,7 @@ export const ConfirmationDialog = ({
       size="sm"
       className="w-full justify-start px-2 !text-destructive"
       aria-label="Delete"
-      disabled={disabled || isDeleting}>
+      disabled={isDisabled}>
       <Trash2 aria-hidden="true" /> <span>Delete</span>
     </Button>
   );

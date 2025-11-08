@@ -50,7 +50,7 @@ vi.mock('@/components/organisms/ProjectFormDialog', () => ({
   ),
 }));
 
-vi.mock('@/components/molecules/ProjectSearchField', () => ({
+vi.mock('@/components/molecules/ProjectSearchField/ProjectSearchField', () => ({
   ProjectSearchField: ({ onChange, searchStatus }: { onChange: () => void; searchStatus: string }) => (
     <input
       data-testid="search-field"

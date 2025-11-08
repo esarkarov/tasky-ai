@@ -32,9 +32,9 @@ export const TaskContentInput = ({ value, disabled, onChange }: TaskContentInput
         disabled={disabled}
         onChange={(e) => onChange(e.currentTarget.value)}
         onKeyDown={handleKeyDown}
-        autoFocus
         aria-label="Task content input"
         aria-multiline="true"
+        autoFocus
       />
       <InputValueCount
         valueLength={value.length}

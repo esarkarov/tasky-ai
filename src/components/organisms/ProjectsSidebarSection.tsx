@@ -1,5 +1,5 @@
 import { AddProjectButton } from '@/components/atoms/AddProjectButton/AddProjectButton';
-import { ProjectsSidebarLabel } from '@/components/molecules/ProjectsSidebarLabel';
+import { ProjectsSidebarLabel } from '@/components/molecules/ProjectsSidebarLabel/ProjectsSidebarLabel';
 import { ProjectsSidebarList } from '@/components/organisms/ProjectsSidebarList';
 import { Collapsible } from '@/components/ui/collapsible';
 import { SidebarGroup } from '@/components/ui/sidebar';

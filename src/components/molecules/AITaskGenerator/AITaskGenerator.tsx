@@ -1,4 +1,4 @@
-import { AIPromptInput } from '@/components/molecules/AIPromptInput';
+import { AIPromptInput } from '@/components/molecules/AIPromptInput/AIPromptInput';
 import { Label } from '@/components/ui/label';
 import { Switch } from '@/components/ui/switch';
 import { Bot } from 'lucide-react';

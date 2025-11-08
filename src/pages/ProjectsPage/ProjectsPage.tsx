@@ -1,7 +1,7 @@
 import { Head } from '@/components/atoms/Head/Head';
 import { PageContainer, PageHeader, PageList, PageTitle } from '@/components/atoms/Page/Page';
 import { TotalCounter } from '@/components/atoms/TotalCounter/TotalCounter';
-import { ProjectSearchField } from '@/components/molecules/ProjectSearchField';
+import { ProjectSearchField } from '@/components/molecules/ProjectSearchField/ProjectSearchField';
 import { ProjectCard } from '@/components/organisms/ProjectCard';
 import { ProjectFormDialog } from '@/components/organisms/ProjectFormDialog';
 import { TopAppBar } from '@/components/organisms/TopAppBar';

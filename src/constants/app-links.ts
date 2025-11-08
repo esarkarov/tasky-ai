@@ -32,4 +32,4 @@ export const TASK_SIDEBAR_LINKS = [
     label: 'Completed',
     icon: CircleCheck,
   },
-] as const;
+];

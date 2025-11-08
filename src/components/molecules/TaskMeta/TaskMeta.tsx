@@ -14,7 +14,7 @@ interface TaskMetaProps {
 export const TaskMeta = ({ task, project }: TaskMetaProps) => {
   const { pathname } = useLocation();
   const showDueDate = Boolean(task.due_date) && pathname !== ROUTES.TODAY;
-  const showProject = pathname !== ROUTES.INBOX && pathname !== ROUTES.PROJECT(project?.$id);
+  const showProject = task.project?.$id && pathname !== ROUTES.INBOX && task.project.$id !== project?.$id;
 
   if (!showDueDate && !showProject) return null;
 

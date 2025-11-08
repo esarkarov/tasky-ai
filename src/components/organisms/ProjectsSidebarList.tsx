@@ -1,6 +1,6 @@
 import { AllProjectsButton } from '@/components/atoms/AllProjectsButton/AllProjectsButton';
 import { NavList } from '@/components/atoms/List/List';
-import { ProjectSidebarNavItem } from '@/components/molecules/ProjectSidebarNavItem';
+import { ProjectSidebarNavItem } from '@/components/molecules/ProjectSidebarNavItem/ProjectSidebarNavItem';
 import { CollapsibleContent } from '@/components/ui/collapsible';
 import { SidebarGroupContent, SidebarMenu, SidebarMenuItem } from '@/components/ui/sidebar';
 import { ProjectsLoaderData } from '@/types/loaders.types';

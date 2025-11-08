@@ -1,8 +1,8 @@
 import { CancelProjectButton } from '@/components/atoms/CancelProjectButton/CancelProjectButton';
 import { SubmitProjectButton } from '@/components/atoms/SubmitProjectButton/SubmitProjectButton';
-import { AITaskGenerator } from '@/components/molecules/AITaskGenerator';
-import { ColorPicker } from '@/components/molecules/ColorPicker';
-import { ProjectNameInput } from '@/components/molecules/ProjectNameInput';
+import { AITaskGenerator } from '@/components/molecules/AITaskGenerator/AITaskGenerator';
+import { ColorPicker } from '@/components/molecules/ColorPicker/ColorPicker';
+import { ProjectNameInput } from '@/components/molecules/ProjectNameInput/ProjectNameInput';
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { Separator } from '@/components/ui/separator';
 import { DEFAULT_PROJECT_FORM_DATA } from '@/constants/defaults';

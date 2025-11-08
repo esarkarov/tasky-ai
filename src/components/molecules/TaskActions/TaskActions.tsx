@@ -1,5 +1,5 @@
 import { EditTaskButton } from '@/components/atoms/EditTaskButton/EditTaskButton';
-import { ConfirmationDialog } from '@/components/molecules/ConfirmationDialog';
+import { ConfirmationDialog } from '@/components/molecules/ConfirmationDialog/ConfirmationDialog';
 import { useTaskOperations } from '@/hooks/use-task-operations';
 import { TaskEntity } from '@/types/tasks.types';
 
