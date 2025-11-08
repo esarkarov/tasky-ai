@@ -15,7 +15,7 @@ vi.mock('@/components/atoms/Head/Head', () => ({
   Head: ({ title }: { title: string }) => <title>{title}</title>,
 }));
 
-vi.mock('@/components/atoms/Page/Page', () => ({
+vi.mock('@/components/templates/PageTemplate/PageTemplate', () => ({
   PageContainer: ({ children, ...props }: { children: React.ReactNode }) => <div {...props}>{children}</div>,
   PageHeader: ({ children }: { children: React.ReactNode }) => <header>{children}</header>,
   PageList: ({ children, ...props }: { children: React.ReactNode }) => <ul {...props}>{children}</ul>,

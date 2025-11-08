@@ -1,12 +1,12 @@
 import { Head } from '@/components/atoms/Head/Head';
 import { ItemList } from '@/components/atoms/List/List';
 import { LoadMoreButton } from '@/components/atoms/LoadMoreButton/LoadMoreButton';
-import { PageContainer, PageHeader, PageList, PageTitle } from '@/components/atoms/Page/Page';
 import { TotalCounter } from '@/components/atoms/TotalCounter/TotalCounter';
 import { EmptyStateMessage } from '@/components/organisms/EmptyStateMessage';
 import { FilterSelect } from '@/components/organisms/FilterSelect';
 import { TaskCard } from '@/components/organisms/TaskCard';
 import { TopAppBar } from '@/components/organisms/TopAppBar';
+import { PageContainer, PageHeader, PageList, PageTitle } from '@/components/templates/PageTemplate/PageTemplate';
 import { useLoadMore } from '@/hooks/use-load-more';
 import { useProjectFilter } from '@/hooks/use-project-filter';
 import { ProjectTaskLoaderData } from '@/types/loaders.types';

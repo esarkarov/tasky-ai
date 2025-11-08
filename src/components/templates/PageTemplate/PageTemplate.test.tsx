@@ -1,6 +1,6 @@
 import { render, screen } from '@testing-library/react';
 import { describe, expect, it } from 'vitest';
-import { PageContainer, PageHeader, PageList, PageTitle } from './Page';
+import { PageContainer, PageHeader, PageList, PageTitle } from './PageTemplate';
 
 describe('Page Components', () => {
   describe('PageContainer', () => {

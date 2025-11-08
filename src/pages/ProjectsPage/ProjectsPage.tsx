@@ -1,20 +1,20 @@
 import { Head } from '@/components/atoms/Head/Head';
-import { PageContainer, PageHeader, PageList, PageTitle } from '@/components/atoms/Page/Page';
+import { ItemList } from '@/components/atoms/List/List';
+import { LoadMoreButton } from '@/components/atoms/LoadMoreButton/LoadMoreButton';
 import { TotalCounter } from '@/components/atoms/TotalCounter/TotalCounter';
 import { ProjectSearchField } from '@/components/molecules/ProjectSearchField/ProjectSearchField';
 import { ProjectCard } from '@/components/organisms/ProjectCard';
 import { ProjectFormDialog } from '@/components/organisms/ProjectFormDialog';
 import { TopAppBar } from '@/components/organisms/TopAppBar';
+import { PageContainer, PageHeader, PageList, PageTitle } from '@/components/templates/PageTemplate/PageTemplate';
 import { Button } from '@/components/ui/button';
 import { ROUTES } from '@/constants/routes';
+import { useLoadMore } from '@/hooks/use-load-more';
 import { useProjectOperations } from '@/hooks/use-project-operations';
-import { cn } from '@/utils/ui/ui.utils';
 import { ProjectsLoaderData } from '@/types/loaders.types';
+import { cn } from '@/utils/ui/ui.utils';
 import { FolderKanban, Plus } from 'lucide-react';
 import { useLoaderData } from 'react-router';
-import { useLoadMore } from '@/hooks/use-load-more';
-import { LoadMoreButton } from '@/components/atoms/LoadMoreButton/LoadMoreButton';
-import { ItemList } from '@/components/atoms/List/List';
 
 export const ProjectsPage = () => {
   const { fetcher, searchStatus, handleSearchProjects } = useProjectOperations();
