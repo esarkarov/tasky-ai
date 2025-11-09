@@ -3,7 +3,7 @@ import { MoreHorizontal } from 'lucide-react';
 import { Link, useLocation } from 'react-router';
 import { SidebarMenuButton } from '@/components/ui/sidebar';
 
-interface AllProjectsButtonProps {
+export interface AllProjectsButtonProps {
   onClick: () => void;
 }
 

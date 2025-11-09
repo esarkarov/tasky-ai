@@ -4,13 +4,13 @@ import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { ProjectBadge } from './ProjectBadge';
 
 vi.mock('lucide-react', () => ({
-  Hash: ({ ...props }) => (
+  Hash: (props: Record<string, unknown>) => (
     <svg
       data-testid="hash-icon"
       {...props}
     />
   ),
-  Inbox: ({ ...props }) => (
+  Inbox: (props: Record<string, unknown>) => (
     <svg
       data-testid="inbox-icon"
       {...props}
@@ -33,127 +33,113 @@ describe('ProjectBadge', () => {
     $permissions: [],
     ...overrides,
   });
+  const setup = (project?: ProjectEntity | null) => {
+    render(<ProjectBadge project={project as ProjectEntity} />);
+  };
 
   beforeEach(() => {
     vi.clearAllMocks();
   });
 
-  describe('with project', () => {
-    it('should render project name', () => {
+  describe('Rendering with project', () => {
+    it('renders project name', () => {
       const project = createMockProject({ name: 'My Project' });
-      render(<ProjectBadge project={project} />);
-
+      setup(project);
       expect(screen.getByText('My Project')).toBeInTheDocument();
     });
 
-    it('should render Hash icon', () => {
+    it('renders Hash icon and not Inbox icon', () => {
       const project = createMockProject();
-      render(<ProjectBadge project={project} />);
-
+      setup(project);
       expect(screen.getByTestId('hash-icon')).toBeInTheDocument();
       expect(screen.queryByTestId('inbox-icon')).not.toBeInTheDocument();
     });
 
-    it('should apply project color to Hash icon', () => {
+    it('applies project color to Hash icon', () => {
       const project = createMockProject({ color_hex: '#FF0000' });
-      render(<ProjectBadge project={project} />);
-
-      const hashIcon = screen.getByTestId('hash-icon');
-      expect(hashIcon).toHaveAttribute('color', '#FF0000');
+      setup(project);
+      expect(screen.getByTestId('hash-icon')).toHaveAttribute('color', '#FF0000');
     });
 
-    it('should set Hash icon size to 14', () => {
+    it('sets Hash icon size to 14', () => {
       const project = createMockProject();
-      render(<ProjectBadge project={project} />);
-
-      const hashIcon = screen.getByTestId('hash-icon');
-      expect(hashIcon).toHaveAttribute('size', '14');
+      setup(project);
+      expect(screen.getByTestId('hash-icon')).toHaveAttribute('size', '14');
     });
 
-    it('should hide Hash icon from screen readers', () => {
+    it('hides Hash icon from assistive tech', () => {
       const project = createMockProject();
-      render(<ProjectBadge project={project} />);
-
-      const hashIcon = screen.getByTestId('hash-icon');
-      expect(hashIcon).toHaveAttribute('aria-hidden', 'true');
+      setup(project);
+      expect(screen.getByTestId('hash-icon')).toHaveAttribute('aria-hidden', 'true');
     });
   });
 
-  describe('without project (inbox)', () => {
-    it('should render "Inbox" text when project is null', () => {
-      render(<ProjectBadge project={null as unknown as ProjectEntity} />);
-
+  describe('Rendering without project (Inbox)', () => {
+    it('renders "Inbox" text when project is null', () => {
+      setup(null);
       expect(screen.getByText('Inbox')).toBeInTheDocument();
     });
 
-    it('should render "Inbox" text when project is undefined', () => {
-      render(<ProjectBadge project={undefined as unknown as ProjectEntity} />);
-
+    it('renders "Inbox" text when project is undefined', () => {
+      setup(undefined);
       expect(screen.getByText('Inbox')).toBeInTheDocument();
     });
 
-    it('should render Inbox icon when project is null', () => {
-      render(<ProjectBadge project={null as unknown as ProjectEntity} />);
-
+    it('renders Inbox icon and not Hash icon', () => {
+      setup(null);
       expect(screen.getByTestId('inbox-icon')).toBeInTheDocument();
       expect(screen.queryByTestId('hash-icon')).not.toBeInTheDocument();
     });
 
-    it('should set Inbox icon size to 14', () => {
-      render(<ProjectBadge project={null as unknown as ProjectEntity} />);
-
-      const inboxIcon = screen.getByTestId('inbox-icon');
-      expect(inboxIcon).toHaveAttribute('size', '14');
+    it('sets Inbox icon size to 14', () => {
+      setup(null);
+      expect(screen.getByTestId('inbox-icon')).toHaveAttribute('size', '14');
     });
 
-    it('should hide Inbox icon from screen readers', () => {
-      render(<ProjectBadge project={null as unknown as ProjectEntity} />);
-
-      const inboxIcon = screen.getByTestId('inbox-icon');
-      expect(inboxIcon).toHaveAttribute('aria-hidden', 'true');
+    it('hides Inbox icon from assistive tech', () => {
+      setup(null);
+      expect(screen.getByTestId('inbox-icon')).toHaveAttribute('aria-hidden', 'true');
     });
 
-    it('should apply muted foreground class to Inbox icon', () => {
-      render(<ProjectBadge project={null as unknown as ProjectEntity} />);
-
-      const inboxIcon = screen.getByTestId('inbox-icon');
-      expect(inboxIcon).toHaveClass('text-muted-foreground');
+    it('applies muted text color to Inbox icon', () => {
+      setup(null);
+      expect(screen.getByTestId('inbox-icon')).toHaveClass('text-muted-foreground');
     });
   });
 
-  describe('project name edge cases', () => {
-    it('should handle long project names with truncation', () => {
+  describe('Project name variations', () => {
+    it('handles long project names with truncation', () => {
       const project = createMockProject({
         name: 'This is a very long project name that should be truncated',
       });
-      render(<ProjectBadge project={project} />);
-
+      setup(project);
       const nameElement = screen.getByText('This is a very long project name that should be truncated');
       expect(nameElement).toHaveClass('truncate');
     });
 
-    it('should handle project with special characters', () => {
+    it('renders names with special characters', () => {
       const project = createMockProject({ name: 'Project #1 @ 2024' });
-      render(<ProjectBadge project={project} />);
-
+      setup(project);
       expect(screen.getByText('Project #1 @ 2024')).toBeInTheDocument();
+    });
+
+    it('renders empty project name as "Inbox"', () => {
+      const project = createMockProject({ name: '' });
+      setup(project);
+      expect(screen.getByText('Inbox')).toBeInTheDocument();
     });
   });
 
-  describe('accessibility', () => {
-    it('should have aria-label on container', () => {
+  describe('Accessibility', () => {
+    it('has aria-label on container when project exists', () => {
       const project = createMockProject();
-      render(<ProjectBadge project={project} />);
-
-      const container = screen.getByLabelText('Task project');
-      expect(container).toBeInTheDocument();
+      setup(project);
+      expect(screen.getByLabelText('Task project')).toBeInTheDocument();
     });
 
-    it('should have aria-label when showing Inbox', () => {
-      render(<ProjectBadge project={null as unknown as ProjectEntity} />);
-
-      const container = screen.getByLabelText('Task project');
-      expect(container).toBeInTheDocument();
+    it('has aria-label on container when showing Inbox', () => {
+      setup(null);
+      expect(screen.getByLabelText('Task project')).toBeInTheDocument();
     });
   });
 });

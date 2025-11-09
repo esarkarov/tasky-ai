@@ -223,14 +223,13 @@ describe('ConfirmationDialog', () => {
       render(<ConfirmationDialog {...defaultProps} />);
 
       await user.click(screen.getByRole('button', { name: /delete/i }));
-
       const confirmButton = screen.getByRole('button', { name: /confirm deletion/i });
-      await user.click(confirmButton);
-      await user.click(confirmButton);
+
+      await user.dblClick(confirmButton);
       await user.click(confirmButton);
 
-      await waitFor(() => {
-        expect(mockHandleDelete).toHaveBeenCalledTimes(1);
+      await waitFor(() => expect(mockHandleDelete).toHaveBeenCalledTimes(1), {
+        timeout: 200,
       });
     });
 

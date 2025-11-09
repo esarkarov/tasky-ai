@@ -1,5 +1,5 @@
 import { render, screen } from '@testing-library/react';
-import { userEvent } from '@testing-library/user-event';
+import userEvent from '@testing-library/user-event';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { FooterNavLink } from './FooterNavLink';
 
@@ -23,198 +23,115 @@ vi.mock('@/constants/app-links', () => ({
 }));
 
 describe('FooterNavLink', () => {
-  const mockLink = {
-    href: 'https://twitter.com',
-    label: 'Twitter',
+  const defaultLink = { href: 'https://twitter.com', label: 'Twitter' };
+  const setup = async (index = 0, link = { href: 'https://twitter.com', label: 'Twitter' }) => {
+    const user = userEvent.setup();
+    render(
+      <FooterNavLink
+        link={link}
+        index={index}
+      />
+    );
+    const navLink = screen.getByRole('link', { name: link.label });
+    const separator = screen.queryByTestId('separator');
+    return { user, navLink, separator };
   };
 
   beforeEach(() => {
     vi.clearAllMocks();
   });
 
-  describe('basic rendering', () => {
-    it('should render link with correct text', () => {
-      render(
-        <FooterNavLink
-          link={mockLink}
-          index={0}
-        />
-      );
+  describe('rendering', () => {
+    it('renders link with correct text and href', async () => {
+      const { navLink } = await setup(0, defaultLink);
 
-      expect(screen.getByRole('link', { name: 'Twitter' })).toBeInTheDocument();
+      expect(navLink).toBeInTheDocument();
+      expect(navLink).toHaveTextContent('Twitter');
+      expect(navLink).toHaveAttribute('href', 'https://twitter.com');
     });
 
-    it('should have correct href attribute', () => {
-      render(
-        <FooterNavLink
-          link={mockLink}
-          index={0}
-        />
-      );
+    it('opens link in a new tab with safe rel attributes', async () => {
+      const { navLink } = await setup();
 
-      const link = screen.getByRole('link', { name: 'Twitter' });
-      expect(link).toHaveAttribute('href', 'https://twitter.com');
-    });
-
-    it('should open link in new tab', () => {
-      render(
-        <FooterNavLink
-          link={mockLink}
-          index={0}
-        />
-      );
-
-      const link = screen.getByRole('link', { name: 'Twitter' });
-      expect(link).toHaveAttribute('target', '_blank');
-      expect(link).toHaveAttribute('rel', 'noopener noreferrer');
+      expect(navLink).toHaveAttribute('target', '_blank');
+      expect(navLink).toHaveAttribute('rel', 'noopener noreferrer');
     });
   });
 
   describe('separator rendering', () => {
-    it('should render separator when not last item', () => {
-      render(
-        <FooterNavLink
-          link={mockLink}
-          index={0}
-        />
-      );
+    it('renders separator when not the last item', async () => {
+      const { separator } = await setup(0);
 
-      expect(screen.getByTestId('separator')).toBeInTheDocument();
+      expect(separator).toBeInTheDocument();
     });
 
-    it('should not render separator when last item', () => {
-      render(
-        <FooterNavLink
-          link={mockLink}
-          index={2}
-        />
-      );
+    it('does not render separator for the last item', async () => {
+      const { separator } = await setup(2);
 
-      expect(screen.queryByTestId('separator')).not.toBeInTheDocument();
+      expect(separator).not.toBeInTheDocument();
     });
 
-    it('should have vertical orientation on separator', () => {
-      render(
-        <FooterNavLink
-          link={mockLink}
-          index={0}
-        />
-      );
+    it('sets vertical orientation and correct classes on separator', async () => {
+      const { separator } = await setup(1);
 
-      const separator = screen.getByTestId('separator');
       expect(separator).toHaveAttribute('data-orientation', 'vertical');
-    });
-
-    it('should have correct classes on separator', () => {
-      render(
-        <FooterNavLink
-          link={mockLink}
-          index={0}
-        />
-      );
-
-      const separator = screen.getByTestId('separator');
       expect(separator).toHaveClass('h-3', 'mx-3');
     });
   });
 
   describe('user interactions', () => {
-    it('should be clickable', async () => {
-      const user = userEvent.setup();
-      render(
-        <FooterNavLink
-          link={mockLink}
-          index={0}
-        />
-      );
+    it('is clickable and navigates to correct href', async () => {
+      const { user, navLink } = await setup();
 
-      const link = screen.getByRole('link', { name: 'Twitter' });
-      await user.click(link);
+      await user.click(navLink);
 
-      expect(link).toHaveAttribute('href', 'https://twitter.com');
+      expect(navLink).toHaveAttribute('href', 'https://twitter.com');
     });
 
-    it('should be keyboard accessible', async () => {
-      const user = userEvent.setup();
-      render(
-        <FooterNavLink
-          link={mockLink}
-          index={0}
-        />
-      );
+    it('is keyboard accessible via Tab', async () => {
+      const { user, navLink } = await setup();
 
-      const link = screen.getByRole('link', { name: 'Twitter' });
       await user.tab();
 
-      expect(link).toHaveFocus();
+      expect(navLink).toHaveFocus();
     });
   });
 
   describe('accessibility', () => {
-    it('should have aria-label on link', () => {
-      render(
-        <FooterNavLink
-          link={mockLink}
-          index={0}
-        />
-      );
+    it('adds aria-label for assistive technologies', async () => {
+      const { navLink } = await setup();
 
-      const link = screen.getByRole('link', { name: 'Twitter' });
-      expect(link).toHaveAttribute('aria-label', 'Twitter');
+      expect(navLink).toHaveAttribute('aria-label', 'Twitter');
     });
 
-    it('should hide separator from screen readers', () => {
-      render(
-        <FooterNavLink
-          link={mockLink}
-          index={0}
-        />
-      );
+    it('hides separator from screen readers', async () => {
+      const { separator } = await setup(0);
 
-      const separator = screen.getByTestId('separator');
       expect(separator).toHaveAttribute('aria-hidden', 'true');
       expect(separator).toHaveAttribute('role', 'presentation');
     });
   });
 
-  describe('multiple links', () => {
-    it('should render first link with separator', () => {
-      const firstLink = { href: 'https://twitter.com', label: 'Twitter' };
-      render(
-        <FooterNavLink
-          link={firstLink}
-          index={0}
-        />
-      );
+  describe('multiple links behavior', () => {
+    it('renders first link with separator', async () => {
+      const { separator, navLink } = await setup(0, { href: 'https://twitter.com', label: 'Twitter' });
 
-      expect(screen.getByRole('link', { name: 'Twitter' })).toBeInTheDocument();
-      expect(screen.getByTestId('separator')).toBeInTheDocument();
+      expect(navLink).toBeInTheDocument();
+      expect(separator).toBeInTheDocument();
     });
 
-    it('should render middle link with separator', () => {
-      const middleLink = { href: 'https://github.com', label: 'GitHub' };
-      render(
-        <FooterNavLink
-          link={middleLink}
-          index={1}
-        />
-      );
+    it('renders middle link with separator', async () => {
+      const { separator, navLink } = await setup(1, { href: 'https://github.com', label: 'GitHub' });
 
-      expect(screen.getByRole('link', { name: 'GitHub' })).toBeInTheDocument();
-      expect(screen.getByTestId('separator')).toBeInTheDocument();
+      expect(navLink).toHaveTextContent('GitHub');
+      expect(separator).toBeInTheDocument();
     });
 
-    it('should render last link without separator', () => {
-      const lastLink = { href: 'https://linkedin.com', label: 'LinkedIn' };
-      render(
-        <FooterNavLink
-          link={lastLink}
-          index={2}
-        />
-      );
+    it('renders last link without separator', async () => {
+      const { navLink, separator } = await setup(2, { href: 'https://linkedin.com', label: 'LinkedIn' });
 
-      expect(screen.getByRole('link', { name: 'LinkedIn' })).toBeInTheDocument();
-      expect(screen.queryByTestId('separator')).not.toBeInTheDocument();
+      expect(navLink).toHaveTextContent('LinkedIn');
+      expect(separator).not.toBeInTheDocument();
     });
   });
 });

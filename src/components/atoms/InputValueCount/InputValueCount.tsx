@@ -1,7 +1,7 @@
 import { INPUT_WARN_THRESHOLD } from '@/constants/validation';
 import { cn } from '@/utils/ui/ui.utils';
 
-interface InputValueCountProps {
+export interface InputValueCountProps {
   valueLength: number;
   maxLength: number;
   warnAtLength?: number;

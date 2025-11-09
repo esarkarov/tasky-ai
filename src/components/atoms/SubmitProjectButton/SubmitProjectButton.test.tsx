@@ -1,6 +1,5 @@
 import { render, screen, waitFor } from '@testing-library/react';
-import { userEvent } from '@testing-library/user-event';
-import { ReactNode } from 'react';
+import userEvent from '@testing-library/user-event';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { SubmitProjectButton } from './SubmitProjectButton';
 
@@ -11,7 +10,7 @@ vi.mock('@/components/ui/button', () => ({
     disabled,
     'aria-label': ariaLabel,
   }: {
-    children: ReactNode;
+    children: React.ReactNode;
     onClick: () => void;
     disabled: boolean;
     'aria-label': string;
@@ -28,268 +27,106 @@ vi.mock('@/components/ui/button', () => ({
 
 describe('SubmitProjectButton', () => {
   let mockOnClick: ReturnType<typeof vi.fn>;
+  const setup = (props?: Partial<React.ComponentProps<typeof SubmitProjectButton>>) => {
+    const user = userEvent.setup();
+    mockOnClick = vi.fn().mockResolvedValue(undefined);
+    const defaultProps = {
+      mode: 'create' as const,
+      disabled: true,
+      onClick: mockOnClick,
+      ...props,
+    };
+    render(<SubmitProjectButton {...defaultProps} />);
+    const button = screen.getByRole('button');
+    return { user, button, ...defaultProps };
+  };
 
   beforeEach(() => {
-    mockOnClick = vi.fn().mockResolvedValue(undefined);
+    vi.clearAllMocks();
   });
 
-  describe('create mode', () => {
-    it('should render "Add" text in create mode', () => {
-      render(
-        <SubmitProjectButton
-          mode="create"
-          disabled={false}
-          onClick={mockOnClick}
-        />
-      );
-
+  describe('rendering', () => {
+    it('renders "Add" text and "Add project" label in create mode', () => {
+      setup({ mode: 'create' });
       expect(screen.getByRole('button')).toHaveTextContent('Add');
-    });
-
-    it('should have "Add project" aria-label in create mode', () => {
-      render(
-        <SubmitProjectButton
-          mode="create"
-          disabled={false}
-          onClick={mockOnClick}
-        />
-      );
-
       expect(screen.getByLabelText('Add project')).toBeInTheDocument();
     });
-  });
 
-  describe('edit mode', () => {
-    it('should render "Save" text in edit mode', () => {
-      render(
-        <SubmitProjectButton
-          mode="update"
-          disabled={false}
-          onClick={mockOnClick}
-        />
-      );
-
+    it('renders "Save" text and "Save project" label in update mode', () => {
+      setup({ mode: 'update' });
       expect(screen.getByRole('button')).toHaveTextContent('Save');
-    });
-
-    it('should have "Save project" aria-label in edit mode', () => {
-      render(
-        <SubmitProjectButton
-          mode="update"
-          disabled={false}
-          onClick={mockOnClick}
-        />
-      );
-
       expect(screen.getByLabelText('Save project')).toBeInTheDocument();
     });
   });
 
-  describe('button type', () => {
-    it('should render as submit type button', () => {
-      render(
-        <SubmitProjectButton
-          mode="create"
-          disabled={false}
-          onClick={mockOnClick}
-        />
-      );
-
-      const button = screen.getByRole('button');
+  describe('button attributes', () => {
+    it('has submit type', () => {
+      const { button } = setup();
       expect(button).toHaveAttribute('type', 'submit');
     });
-  });
 
-  describe('disabled state', () => {
-    it('should be disabled when disabled prop is false', () => {
-      render(
-        <SubmitProjectButton
-          mode="create"
-          disabled={false}
-          onClick={mockOnClick}
-        />
-      );
-
-      const button = screen.getByRole('button');
+    it('is disabled when disabled prop is false', () => {
+      const { button } = setup({ disabled: false });
       expect(button).toBeDisabled();
     });
 
-    it('should be enabled when disabled prop is true', () => {
-      render(
-        <SubmitProjectButton
-          mode="create"
-          disabled={true}
-          onClick={mockOnClick}
-        />
-      );
-
-      const button = screen.getByRole('button');
+    it('is enabled when disabled prop is true', () => {
+      const { button } = setup({ disabled: true });
       expect(button).not.toBeDisabled();
-    });
-
-    it('should not call onClick when button is disabled', async () => {
-      const user = userEvent.setup();
-      render(
-        <SubmitProjectButton
-          mode="create"
-          disabled={false}
-          onClick={mockOnClick}
-        />
-      );
-      const button = screen.getByRole('button');
-
-      await user.click(button);
-
-      expect(mockOnClick).not.toHaveBeenCalled();
     });
   });
 
   describe('user interactions', () => {
-    it('should call onClick when button is clicked and enabled', async () => {
-      const user = userEvent.setup();
-      render(
-        <SubmitProjectButton
-          mode="create"
-          disabled={true}
-          onClick={mockOnClick}
-        />
-      );
-      const button = screen.getByRole('button');
-
+    it('does not call onClick when disabled', async () => {
+      const { user, button } = setup({ disabled: false });
       await user.click(button);
-
-      await waitFor(() => {
-        expect(mockOnClick).toHaveBeenCalledTimes(1);
-      });
+      expect(mockOnClick).not.toHaveBeenCalled();
     });
 
-    it('should handle async onClick in create mode', async () => {
-      const user = userEvent.setup();
-      const asyncOnClick = vi.fn().mockResolvedValue(undefined);
-      render(
-        <SubmitProjectButton
-          mode="create"
-          disabled={true}
-          onClick={asyncOnClick}
-        />
-      );
-      const button = screen.getByRole('button');
-
+    it('calls onClick when enabled', async () => {
+      const { user, button } = setup({ disabled: true });
       await user.click(button);
-
-      await waitFor(() => {
-        expect(asyncOnClick).toHaveBeenCalledTimes(1);
-      });
+      await waitFor(() => expect(mockOnClick).toHaveBeenCalledTimes(1));
     });
 
-    it('should handle async onClick in edit mode', async () => {
-      const user = userEvent.setup();
-      const asyncOnClick = vi.fn().mockResolvedValue(undefined);
-      render(
-        <SubmitProjectButton
-          mode="update"
-          disabled={true}
-          onClick={asyncOnClick}
-        />
-      );
-      const button = screen.getByRole('button');
-
+    it('handles async onClick without errors', async () => {
+      const asyncClick = vi.fn().mockResolvedValue(undefined);
+      const { user, button } = setup({ onClick: asyncClick });
       await user.click(button);
-
-      await waitFor(() => {
-        expect(asyncOnClick).toHaveBeenCalledTimes(1);
-      });
+      await waitFor(() => expect(asyncClick).toHaveBeenCalledTimes(1));
     });
 
-    it('should handle onClick rejection gracefully', async () => {
-      const user = userEvent.setup();
-      const errorOnClick = vi.fn().mockRejectedValue(new Error('Submit failed'));
-      render(
-        <SubmitProjectButton
-          mode="create"
-          disabled={true}
-          onClick={errorOnClick}
-        />
-      );
-      const button = screen.getByRole('button');
-
+    it('handles rejected onClick gracefully', async () => {
+      const errorClick = vi.fn().mockRejectedValue(new Error('Submit failed'));
+      const { user, button } = setup({ onClick: errorClick });
       await user.click(button);
-
-      await waitFor(() => {
-        expect(errorOnClick).toHaveBeenCalledTimes(1);
-      });
+      await waitFor(() => expect(errorClick).toHaveBeenCalledTimes(1));
     });
   });
 
   describe('accessibility', () => {
-    it('should be keyboard accessible via Enter key when enabled', async () => {
-      const user = userEvent.setup();
-      render(
-        <SubmitProjectButton
-          mode="create"
-          disabled={true}
-          onClick={mockOnClick}
-        />
-      );
-      const button = screen.getByRole('button');
-
+    it('triggers onClick via Enter key when enabled', async () => {
+      const { user, button } = setup({ disabled: true });
       button.focus();
       await user.keyboard('{Enter}');
-
-      await waitFor(() => {
-        expect(mockOnClick).toHaveBeenCalledTimes(1);
-      });
+      await waitFor(() => expect(mockOnClick).toHaveBeenCalledTimes(1));
     });
 
-    it('should be accessible via Space key when enabled', async () => {
-      const user = userEvent.setup();
-      render(
-        <SubmitProjectButton
-          mode="create"
-          disabled={true}
-          onClick={mockOnClick}
-        />
-      );
-      const button = screen.getByRole('button');
-
+    it('triggers onClick via Space key when enabled', async () => {
+      const { user, button } = setup({ disabled: true });
       button.focus();
       await user.keyboard(' ');
-
-      await waitFor(() => {
-        expect(mockOnClick).toHaveBeenCalledTimes(1);
-      });
-    });
-
-    it('should have appropriate aria-label for different modes', () => {
-      const { rerender } = render(
-        <SubmitProjectButton
-          mode="create"
-          disabled={true}
-          onClick={mockOnClick}
-        />
-      );
-
-      expect(screen.getByLabelText('Add project')).toBeInTheDocument();
-
-      rerender(
-        <SubmitProjectButton
-          mode="update"
-          disabled={true}
-          onClick={mockOnClick}
-        />
-      );
-
-      expect(screen.getByLabelText('Save project')).toBeInTheDocument();
+      await waitFor(() => expect(mockOnClick).toHaveBeenCalledTimes(1));
     });
   });
 
   describe('mode transitions', () => {
-    it('should update text and label when mode changes from create to edit', () => {
+    it('updates from create → update', () => {
       const { rerender } = render(
         <SubmitProjectButton
           mode="create"
           disabled={true}
-          onClick={mockOnClick}
+          onClick={vi.fn()}
         />
       );
 
@@ -300,7 +137,7 @@ describe('SubmitProjectButton', () => {
         <SubmitProjectButton
           mode="update"
           disabled={true}
-          onClick={mockOnClick}
+          onClick={vi.fn()}
         />
       );
 
@@ -308,12 +145,12 @@ describe('SubmitProjectButton', () => {
       expect(screen.getByLabelText('Save project')).toBeInTheDocument();
     });
 
-    it('should update text and label when mode changes from edit to create', () => {
+    it('updates from update → create', () => {
       const { rerender } = render(
         <SubmitProjectButton
           mode="update"
           disabled={true}
-          onClick={mockOnClick}
+          onClick={vi.fn()}
         />
       );
 
@@ -324,7 +161,7 @@ describe('SubmitProjectButton', () => {
         <SubmitProjectButton
           mode="create"
           disabled={true}
-          onClick={mockOnClick}
+          onClick={vi.fn()}
         />
       );
 

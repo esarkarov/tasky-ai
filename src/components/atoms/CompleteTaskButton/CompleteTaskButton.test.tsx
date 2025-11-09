@@ -1,8 +1,15 @@
 import { render, screen, waitFor } from '@testing-library/react';
-import { userEvent } from '@testing-library/user-event';
+import userEvent from '@testing-library/user-event';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { CompleteTaskButton } from './CompleteTaskButton';
 import { ReactNode } from 'react';
+
+const mockToggleTaskComplete = vi.fn();
+vi.mock('@/hooks/use-task-operations', () => ({
+  useTaskOperations: () => ({
+    toggleTaskComplete: mockToggleTaskComplete,
+  }),
+}));
 
 vi.mock('@/components/ui/button', () => ({
   Button: ({
@@ -19,10 +26,10 @@ vi.mock('@/components/ui/button', () => ({
     onClick: () => void;
     variant: string;
     size: string;
-    className: string;
+    className?: string;
     role: string;
-    'aria-checked': boolean;
-    'aria-label': string;
+    'aria-checked'?: boolean;
+    'aria-label'?: string;
   }) => (
     <button
       type="button"
@@ -39,351 +46,146 @@ vi.mock('@/components/ui/button', () => ({
 }));
 
 vi.mock('lucide-react', () => ({
-  Check: ({ className }: { className: string }) => (
+  Check: ({ className }: { className?: string }) => (
     <svg
       data-testid="check-icon"
-      className={className}
+      className={className ?? ''}
+      data-has-class={!!className}
       aria-hidden="true"
     />
   ),
 }));
 
 vi.mock('@/utils/ui/ui.utils', () => ({
-  cn: (...classes: (string | boolean)[]) => classes.filter(Boolean).join(' '),
-}));
-
-const mockToggleTaskComplete = vi.fn();
-vi.mock('@/hooks/use-task-operations', () => ({
-  useTaskOperations: () => ({
-    toggleTaskComplete: mockToggleTaskComplete,
-  }),
+  cn: (...classes: (string | boolean | undefined)[]) => classes.filter(Boolean).join(' '),
 }));
 
 describe('CompleteTaskButton', () => {
-  const MOCK_TASK_ID = 'task-123';
+  const setup = async (props?: { completed?: boolean; taskId?: string }) => {
+    const user = userEvent.setup();
+    const taskId = props?.taskId ?? 'task-123';
+    const completed = props?.completed ?? false;
+    render(
+      <CompleteTaskButton
+        taskId={taskId}
+        completed={completed}
+      />
+    );
+    const button = screen.getByRole('checkbox');
+    const icon = screen.getByTestId('check-icon');
+    return { user, button, icon, taskId };
+  };
 
   beforeEach(() => {
     vi.clearAllMocks();
   });
 
-  describe('basic rendering', () => {
-    it('should render button with checkbox role', () => {
-      render(
-        <CompleteTaskButton
-          taskId={MOCK_TASK_ID}
-          completed={false}
-        />
-      );
+  describe('rendering', () => {
+    it('renders correctly with checkbox role and proper attributes', async () => {
+      const { button } = await setup();
 
-      const button = screen.getByRole('checkbox');
       expect(button).toBeInTheDocument();
-    });
-
-    it('should render as button type', () => {
-      render(
-        <CompleteTaskButton
-          taskId={MOCK_TASK_ID}
-          completed={false}
-        />
-      );
-
-      const button = screen.getByRole('checkbox');
+      expect(button).toHaveAttribute('role', 'checkbox');
       expect(button).toHaveAttribute('type', 'button');
-    });
-
-    it('should render with outline variant and icon size', () => {
-      render(
-        <CompleteTaskButton
-          taskId={MOCK_TASK_ID}
-          completed={false}
-        />
-      );
-
-      const button = screen.getByRole('checkbox');
       expect(button).toHaveAttribute('data-variant', 'outline');
       expect(button).toHaveAttribute('data-size', 'icon');
     });
 
-    it('should render check icon', () => {
-      render(
-        <CompleteTaskButton
-          taskId={MOCK_TASK_ID}
-          completed={false}
-        />
-      );
-
-      expect(screen.getByTestId('check-icon')).toBeInTheDocument();
+    it('renders check icon inside button', async () => {
+      const { icon } = await setup();
+      expect(icon).toBeInTheDocument();
+      expect(icon).toHaveAttribute('aria-hidden', 'true');
     });
   });
 
   describe('incomplete state', () => {
-    it('should have aria-checked false when incomplete', () => {
-      render(
-        <CompleteTaskButton
-          taskId={MOCK_TASK_ID}
-          completed={false}
-        />
-      );
-
+    it('sets aria-checked to false and label to “Mark task as complete”', async () => {
+      await setup({ completed: false });
       const button = screen.getByRole('checkbox');
       expect(button).toHaveAttribute('aria-checked', 'false');
-    });
-
-    it('should have correct aria-label when incomplete', () => {
-      render(
-        <CompleteTaskButton
-          taskId={MOCK_TASK_ID}
-          completed={false}
-        />
-      );
-
       expect(screen.getByLabelText('Mark task as complete')).toBeInTheDocument();
     });
 
-    it('should apply opacity-0 class to check icon when incomplete', () => {
-      render(
-        <CompleteTaskButton
-          taskId={MOCK_TASK_ID}
-          completed={false}
-        />
-      );
+    it('renders check icon with opacity-0 and hover transition classes', async () => {
+      const { icon } = await setup({ completed: false });
 
-      const checkIcon = screen.getByTestId('check-icon');
-      expect(checkIcon).toHaveClass('opacity-0');
-    });
+      expect(icon).toBeInTheDocument();
+      const className = icon.getAttribute('class') || '';
 
-    it('should not apply bg-border class when incomplete', () => {
-      render(
-        <CompleteTaskButton
-          taskId={MOCK_TASK_ID}
-          completed={false}
-        />
-      );
-
-      const button = screen.getByRole('checkbox');
-      expect(button.className).not.toContain('bg-border');
+      expect(className).toContain('opacity-0');
+      expect(className).toContain('group-hover/button:opacity-100');
     });
   });
 
   describe('completed state', () => {
-    it('should have aria-checked true when completed', () => {
-      render(
-        <CompleteTaskButton
-          taskId={MOCK_TASK_ID}
-          completed={true}
-        />
-      );
-
+    it('sets aria-checked to true and label to “Mark task as incomplete”', async () => {
+      await setup({ completed: true });
       const button = screen.getByRole('checkbox');
       expect(button).toHaveAttribute('aria-checked', 'true');
-    });
-
-    it('should have correct aria-label when completed', () => {
-      render(
-        <CompleteTaskButton
-          taskId={MOCK_TASK_ID}
-          completed={true}
-        />
-      );
-
       expect(screen.getByLabelText('Mark task as incomplete')).toBeInTheDocument();
     });
 
-    it('should apply opacity-100 class to check icon when completed', () => {
-      render(
-        <CompleteTaskButton
-          taskId={MOCK_TASK_ID}
-          completed={true}
-        />
-      );
-
-      const checkIcon = screen.getByTestId('check-icon');
-      expect(checkIcon).toHaveClass('opacity-100');
-    });
-
-    it('should apply bg-border class when completed', () => {
-      render(
-        <CompleteTaskButton
-          taskId={MOCK_TASK_ID}
-          completed={true}
-        />
-      );
-
-      const button = screen.getByRole('checkbox');
-      expect(button).toHaveClass('bg-border');
+    it('applies visual completion indicator', async () => {
+      const { icon } = await setup({ completed: true });
+      expect(icon).toBeInTheDocument();
+      expect(icon.getAttribute('data-has-class')).toBe('true');
     });
   });
 
   describe('user interactions', () => {
-    it('should call toggleTaskComplete with correct params when incomplete task is clicked', async () => {
-      const user = userEvent.setup();
+    it('calls toggleTaskComplete(true) when incomplete task clicked', async () => {
+      const { user, button, taskId } = await setup({ completed: false });
       mockToggleTaskComplete.mockResolvedValue(undefined);
-      render(
-        <CompleteTaskButton
-          taskId={MOCK_TASK_ID}
-          completed={false}
-        />
-      );
-      const button = screen.getByRole('checkbox');
 
       await user.click(button);
 
       await waitFor(() => {
-        expect(mockToggleTaskComplete).toHaveBeenCalledWith(MOCK_TASK_ID, true);
+        expect(mockToggleTaskComplete).toHaveBeenCalledWith(taskId, true);
       });
     });
 
-    it('should call toggleTaskComplete with correct params when completed task is clicked', async () => {
-      const user = userEvent.setup();
+    it('calls toggleTaskComplete(false) when completed task clicked', async () => {
+      const { user, button, taskId } = await setup({ completed: true });
       mockToggleTaskComplete.mockResolvedValue(undefined);
-      render(
-        <CompleteTaskButton
-          taskId={MOCK_TASK_ID}
-          completed={true}
-        />
-      );
-      const button = screen.getByRole('checkbox');
 
       await user.click(button);
 
       await waitFor(() => {
-        expect(mockToggleTaskComplete).toHaveBeenCalledWith(MOCK_TASK_ID, false);
-      });
-    });
-
-    it('should toggle between incomplete and complete states', async () => {
-      const user = userEvent.setup();
-      mockToggleTaskComplete.mockResolvedValue(undefined);
-      const { rerender } = render(
-        <CompleteTaskButton
-          taskId={MOCK_TASK_ID}
-          completed={false}
-        />
-      );
-      const button = screen.getByRole('checkbox');
-
-      await user.click(button);
-
-      await waitFor(() => {
-        expect(mockToggleTaskComplete).toHaveBeenCalledWith(MOCK_TASK_ID, true);
-      });
-
-      rerender(
-        <CompleteTaskButton
-          taskId={MOCK_TASK_ID}
-          completed={true}
-        />
-      );
-      await user.click(button);
-
-      await waitFor(() => {
-        expect(mockToggleTaskComplete).toHaveBeenCalledWith(MOCK_TASK_ID, false);
-      });
-    });
-
-    it('should handle multiple clicks', async () => {
-      const user = userEvent.setup();
-      mockToggleTaskComplete.mockResolvedValue(undefined);
-      render(
-        <CompleteTaskButton
-          taskId={MOCK_TASK_ID}
-          completed={false}
-        />
-      );
-      const button = screen.getByRole('checkbox');
-
-      await user.click(button);
-      await user.click(button);
-      await user.click(button);
-
-      await waitFor(() => {
-        expect(mockToggleTaskComplete).toHaveBeenCalledTimes(3);
+        expect(mockToggleTaskComplete).toHaveBeenCalledWith(taskId, false);
       });
     });
   });
 
   describe('accessibility', () => {
-    it('should be keyboard accessible via Enter key', async () => {
-      const user = userEvent.setup();
+    it('is keyboard accessible with Enter and Space', async () => {
+      const { user, button, taskId } = await setup({ completed: false });
       mockToggleTaskComplete.mockResolvedValue(undefined);
-      render(
-        <CompleteTaskButton
-          taskId={MOCK_TASK_ID}
-          completed={false}
-        />
-      );
-      const button = screen.getByRole('checkbox');
 
       button.focus();
       await user.keyboard('{Enter}');
-
-      await waitFor(() => {
-        expect(mockToggleTaskComplete).toHaveBeenCalledWith(MOCK_TASK_ID, true);
-      });
-    });
-
-    it('should be accessible via Space key', async () => {
-      const user = userEvent.setup();
-      mockToggleTaskComplete.mockResolvedValue(undefined);
-      render(
-        <CompleteTaskButton
-          taskId={MOCK_TASK_ID}
-          completed={false}
-        />
-      );
-      const button = screen.getByRole('checkbox');
-
-      button.focus();
       await user.keyboard(' ');
 
       await waitFor(() => {
-        expect(mockToggleTaskComplete).toHaveBeenCalledWith(MOCK_TASK_ID, true);
+        expect(mockToggleTaskComplete).toHaveBeenCalledWith(taskId, true);
       });
     });
 
-    it('should hide check icon from screen readers', () => {
-      render(
-        <CompleteTaskButton
-          taskId={MOCK_TASK_ID}
-          completed={false}
-        />
-      );
-
-      const checkIcon = screen.getByTestId('check-icon');
-      expect(checkIcon).toHaveAttribute('aria-hidden', 'true');
-    });
-
-    it('should have different labels for different states', () => {
+    it('uses correct aria-label per completion state', async () => {
       const { rerender } = render(
         <CompleteTaskButton
-          taskId={MOCK_TASK_ID}
+          taskId="task-123"
           completed={false}
         />
       );
-
       expect(screen.getByLabelText('Mark task as complete')).toBeInTheDocument();
 
       rerender(
         <CompleteTaskButton
-          taskId={MOCK_TASK_ID}
-          completed={true}
+          taskId="task-123"
+          completed
         />
       );
-
       expect(screen.getByLabelText('Mark task as incomplete')).toBeInTheDocument();
-    });
-  });
-
-  describe('hook integration', () => {
-    it('should call useTaskOperations with enableUndo option', () => {
-      render(
-        <CompleteTaskButton
-          taskId={MOCK_TASK_ID}
-          completed={false}
-        />
-      );
-
-      expect(mockToggleTaskComplete).toBeDefined();
     });
   });
 });

@@ -1,6 +1,6 @@
 import { cn } from '@/utils/ui/ui.utils';
 
-interface AppBarTitleProps {
+export interface AppBarTitleProps {
   totalCount: number;
   isVisible: boolean;
   title: string;

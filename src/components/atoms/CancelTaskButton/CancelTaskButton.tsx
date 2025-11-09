@@ -1,7 +1,7 @@
 import { Button } from '@/components/ui/button';
 import { X } from 'lucide-react';
 
-interface CancelTaskButtonProps {
+export interface CancelTaskButtonProps {
   onClick: () => void;
 }
 

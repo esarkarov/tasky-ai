@@ -1,204 +1,111 @@
 import { render, screen } from '@testing-library/react';
-import { describe, expect, it } from 'vitest';
-import { AppBarTitle } from './AppBarTitle';
+import { describe, it, expect } from 'vitest';
+import { AppBarTitle, AppBarTitleProps } from './AppBarTitle';
 
 describe('AppBarTitle', () => {
-  describe('basic rendering', () => {
-    it('should render title', () => {
-      render(
-        <AppBarTitle
-          title="My Tasks"
-          totalCount={5}
-          isVisible={true}
-          label="task"
-        />
-      );
+  const renderComponent = (props?: Partial<AppBarTitleProps>) => {
+    const defaultProps = {
+      title: 'My Tasks',
+      totalCount: 5,
+      isVisible: true,
+      label: 'task',
+    };
+    return render(
+      <AppBarTitle
+        {...defaultProps}
+        {...props}
+      />
+    );
+  };
 
-      expect(screen.getByRole('heading', { name: 'My Tasks' })).toBeInTheDocument();
+  describe('rendering', () => {
+    it('renders title correctly', () => {
+      renderComponent();
+
+      expect(screen.getByRole('heading', { name: /my tasks/i })).toBeInTheDocument();
     });
 
-    it('should have correct heading id', () => {
-      render(
-        <AppBarTitle
-          title="My Tasks"
-          totalCount={5}
-          isVisible={true}
-          label="task"
-        />
-      );
+    it('assigns correct heading id', () => {
+      renderComponent();
 
-      const heading = screen.getByRole('heading', { name: 'My Tasks' });
-      expect(heading).toHaveAttribute('id', 'top-app-bar-title');
+      expect(screen.getByRole('heading')).toHaveAttribute('id', 'top-app-bar-title');
     });
   });
 
   describe('count display', () => {
-    it('should show count with singular label when count is 1', () => {
-      render(
-        <AppBarTitle
-          title="My Tasks"
-          totalCount={1}
-          isVisible={true}
-          label="task"
-        />
-      );
+    it('shows singular label when count is 1', () => {
+      renderComponent({ totalCount: 1 });
 
       expect(screen.getByText('1 task')).toBeInTheDocument();
     });
 
-    it('should show count with plural label when count is greater than 1', () => {
-      render(
-        <AppBarTitle
-          title="My Tasks"
-          totalCount={5}
-          isVisible={true}
-          label="task"
-        />
-      );
-
+    it('shows plural label when count > 1', () => {
+      renderComponent({ totalCount: 5 });
       expect(screen.getByText('5 tasks')).toBeInTheDocument();
     });
 
-    it('should show count with plural label when count is 0', () => {
-      render(
-        <AppBarTitle
-          title="My Tasks"
-          totalCount={0}
-          isVisible={true}
-          label="task"
-        />
-      );
-
+    it('does not render count when totalCount = 0', () => {
+      renderComponent({ totalCount: 0 });
       expect(screen.queryByText(/task/)).not.toBeInTheDocument();
     });
 
-    it('should not render count when totalCount is 0', () => {
-      render(
-        <AppBarTitle
-          title="My Tasks"
-          totalCount={0}
-          isVisible={true}
-          label="task"
-        />
-      );
-
-      expect(screen.queryByText('0 tasks')).not.toBeInTheDocument();
-    });
-
-    it('should handle different labels correctly', () => {
-      render(
-        <AppBarTitle
-          title="Projects"
-          totalCount={3}
-          isVisible={true}
-          label="project"
-        />
-      );
-
+    it('handles different labels correctly', () => {
+      renderComponent({ title: 'Projects', totalCount: 3, label: 'project' });
       expect(screen.getByText('3 projects')).toBeInTheDocument();
     });
   });
 
   describe('visibility state', () => {
-    it('should have visible classes when isVisible is true', () => {
-      const { container } = render(
-        <AppBarTitle
-          title="My Tasks"
-          totalCount={5}
-          isVisible={true}
-          label="task"
-        />
-      );
+    it('applies visible classes when isVisible is true', () => {
+      const { container } = renderComponent({ isVisible: true });
 
-      const wrapper = container.firstChild as HTMLElement;
-      expect(wrapper).toHaveClass('translate-y-0', 'opacity-100');
+      expect(container.firstChild).toHaveClass('translate-y-0', 'opacity-100');
     });
 
-    it('should have hidden classes when isVisible is false', () => {
-      const { container } = render(
-        <AppBarTitle
-          title="My Tasks"
-          totalCount={5}
-          isVisible={false}
-          label="task"
-        />
-      );
+    it('applies hidden classes when isVisible is false', () => {
+      const { container } = renderComponent({ isVisible: false });
 
-      const wrapper = container.firstChild as HTMLElement;
-      expect(wrapper).toHaveClass('translate-y-5', 'opacity-0');
+      expect(container.firstChild).toHaveClass('translate-y-5', 'opacity-0');
     });
 
-    it('should still render content when not visible', () => {
-      render(
-        <AppBarTitle
-          title="My Tasks"
-          totalCount={5}
-          isVisible={false}
-          label="task"
-        />
-      );
+    it('still renders content when not visible', () => {
+      renderComponent({ isVisible: false });
 
-      expect(screen.getByRole('heading', { name: 'My Tasks' })).toBeInTheDocument();
+      expect(screen.getByRole('heading', { name: /my tasks/i })).toBeInTheDocument();
       expect(screen.getByText('5 tasks')).toBeInTheDocument();
     });
   });
 
   describe('accessibility', () => {
-    it('should have aria-live on count display', () => {
-      render(
-        <AppBarTitle
-          title="My Tasks"
-          totalCount={5}
-          isVisible={true}
-          label="task"
-        />
-      );
+    it('includes aria-live on count display when count > 0', () => {
+      renderComponent({ totalCount: 5 });
 
       const countElement = screen.getByText('5 tasks');
       expect(countElement).toHaveAttribute('aria-live', 'polite');
     });
 
-    it('should not have aria-live when count is 0', () => {
-      render(
-        <AppBarTitle
-          title="My Tasks"
-          totalCount={0}
-          isVisible={true}
-          label="task"
-        />
-      );
+    it('does not include aria-live when count = 0', () => {
+      renderComponent({ totalCount: 0 });
 
-      const elements = document.querySelectorAll('[aria-live]');
-      expect(elements.length).toBe(0);
+      expect(document.querySelectorAll('[aria-live]')).toHaveLength(0);
     });
   });
 
   describe('edge cases', () => {
-    it('should handle large counts', () => {
-      render(
-        <AppBarTitle
-          title="My Tasks"
-          totalCount={999}
-          isVisible={true}
-          label="task"
-        />
-      );
-
+    it('renders correctly for large counts', () => {
+      renderComponent({ totalCount: 999 });
       expect(screen.getByText('999 tasks')).toBeInTheDocument();
     });
 
-    it('should handle empty string title', () => {
-      render(
-        <AppBarTitle
-          title=""
-          totalCount={5}
-          isVisible={true}
-          label="task"
-        />
-      );
-
+    it('handles empty title gracefully', () => {
+      renderComponent({ title: '' });
       expect(screen.getByRole('heading')).toBeInTheDocument();
       expect(screen.getByText('5 tasks')).toBeInTheDocument();
+    });
+
+    it('renders correctly when totalCount = 0 but visible = false', () => {
+      const { container } = renderComponent({ totalCount: 0, isVisible: false });
+      expect(container.firstChild).toHaveClass('translate-y-5', 'opacity-0');
     });
   });
 });

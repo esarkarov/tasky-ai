@@ -1,16 +1,24 @@
 import { render, screen } from '@testing-library/react';
-import { userEvent } from '@testing-library/user-event';
-import { ReactNode } from 'react';
+import userEvent from '@testing-library/user-event';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { CancelProjectButton } from './CancelProjectButton';
 
 vi.mock('@/components/ui/button', () => ({
-  Button: ({ children, onClick, variant, ...props }: { children: ReactNode; onClick: () => void; variant: string }) => (
+  Button: ({
+    children,
+    onClick,
+    variant,
+    ...props
+  }: {
+    children: React.ReactNode;
+    onClick: () => void;
+    variant: string;
+  }) => (
     <button
       type="button"
       data-variant={variant}
       onClick={onClick}
-      aaria-label="Cancel project form"
+      aria-label="Cancel project form"
       {...props}>
       {children}
     </button>
@@ -18,86 +26,87 @@ vi.mock('@/components/ui/button', () => ({
 }));
 
 describe('CancelProjectButton', () => {
-  let mockOnClick: ReturnType<typeof vi.fn>;
+  const setup = async (overrides = {}) => {
+    const user = userEvent.setup();
+    const onClick = vi.fn();
+    render(
+      <CancelProjectButton
+        onClick={onClick}
+        {...overrides}
+      />
+    );
+    const button = screen.getByRole('button', { name: /cancel project form/i });
+    return { button, user, onClick };
+  };
 
   beforeEach(() => {
-    mockOnClick = vi.fn();
+    vi.clearAllMocks();
   });
 
-  describe('basic rendering', () => {
-    it('should render cancel button with correct text', () => {
-      render(<CancelProjectButton onClick={mockOnClick} />);
+  describe('rendering', () => {
+    it('renders cancel button with correct text', async () => {
+      const { button } = await setup();
 
-      expect(screen.getByRole('button', { name: 'Cancel project form' })).toBeInTheDocument();
+      expect(button).toBeInTheDocument();
       expect(screen.getByText('Cancel')).toBeInTheDocument();
     });
 
-    it('should render as a button type', () => {
-      render(<CancelProjectButton onClick={mockOnClick} />);
+    it('renders with type="button"', async () => {
+      const { button } = await setup();
 
-      const button = screen.getByRole('button');
       expect(button).toHaveAttribute('type', 'button');
     });
 
-    it('should render with secondary variant', () => {
-      render(<CancelProjectButton onClick={mockOnClick} />);
+    it('renders with secondary variant', async () => {
+      const { button } = await setup();
 
-      const button = screen.getByRole('button');
       expect(button).toHaveAttribute('data-variant', 'secondary');
     });
   });
 
   describe('user interactions', () => {
-    it('should call onClick when button is clicked', async () => {
-      const user = userEvent.setup();
-      render(<CancelProjectButton onClick={mockOnClick} />);
-      const button = screen.getByRole('button');
+    it('calls onClick once when clicked', async () => {
+      const { button, user, onClick } = await setup();
 
       await user.click(button);
 
-      expect(mockOnClick).toHaveBeenCalledTimes(1);
+      expect(onClick).toHaveBeenCalledTimes(1);
     });
 
-    it('should call onClick multiple times when clicked multiple times', async () => {
-      const user = userEvent.setup();
-      render(<CancelProjectButton onClick={mockOnClick} />);
-      const button = screen.getByRole('button');
+    it('calls onClick multiple times when clicked repeatedly', async () => {
+      const { button, user, onClick } = await setup();
 
       await user.click(button);
       await user.click(button);
       await user.click(button);
 
-      expect(mockOnClick).toHaveBeenCalledTimes(3);
+      expect(onClick).toHaveBeenCalledTimes(3);
     });
   });
 
   describe('accessibility', () => {
-    it('should have proper aria-label', () => {
-      render(<CancelProjectButton onClick={mockOnClick} />);
+    it('has correct aria-label', async () => {
+      const { button } = await setup();
 
-      expect(screen.getByLabelText('Cancel project form')).toBeInTheDocument();
+      expect(button).toHaveAccessibleName('Cancel project form');
     });
 
-    it('should be keyboard accessible', async () => {
-      const user = userEvent.setup();
-      render(<CancelProjectButton onClick={mockOnClick} />);
-      const button = screen.getByRole('button');
+    it('is keyboard accessible via Enter key', async () => {
+      const { button, user, onClick } = await setup();
 
       button.focus();
       await user.keyboard('{Enter}');
 
-      expect(mockOnClick).toHaveBeenCalledTimes(1);
+      expect(onClick).toHaveBeenCalledTimes(1);
     });
 
-    it('should be accessible via space key', async () => {
-      const user = userEvent.setup();
-      render(<CancelProjectButton onClick={mockOnClick} />);
-      const button = screen.getByRole('button');
+    it('is keyboard accessible via Space key', async () => {
+      const { button, user, onClick } = await setup();
 
       button.focus();
       await user.keyboard(' ');
 
-      expect(mockOnClick).toHaveBeenCalledTimes(1);
+      expect(onClick).toHaveBeenCalledTimes(1);
     });
   });
 });

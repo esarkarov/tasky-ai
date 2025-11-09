@@ -1,8 +1,7 @@
 import { render, screen } from '@testing-library/react';
-import { userEvent } from '@testing-library/user-event';
+import userEvent from '@testing-library/user-event';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { EditTaskButton } from './EditTaskButton';
-import { ReactNode } from 'react';
 
 vi.mock('@/components/ui/button', () => ({
   Button: ({
@@ -12,7 +11,7 @@ vi.mock('@/components/ui/button', () => ({
     size,
     className,
   }: {
-    children: ReactNode;
+    children: React.ReactNode;
     onClick: () => void;
     variant: string;
     size: string;
@@ -31,19 +30,19 @@ vi.mock('@/components/ui/button', () => ({
 }));
 
 vi.mock('@/components/ui/tooltip', () => ({
-  Tooltip: ({ children }: { children: ReactNode }) => <div data-testid="tooltip">{children}</div>,
-  TooltipTrigger: ({ children, asChild }: { children: ReactNode; asChild: boolean }) => (
+  Tooltip: ({ children }: { children: React.ReactNode }) => <div data-testid="tooltip">{children}</div>,
+  TooltipTrigger: ({ children, asChild }: { children: React.ReactNode; asChild: boolean }) => (
     <div
       data-testid="tooltip-trigger"
       data-as-child={asChild}>
       {children}
     </div>
   ),
-  TooltipContent: ({ children }: { children: ReactNode }) => <div data-testid="tooltip-content">{children}</div>,
+  TooltipContent: ({ children }: { children: React.ReactNode }) => <div data-testid="tooltip-content">{children}</div>,
 }));
 
 vi.mock('lucide-react', () => ({
-  Edit: ({ ...props }) => (
+  Edit: (props: Record<string, unknown>) => (
     <svg
       data-testid="edit-icon"
       aria-hidden="true"
@@ -53,107 +52,99 @@ vi.mock('lucide-react', () => ({
 }));
 
 describe('EditTaskButton', () => {
-  let mockOnClick: ReturnType<typeof vi.fn>;
+  const setup = async () => {
+    const user = userEvent.setup();
+    const onClick = vi.fn();
+    render(<EditTaskButton onClick={onClick} />);
+    const button = screen.getByRole('button', { name: /edit task/i });
+    const icon = screen.getByTestId('edit-icon');
+    return { user, onClick, button, icon };
+  };
 
   beforeEach(() => {
-    mockOnClick = vi.fn();
+    vi.clearAllMocks();
   });
 
-  describe('basic rendering', () => {
-    it('should render button with edit icon', () => {
-      render(<EditTaskButton onClick={mockOnClick} />);
+  describe('rendering', () => {
+    it('renders button with edit icon', async () => {
+      const { button, icon } = await setup();
 
-      expect(screen.getByRole('button')).toBeInTheDocument();
-      expect(screen.getByTestId('edit-icon')).toBeInTheDocument();
+      expect(button).toBeInTheDocument();
+      expect(icon).toBeInTheDocument();
     });
 
-    it('should render as button type', () => {
-      render(<EditTaskButton onClick={mockOnClick} />);
+    it('renders correct button attributes', async () => {
+      const { button } = await setup();
 
-      const button = screen.getByRole('button');
       expect(button).toHaveAttribute('type', 'button');
-    });
-
-    it('should render with ghost variant and icon size', () => {
-      render(<EditTaskButton onClick={mockOnClick} />);
-
-      const button = screen.getByRole('button');
       expect(button).toHaveAttribute('data-variant', 'ghost');
       expect(button).toHaveAttribute('data-size', 'icon');
     });
   });
 
-  describe('tooltip', () => {
-    it('should render within tooltip wrapper', () => {
-      render(<EditTaskButton onClick={mockOnClick} />);
+  describe('tooltip integration', () => {
+    it('renders inside Tooltip component', async () => {
+      await setup();
 
       expect(screen.getByTestId('tooltip')).toBeInTheDocument();
     });
 
-    it('should render button as tooltip trigger', () => {
-      render(<EditTaskButton onClick={mockOnClick} />);
+    it('renders button as TooltipTrigger with asChild=true', async () => {
+      await setup();
 
       const trigger = screen.getByTestId('tooltip-trigger');
       expect(trigger).toBeInTheDocument();
       expect(trigger).toHaveAttribute('data-as-child', 'true');
     });
 
-    it('should render tooltip content with correct text', () => {
-      render(<EditTaskButton onClick={mockOnClick} />);
+    it('renders tooltip content with correct text', async () => {
+      await setup();
 
       const tooltipContent = screen.getByTestId('tooltip-content');
-      expect(tooltipContent).toBeInTheDocument();
       expect(tooltipContent).toHaveTextContent('Edit task');
     });
   });
 
   describe('user interactions', () => {
-    it('should call onClick when button is clicked', async () => {
-      const user = userEvent.setup();
-      render(<EditTaskButton onClick={mockOnClick} />);
-      const button = screen.getByRole('button');
+    it('calls onClick when button is clicked', async () => {
+      const { user, button, onClick } = await setup();
 
       await user.click(button);
 
-      expect(mockOnClick).toHaveBeenCalledTimes(1);
+      expect(onClick).toHaveBeenCalledTimes(1);
     });
 
-    it('should call onClick multiple times when clicked multiple times', async () => {
-      const user = userEvent.setup();
-      render(<EditTaskButton onClick={mockOnClick} />);
-      const button = screen.getByRole('button');
+    it('calls onClick multiple times when clicked repeatedly', async () => {
+      const { user, button, onClick } = await setup();
 
       await user.click(button);
       await user.click(button);
       await user.click(button);
 
-      expect(mockOnClick).toHaveBeenCalledTimes(3);
-    });
-  });
-
-  describe('accessibility', () => {
-    it('should have proper aria-label', () => {
-      render(<EditTaskButton onClick={mockOnClick} />);
-
-      expect(screen.getByLabelText('Edit task')).toBeInTheDocument();
+      expect(onClick).toHaveBeenCalledTimes(3);
     });
 
-    it('should hide icon from screen readers', () => {
-      render(<EditTaskButton onClick={mockOnClick} />);
-
-      const icon = screen.getByTestId('edit-icon');
-      expect(icon).toHaveAttribute('aria-hidden', 'true');
-    });
-
-    it('should be keyboard accessible via Enter key', async () => {
-      const user = userEvent.setup();
-      render(<EditTaskButton onClick={mockOnClick} />);
-      const button = screen.getByRole('button');
+    it('is keyboard accessible via Enter key', async () => {
+      const { user, button, onClick } = await setup();
 
       button.focus();
       await user.keyboard('{Enter}');
 
-      expect(mockOnClick).toHaveBeenCalledTimes(1);
+      expect(onClick).toHaveBeenCalledTimes(1);
+    });
+  });
+
+  describe('accessibility', () => {
+    it('has correct aria-label', async () => {
+      const { button } = await setup();
+
+      expect(button).toHaveAccessibleName('Edit task');
+    });
+
+    it('hides icon from screen readers', async () => {
+      const { icon } = await setup();
+
+      expect(icon).toHaveAttribute('aria-hidden', 'true');
     });
   });
 });

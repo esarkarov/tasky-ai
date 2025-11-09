@@ -2,7 +2,7 @@ import { Button } from '@/components/ui/button';
 import { Loader2 } from 'lucide-react';
 import { memo } from 'react';
 
-interface LoadMoreButtonProps {
+export interface LoadMoreButtonProps {
   onClick: () => void;
   loading: boolean;
 }

@@ -1,12 +1,10 @@
-import type { ReactElement } from 'react';
 import { render, screen } from '@testing-library/react';
-import { userEvent } from '@testing-library/user-event';
+import userEvent from '@testing-library/user-event';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { BrowserRouter } from 'react-router';
 import { AllProjectsButton } from './AllProjectsButton';
 
 const mockUseLocation = vi.fn();
-
 vi.mock('react-router', async () => {
   const actual = await vi.importActual('react-router');
   return {
@@ -16,18 +14,18 @@ vi.mock('react-router', async () => {
 });
 
 vi.mock('lucide-react', () => ({
-  MoreHorizontal: ({ ...props }) => (
+  MoreHorizontal: (props: React.SVGProps<SVGSVGElement>) => (
     <svg
       data-testid="more-horizontal-icon"
+      aria-hidden="true"
+      focusable="false"
       {...props}
     />
   ),
 }));
 
 vi.mock('@/constants/routes', () => ({
-  ROUTES: {
-    PROJECTS: '/projects',
-  },
+  ROUTES: { PROJECTS: '/projects' },
 }));
 
 vi.mock('@/components/ui/sidebar', () => ({
@@ -41,116 +39,91 @@ vi.mock('@/components/ui/sidebar', () => ({
   ),
 }));
 
-const renderComponent = (component: ReactElement) => {
-  return render(<BrowserRouter>{component}</BrowserRouter>);
-};
-
 describe('AllProjectsButton', () => {
   const mockOnClick = vi.fn();
+
+  const renderComponent = () =>
+    render(
+      <BrowserRouter>
+        <AllProjectsButton onClick={mockOnClick} />
+      </BrowserRouter>
+    );
+  const getLink = () => screen.getByRole('link', { name: /view all projects/i });
 
   beforeEach(() => {
     vi.clearAllMocks();
   });
 
-  describe('basic rendering', () => {
-    it('should render link with correct text', () => {
+  describe('rendering', () => {
+    it('renders link with correct text and icon', () => {
       mockUseLocation.mockReturnValue({ pathname: '/inbox' });
 
-      renderComponent(<AllProjectsButton onClick={mockOnClick} />);
+      renderComponent();
 
       expect(screen.getByText('All projects')).toBeInTheDocument();
-      expect(screen.getByRole('link', { name: 'View all projects' })).toBeInTheDocument();
+      expect(screen.getByTestId('more-horizontal-icon')).toBeInTheDocument();
+      expect(getLink()).toHaveAttribute('href', '/projects');
     });
 
-    it('should render MoreHorizontal icon', () => {
+    it('renders with SidebarMenuButton wrapper', () => {
       mockUseLocation.mockReturnValue({ pathname: '/inbox' });
+      renderComponent();
 
-      renderComponent(<AllProjectsButton onClick={mockOnClick} />);
-
-      const icon = screen.getByTestId('more-horizontal-icon');
-      expect(icon).toBeInTheDocument();
-    });
-
-    it('should have correct href attribute', () => {
-      mockUseLocation.mockReturnValue({ pathname: '/inbox' });
-
-      renderComponent(<AllProjectsButton onClick={mockOnClick} />);
-
-      const link = screen.getByRole('link', { name: 'View all projects' });
-      expect(link).toHaveAttribute('href', '/projects');
+      expect(screen.getByTestId('sidebar-menu-button')).toBeInTheDocument();
     });
   });
 
   describe('active state', () => {
-    it('should be active when on projects page', () => {
+    it('sets active attributes when on projects page', () => {
       mockUseLocation.mockReturnValue({ pathname: '/projects' });
-
-      renderComponent(<AllProjectsButton onClick={mockOnClick} />);
-
+      renderComponent();
       const button = screen.getByTestId('sidebar-menu-button');
+      const link = getLink();
+
       expect(button).toHaveAttribute('data-active', 'true');
-    });
-
-    it('should not be active when on other pages', () => {
-      mockUseLocation.mockReturnValue({ pathname: '/inbox' });
-
-      renderComponent(<AllProjectsButton onClick={mockOnClick} />);
-
-      const button = screen.getByTestId('sidebar-menu-button');
-      expect(button).toHaveAttribute('data-active', 'false');
-    });
-
-    it('should have aria-current when active', () => {
-      mockUseLocation.mockReturnValue({ pathname: '/projects' });
-
-      renderComponent(<AllProjectsButton onClick={mockOnClick} />);
-
-      const link = screen.getByRole('link', { name: 'View all projects' });
       expect(link).toHaveAttribute('aria-current', 'page');
     });
 
-    it('should not have aria-current when not active', () => {
+    it('is not active when on other pages', () => {
       mockUseLocation.mockReturnValue({ pathname: '/inbox' });
+      renderComponent();
+      const button = screen.getByTestId('sidebar-menu-button');
+      const link = getLink();
 
-      renderComponent(<AllProjectsButton onClick={mockOnClick} />);
-
-      const link = screen.getByRole('link', { name: 'View all projects' });
+      expect(button).toHaveAttribute('data-active', 'false');
       expect(link).not.toHaveAttribute('aria-current');
     });
   });
 
   describe('user interactions', () => {
-    it('should call onClick when clicked', async () => {
+    it('calls onClick when link is clicked', async () => {
       const user = userEvent.setup();
       mockUseLocation.mockReturnValue({ pathname: '/inbox' });
+      renderComponent();
+      const link = getLink();
 
-      renderComponent(<AllProjectsButton onClick={mockOnClick} />);
-
-      const link = screen.getByRole('link', { name: 'View all projects' });
       await user.click(link);
 
       expect(mockOnClick).toHaveBeenCalledTimes(1);
     });
 
-    it('should be keyboard accessible', async () => {
+    it('is keyboard accessible (focus on Tab)', async () => {
       const user = userEvent.setup();
       mockUseLocation.mockReturnValue({ pathname: '/inbox' });
+      renderComponent();
+      const link = getLink();
 
-      renderComponent(<AllProjectsButton onClick={mockOnClick} />);
-
-      const link = screen.getByRole('link', { name: 'View all projects' });
       await user.tab();
 
       expect(link).toHaveFocus();
     });
 
-    it('should trigger onClick on Enter key', async () => {
+    it('calls onClick on Enter key press', async () => {
       const user = userEvent.setup();
       mockUseLocation.mockReturnValue({ pathname: '/inbox' });
+      renderComponent();
+      const link = getLink();
 
-      renderComponent(<AllProjectsButton onClick={mockOnClick} />);
-
-      const link = screen.getByRole('link', { name: 'View all projects' });
       link.focus();
       await user.keyboard('{Enter}');
 
@@ -158,33 +131,35 @@ describe('AllProjectsButton', () => {
     });
   });
 
-  describe('accessibility', () => {
-    it('should have aria-label on link', () => {
+  describe('Accessibility', () => {
+    it('has correct aria-label and title attributes', () => {
       mockUseLocation.mockReturnValue({ pathname: '/inbox' });
+      renderComponent();
+      const link = getLink();
 
-      renderComponent(<AllProjectsButton onClick={mockOnClick} />);
-
-      const link = screen.getByRole('link', { name: 'View all projects' });
       expect(link).toHaveAttribute('aria-label', 'View all projects');
-    });
-
-    it('should have title attribute', () => {
-      mockUseLocation.mockReturnValue({ pathname: '/inbox' });
-
-      renderComponent(<AllProjectsButton onClick={mockOnClick} />);
-
-      const link = screen.getByRole('link', { name: 'View all projects' });
       expect(link).toHaveAttribute('title', 'All projects');
     });
 
-    it('should hide icon from screen readers', () => {
+    it('hides icon from assistive technologies', () => {
       mockUseLocation.mockReturnValue({ pathname: '/inbox' });
-
-      renderComponent(<AllProjectsButton onClick={mockOnClick} />);
-
+      renderComponent();
       const icon = screen.getByTestId('more-horizontal-icon');
+
       expect(icon).toHaveAttribute('aria-hidden', 'true');
       expect(icon).toHaveAttribute('focusable', 'false');
+    });
+  });
+
+  describe('edge cases', () => {
+    it('handles unexpected pathname gracefully', () => {
+      mockUseLocation.mockReturnValue({ pathname: '/unknown' });
+      renderComponent();
+      const button = screen.getByTestId('sidebar-menu-button');
+      const link = getLink();
+
+      expect(button).toHaveAttribute('data-active', 'false');
+      expect(link).not.toHaveAttribute('aria-current');
     });
   });
 });

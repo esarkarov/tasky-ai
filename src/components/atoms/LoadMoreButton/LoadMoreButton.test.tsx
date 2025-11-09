@@ -1,7 +1,7 @@
 import { render, screen } from '@testing-library/react';
-import { userEvent } from '@testing-library/user-event';
+import userEvent from '@testing-library/user-event';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
-import { LoadMoreButton } from './LoadMoreButton';
+import { LoadMoreButton, LoadMoreButtonProps } from './LoadMoreButton';
 
 vi.mock('lucide-react', () => ({
   Loader2: (props: Record<string, unknown>) => (
@@ -13,259 +13,152 @@ vi.mock('lucide-react', () => ({
 }));
 
 describe('LoadMoreButton', () => {
-  const mockOnClick = vi.fn();
+  const setup = (props?: Partial<LoadMoreButtonProps>) => {
+    const user = userEvent.setup();
+    const defaultProps = {
+      onClick: vi.fn(),
+      loading: false,
+      ...props,
+    };
+    render(<LoadMoreButton {...defaultProps} />);
+    const button = screen.getByRole('button', { name: /load more tasks/i });
+    return { user, button, ...defaultProps };
+  };
 
   beforeEach(() => {
     vi.clearAllMocks();
   });
 
-  describe('basic rendering', () => {
-    it('should render button with "Load More" text when not loading', () => {
-      render(
-        <LoadMoreButton
-          onClick={mockOnClick}
-          loading={false}
-        />
-      );
-
-      expect(screen.getByRole('button', { name: 'Load more tasks' })).toBeInTheDocument();
+  describe('rendering', () => {
+    it('renders with "Load More" text when not loading', () => {
+      setup();
       expect(screen.getByText('Load More')).toBeInTheDocument();
     });
 
-    it('should render button with "Loading..." text when loading', () => {
-      render(
-        <LoadMoreButton
-          onClick={mockOnClick}
-          loading={true}
-        />
-      );
-
+    it('renders with "Loading..." text when loading', () => {
+      setup({ loading: true });
       expect(screen.getByText('Loading...')).toBeInTheDocument();
     });
 
-    it('should have correct display name', () => {
+    it('renders loader icon when loading', () => {
+      setup({ loading: true });
+      expect(screen.getByTestId('loader-icon')).toBeInTheDocument();
+    });
+
+    it('does not render loader icon when not loading', () => {
+      setup();
+      expect(screen.queryByTestId('loader-icon')).not.toBeInTheDocument();
+    });
+
+    it('has correct display name', () => {
       expect(LoadMoreButton.displayName).toBe('LoadMoreButton');
     });
   });
 
-  describe('loading state', () => {
-    it('should show loader icon when loading', () => {
-      render(
-        <LoadMoreButton
-          onClick={mockOnClick}
-          loading={true}
-        />
-      );
-
-      expect(screen.getByTestId('loader-icon')).toBeInTheDocument();
-    });
-
-    it('should not show loader icon when not loading', () => {
-      render(
-        <LoadMoreButton
-          onClick={mockOnClick}
-          loading={false}
-        />
-      );
-
-      expect(screen.queryByTestId('loader-icon')).not.toBeInTheDocument();
-    });
-
-    it('should have animate-spin class on loader icon', () => {
-      render(
-        <LoadMoreButton
-          onClick={mockOnClick}
-          loading={true}
-        />
-      );
-
-      const loader = screen.getByTestId('loader-icon');
-      expect(loader).toHaveClass('w-4', 'h-4', 'animate-spin');
-    });
-
-    it('should be disabled when loading', () => {
-      render(
-        <LoadMoreButton
-          onClick={mockOnClick}
-          loading={true}
-        />
-      );
-
-      const button = screen.getByRole('button', { name: 'Load more tasks' });
+  describe('state and styles', () => {
+    it('is disabled when loading', () => {
+      const { button } = setup({ loading: true });
       expect(button).toBeDisabled();
     });
 
-    it('should not be disabled when not loading', () => {
-      render(
-        <LoadMoreButton
-          onClick={mockOnClick}
-          loading={false}
-        />
-      );
-
-      const button = screen.getByRole('button', { name: 'Load more tasks' });
+    it('is not disabled when not loading', () => {
+      const { button } = setup();
       expect(button).not.toBeDisabled();
     });
 
-    it('should have disabled styling classes', () => {
-      render(
-        <LoadMoreButton
-          onClick={mockOnClick}
-          loading={true}
-        />
-      );
-
-      const button = screen.getByRole('button', { name: 'Load more tasks' });
+    it('applies disabled styling when loading', () => {
+      const { button } = setup({ loading: true });
       expect(button).toHaveClass('disabled:opacity-50', 'disabled:cursor-not-allowed');
+    });
+
+    it('applies spinner classes when loading', () => {
+      setup({ loading: true });
+      const loader = screen.getByTestId('loader-icon');
+      expect(loader).toHaveClass('w-4', 'h-4', 'animate-spin');
     });
   });
 
   describe('user interactions', () => {
-    it('should call onClick when clicked and not loading', async () => {
-      const user = userEvent.setup();
-      render(
-        <LoadMoreButton
-          onClick={mockOnClick}
-          loading={false}
-        />
-      );
-
-      const button = screen.getByRole('button', { name: 'Load more tasks' });
+    it('calls onClick when clicked and not loading', async () => {
+      const { button, onClick, user } = setup({ loading: false });
       await user.click(button);
-
-      expect(mockOnClick).toHaveBeenCalledTimes(1);
+      expect(onClick).toHaveBeenCalledTimes(1);
     });
 
-    it('should not call onClick when loading', async () => {
-      const user = userEvent.setup();
-      render(
-        <LoadMoreButton
-          onClick={mockOnClick}
-          loading={true}
-        />
-      );
-
-      const button = screen.getByRole('button', { name: 'Load more tasks' });
+    it('does not call onClick when clicked while loading', async () => {
+      const { button, onClick, user } = setup({ loading: true });
       await user.click(button);
-
-      expect(mockOnClick).not.toHaveBeenCalled();
+      expect(onClick).not.toHaveBeenCalled();
     });
 
-    it('should be keyboard accessible when not loading', async () => {
-      const user = userEvent.setup();
-      render(
-        <LoadMoreButton
-          onClick={mockOnClick}
-          loading={false}
-        />
-      );
-
-      const button = screen.getByRole('button', { name: 'Load more tasks' });
+    it('is keyboard focusable when not loading', async () => {
+      const { button, user } = setup({ loading: false });
       await user.tab();
-
       expect(button).toHaveFocus();
     });
 
-    it('should trigger onClick on Enter key when not loading', async () => {
+    it('triggers onClick with Enter key when not loading', async () => {
       const user = userEvent.setup();
-      render(
-        <LoadMoreButton
-          onClick={mockOnClick}
-          loading={false}
-        />
-      );
-
-      const button = screen.getByRole('button', { name: 'Load more tasks' });
+      const { button, onClick } = setup({ loading: false });
       button.focus();
       await user.keyboard('{Enter}');
-
-      expect(mockOnClick).toHaveBeenCalled();
+      expect(onClick).toHaveBeenCalledTimes(1);
     });
 
-    it('should not trigger onClick on Enter key when loading', async () => {
+    it('does not trigger onClick with Enter key when loading', async () => {
       const user = userEvent.setup();
-      render(
-        <LoadMoreButton
-          onClick={mockOnClick}
-          loading={true}
-        />
-      );
-
-      const button = screen.getByRole('button', { name: 'Load more tasks' });
+      const { button, onClick } = setup({ loading: true });
       button.focus();
       await user.keyboard('{Enter}');
-
-      expect(mockOnClick).not.toHaveBeenCalled();
+      expect(onClick).not.toHaveBeenCalled();
     });
   });
 
   describe('accessibility', () => {
-    it('should have aria-label', () => {
-      render(
-        <LoadMoreButton
-          onClick={mockOnClick}
-          loading={false}
-        />
-      );
-
-      const button = screen.getByRole('button', { name: 'Load more tasks' });
+    it('has correct aria-label', () => {
+      const { button } = setup();
       expect(button).toHaveAttribute('aria-label', 'Load more tasks');
     });
 
-    it('should indicate loading state to screen readers', () => {
-      render(
-        <LoadMoreButton
-          onClick={mockOnClick}
-          loading={true}
-        />
-      );
-
+    it('announces loading state to screen readers', () => {
+      setup({ loading: true });
       expect(screen.getByText('Loading...')).toBeInTheDocument();
-      const button = screen.getByRole('button', { name: 'Load more tasks' });
-      expect(button).toBeDisabled();
     });
   });
 
   describe('memoization', () => {
-    it('should not re-render when props are the same', () => {
+    it('does not re-render when props are the same', () => {
       const { rerender } = render(
         <LoadMoreButton
-          onClick={mockOnClick}
+          onClick={vi.fn()}
           loading={false}
         />
       );
-
-      const button = screen.getByRole('button', { name: 'Load more tasks' });
-      const firstRender = button;
-
+      const buttonBefore = screen.getByRole('button', { name: /load more tasks/i });
       rerender(
         <LoadMoreButton
-          onClick={mockOnClick}
+          onClick={vi.fn()}
           loading={false}
         />
       );
-
-      const secondRender = screen.getByRole('button', { name: 'Load more tasks' });
-      expect(firstRender).toBe(secondRender);
+      const buttonAfter = screen.getByRole('button', { name: /load more tasks/i });
+      expect(buttonBefore).toBe(buttonAfter);
     });
 
-    it('should re-render when loading state changes', () => {
+    it('re-renders when loading state changes', () => {
       const { rerender } = render(
         <LoadMoreButton
-          onClick={mockOnClick}
+          onClick={vi.fn()}
           loading={false}
         />
       );
-
       expect(screen.getByText('Load More')).toBeInTheDocument();
-
       rerender(
         <LoadMoreButton
-          onClick={mockOnClick}
+          onClick={vi.fn()}
           loading={true}
         />
       );
-
       expect(screen.getByText('Loading...')).toBeInTheDocument();
     });
   });

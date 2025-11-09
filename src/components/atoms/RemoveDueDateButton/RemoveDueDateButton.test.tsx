@@ -1,11 +1,11 @@
 import { render, screen } from '@testing-library/react';
-import { userEvent } from '@testing-library/user-event';
+import userEvent from '@testing-library/user-event';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { RemoveDueDateButton } from './RemoveDueDateButton';
 import { ReactNode } from 'react';
 
 vi.mock('lucide-react', () => ({
-  X: ({ ...props }) => (
+  X: (props: Record<string, unknown>) => (
     <svg
       data-testid="x-icon"
       {...props}
@@ -26,118 +26,84 @@ vi.mock('@/components/ui/tooltip', () => ({
 }));
 
 describe('RemoveDueDateButton', () => {
-  const mockOnClick = vi.fn();
+  const onClick = vi.fn();
+  const setup = async () => {
+    const user = userEvent.setup();
+    render(<RemoveDueDateButton onClick={onClick} />);
+    const button = screen.getByRole('button', { name: /remove due date/i });
+    return { user, button };
+  };
 
   beforeEach(() => {
     vi.clearAllMocks();
   });
 
-  describe('basic rendering', () => {
-    it('should render button', () => {
-      render(<RemoveDueDateButton onClick={mockOnClick} />);
-
-      expect(screen.getByRole('button', { name: 'Remove due date' })).toBeInTheDocument();
-    });
-
-    it('should render X icon', () => {
-      render(<RemoveDueDateButton onClick={mockOnClick} />);
-
-      expect(screen.getByTestId('x-icon')).toBeInTheDocument();
-    });
-
-    it('should render tooltip content', () => {
-      render(<RemoveDueDateButton onClick={mockOnClick} />);
-
-      expect(screen.getByText('Remove due date')).toBeInTheDocument();
-    });
-
-    it('should have type button', () => {
-      render(<RemoveDueDateButton onClick={mockOnClick} />);
-
-      const button = screen.getByRole('button', { name: 'Remove due date' });
+  describe('rendering', () => {
+    it('renders button with correct role and label', async () => {
+      const { button } = await setup();
+      expect(button).toBeInTheDocument();
       expect(button).toHaveAttribute('type', 'button');
+      expect(button).toHaveAttribute('aria-label', 'Remove due date');
+    });
+
+    it('renders X icon inside the button', async () => {
+      await setup();
+      expect(screen.getByTestId('x-icon')).toBeInTheDocument();
+      expect(screen.getByTestId('x-icon')).toHaveAttribute('aria-hidden', 'true');
+    });
+
+    it('renders tooltip trigger and content', async () => {
+      await setup();
+      expect(screen.getByTestId('tooltip-trigger')).toBeInTheDocument();
+      expect(screen.getByTestId('tooltip-content')).toBeInTheDocument();
+      expect(screen.getByTestId('tooltip-content')).toHaveTextContent('Remove due date');
+    });
+
+    it('uses "asChild" on tooltip trigger', async () => {
+      await setup();
+      expect(screen.getByTestId('tooltip-trigger')).toHaveAttribute('data-as-child', 'true');
     });
   });
 
   describe('user interactions', () => {
-    it('should call onClick when clicked', async () => {
-      const user = userEvent.setup();
-      render(<RemoveDueDateButton onClick={mockOnClick} />);
-
-      const button = screen.getByRole('button', { name: 'Remove due date' });
+    it('calls onClick when clicked', async () => {
+      const { user, button } = await setup();
       await user.click(button);
-
-      expect(mockOnClick).toHaveBeenCalledTimes(1);
+      expect(onClick).toHaveBeenCalledTimes(1);
     });
 
-    it('should be keyboard accessible', async () => {
-      const user = userEvent.setup();
-      render(<RemoveDueDateButton onClick={mockOnClick} />);
-
-      const button = screen.getByRole('button', { name: 'Remove due date' });
+    it('is keyboard focusable', async () => {
+      const { user, button } = await setup();
       await user.tab();
-
       expect(button).toHaveFocus();
     });
 
-    it('should trigger onClick on Enter key', async () => {
-      const user = userEvent.setup();
-      render(<RemoveDueDateButton onClick={mockOnClick} />);
-
-      const button = screen.getByRole('button', { name: 'Remove due date' });
+    it('triggers onClick when pressing Enter', async () => {
+      const { user, button } = await setup();
       button.focus();
       await user.keyboard('{Enter}');
-
-      expect(mockOnClick).toHaveBeenCalled();
+      expect(onClick).toHaveBeenCalledTimes(1);
     });
 
-    it('should trigger onClick on Space key', async () => {
-      const user = userEvent.setup();
-      render(<RemoveDueDateButton onClick={mockOnClick} />);
-
-      const button = screen.getByRole('button', { name: 'Remove due date' });
+    it('triggers onClick when pressing Space', async () => {
+      const { user, button } = await setup();
       button.focus();
       await user.keyboard(' ');
-
-      expect(mockOnClick).toHaveBeenCalled();
+      expect(onClick).toHaveBeenCalledTimes(1);
     });
   });
 
   describe('accessibility', () => {
-    it('should have aria-label on button', () => {
-      render(<RemoveDueDateButton onClick={mockOnClick} />);
-
-      const button = screen.getByRole('button', { name: 'Remove due date' });
-      expect(button).toHaveAttribute('aria-label', 'Remove due date');
+    it('has accessible name matching tooltip and aria-label', async () => {
+      const { button } = await setup();
+      expect(button).toHaveAccessibleName('Remove due date');
+      expect(screen.getByTestId('tooltip-content')).toHaveTextContent('Remove due date');
     });
 
-    it('should hide icon from screen readers', () => {
-      render(<RemoveDueDateButton onClick={mockOnClick} />);
-
+    it('ensures icon is hidden from assistive technologies', async () => {
+      await setup();
       const icon = screen.getByTestId('x-icon');
       expect(icon).toHaveAttribute('aria-hidden', 'true');
-    });
-  });
-
-  describe('tooltip', () => {
-    it('should render tooltip trigger', () => {
-      render(<RemoveDueDateButton onClick={mockOnClick} />);
-
-      expect(screen.getByTestId('tooltip-trigger')).toBeInTheDocument();
-    });
-
-    it('should render tooltip content with text', () => {
-      render(<RemoveDueDateButton onClick={mockOnClick} />);
-
-      const tooltipContent = screen.getByTestId('tooltip-content');
-      expect(tooltipContent).toHaveTextContent('Remove due date');
-    });
-
-    it('should use asChild on tooltip trigger', () => {
-      render(<RemoveDueDateButton onClick={mockOnClick} />);
-
-      const trigger = screen.getByTestId('tooltip-trigger');
-      expect(trigger).toHaveAttribute('data-as-child', 'true');
     });
   });
 });
