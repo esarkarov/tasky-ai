@@ -1,20 +1,20 @@
 import { render, screen, waitFor } from '@testing-library/react';
 import { describe, it, expect, vi, beforeEach } from 'vitest';
-import { RequireAuth } from './RequireAuth';
 import { MemoryRouter } from 'react-router';
+import { RequireAuth } from './RequireAuth';
 import { TIMING } from '@/constants/timing';
 
 vi.mock('@/components/atoms/Loader/Loader', () => ({
   Loader: () => <div data-testid="loader">Loading...</div>,
 }));
 
-const mockUseNavigate = vi.fn();
+const mockNavigate = vi.fn();
 vi.mock('react-router', async () => {
   const actual = await vi.importActual('react-router');
   return {
     ...actual,
     Outlet: () => <div data-testid="protected-content">Protected Content</div>,
-    useNavigate: () => mockUseNavigate,
+    useNavigate: () => mockNavigate,
     useLocation: () => ({ pathname: '/protected' }),
   };
 });
@@ -30,24 +30,19 @@ vi.mock('@clerk/clerk-react', () => ({
 }));
 
 vi.mock('@/constants/routes', () => ({
-  ROUTES: {
-    LOGIN: '/login',
-  },
+  ROUTES: { LOGIN: '/login' },
 }));
 
 vi.mock('@/constants/timing', () => ({
-  TIMING: {
-    TOAST_DURATION: 3000,
-  },
+  TIMING: { TOAST_DURATION: 3000 },
 }));
 
-const renderComponent = () => {
-  return render(
+const renderComponent = () =>
+  render(
     <MemoryRouter>
       <RequireAuth />
     </MemoryRouter>
   );
-};
 const setupAuth = (isLoaded: boolean, isSignedIn: boolean) => {
   mockUseAuth.mockReturnValue({ isLoaded, isSignedIn });
 };
@@ -58,86 +53,59 @@ describe('RequireAuth', () => {
   });
 
   describe('loading state', () => {
-    it('should show loader while authentication is being checked', () => {
+    it('renders loader while authentication is loading', () => {
       setupAuth(false, false);
-
       renderComponent();
-
       expect(screen.getByTestId('loader')).toBeInTheDocument();
       expect(screen.queryByTestId('protected-content')).not.toBeInTheDocument();
-    });
-
-    it('should not navigate or show toast while loading', () => {
-      setupAuth(false, false);
-
-      renderComponent();
-
-      expect(mockUseNavigate).not.toHaveBeenCalled();
+      expect(mockNavigate).not.toHaveBeenCalled();
       expect(mockToast).not.toHaveBeenCalled();
     });
   });
 
   describe('authenticated user', () => {
-    it('should render protected content when user is signed in', () => {
+    it('renders protected content when signed in', () => {
       setupAuth(true, true);
-
       renderComponent();
-
       expect(screen.getByTestId('protected-content')).toBeInTheDocument();
       expect(screen.queryByTestId('loader')).not.toBeInTheDocument();
-    });
-
-    it('should not show toast or redirect when authenticated', () => {
-      setupAuth(true, true);
-
-      renderComponent();
-
-      expect(mockUseNavigate).not.toHaveBeenCalled();
+      expect(mockNavigate).not.toHaveBeenCalled();
       expect(mockToast).not.toHaveBeenCalled();
     });
   });
 
   describe('unauthenticated user', () => {
-    it('should redirect to login page when not signed in', async () => {
+    it('redirects to login when user not signed in', async () => {
       setupAuth(true, false);
-
       renderComponent();
-
-      await waitFor(() => {
-        expect(mockUseNavigate).toHaveBeenCalledWith('/login', { replace: true });
-      });
+      await waitFor(() => expect(mockNavigate).toHaveBeenCalledWith('/login', { replace: true }));
     });
 
-    it('should show authentication error toast', async () => {
+    it('shows authentication required toast', async () => {
       setupAuth(true, false);
-
       renderComponent();
-
-      await waitFor(() => {
+      await waitFor(() =>
         expect(mockToast).toHaveBeenCalledWith({
           variant: 'destructive',
           title: 'Authentication Required',
           description: 'Please sign in to access this page.',
           duration: TIMING.TOAST_DURATION,
-        });
-      });
+        })
+      );
     });
 
-    it('should render nothing while redirecting', () => {
+    it('renders nothing while redirecting', () => {
       setupAuth(true, false);
-
       renderComponent();
-
       expect(screen.queryByTestId('protected-content')).not.toBeInTheDocument();
       expect(screen.queryByTestId('loader')).not.toBeInTheDocument();
     });
   });
 
-  describe('authentication state', () => {
-    it('should transition from loading to authenticated', () => {
+  describe('state transitions', () => {
+    it('transitions from loading to authenticated', () => {
       setupAuth(false, false);
       const { rerender } = renderComponent();
-
       expect(screen.getByTestId('loader')).toBeInTheDocument();
 
       setupAuth(true, true);
@@ -151,10 +119,9 @@ describe('RequireAuth', () => {
       expect(screen.queryByTestId('loader')).not.toBeInTheDocument();
     });
 
-    it('should transition from loading to unauthenticated', async () => {
+    it('transitions from loading to unauthenticated with redirect and toast', async () => {
       setupAuth(false, false);
       const { rerender } = renderComponent();
-
       expect(screen.getByTestId('loader')).toBeInTheDocument();
 
       setupAuth(true, false);
@@ -165,9 +132,31 @@ describe('RequireAuth', () => {
       );
 
       await waitFor(() => {
-        expect(mockUseNavigate).toHaveBeenCalledWith('/login', { replace: true });
+        expect(mockNavigate).toHaveBeenCalledWith('/login', { replace: true });
         expect(mockToast).toHaveBeenCalled();
       });
+    });
+  });
+
+  describe('edge cases', () => {
+    it('does not call navigate or toast if auth is still loading', () => {
+      setupAuth(false, true);
+      renderComponent();
+      expect(mockNavigate).not.toHaveBeenCalled();
+      expect(mockToast).not.toHaveBeenCalled();
+    });
+
+    it('handles rerender stability when user remains authenticated', () => {
+      setupAuth(true, true);
+      const { rerender } = renderComponent();
+      rerender(
+        <MemoryRouter>
+          <RequireAuth />
+        </MemoryRouter>
+      );
+      expect(screen.getByTestId('protected-content')).toBeInTheDocument();
+      expect(mockNavigate).not.toHaveBeenCalled();
+      expect(mockToast).not.toHaveBeenCalled();
     });
   });
 });

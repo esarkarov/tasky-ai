@@ -1,7 +1,7 @@
 import { render, screen, waitFor } from '@testing-library/react';
+import { MemoryRouter } from 'react-router';
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { RedirectIfAuthenticated } from './RedirectIfAuthenticated';
-import { MemoryRouter } from 'react-router';
 
 vi.mock('@/components/atoms/Loader/Loader', () => ({
   Loader: () => <div data-testid="loader">Loading...</div>,
@@ -23,25 +23,20 @@ vi.mock('@/hooks/use-toast', () => ({
 }));
 
 const mockUseAuth = vi.fn();
-const mockUseUser = vi.fn();
 vi.mock('@clerk/clerk-react', () => ({
   useAuth: () => mockUseAuth(),
-  useUser: () => mockUseUser(),
 }));
 
 vi.mock('@/constants/routes', () => ({
-  ROUTES: {
-    TODAY: '/today',
-  },
+  ROUTES: { TODAY: '/today' },
 }));
 
-const renderComponent = () => {
-  return render(
+const renderComponent = () =>
+  render(
     <MemoryRouter>
       <RedirectIfAuthenticated />
     </MemoryRouter>
   );
-};
 const setupAuth = (isLoaded: boolean, isSignedIn: boolean) => {
   mockUseAuth.mockReturnValue({ isLoaded, isSignedIn });
 };
@@ -52,89 +47,55 @@ describe('RedirectIfAuthenticated', () => {
   });
 
   describe('loading state', () => {
-    it('should show loader while authentication is being checked', () => {
+    it('renders loader when auth is not loaded', () => {
       setupAuth(false, false);
-
       renderComponent();
 
       expect(screen.getByTestId('loader')).toBeInTheDocument();
       expect(screen.queryByTestId('public-content')).not.toBeInTheDocument();
-    });
-
-    it('should not navigate while loading', () => {
-      setupAuth(false, false);
-
-      renderComponent();
-
       expect(mockNavigate).not.toHaveBeenCalled();
     });
   });
 
   describe('unauthenticated user', () => {
-    it('should render public content when user is not signed in', () => {
+    it('renders public content when user is not signed in', () => {
       setupAuth(true, false);
-
       renderComponent();
 
       expect(screen.getByTestId('public-content')).toBeInTheDocument();
       expect(screen.queryByTestId('loader')).not.toBeInTheDocument();
-    });
-
-    it('should not redirect when not authenticated', () => {
-      setupAuth(true, false);
-
-      renderComponent();
-
       expect(mockNavigate).not.toHaveBeenCalled();
     });
   });
 
   describe('authenticated user', () => {
-    it('should redirect to today page when user is signed in', async () => {
+    it('redirects to /today when user is signed in', async () => {
       setupAuth(true, true);
-
       renderComponent();
 
-      await waitFor(() => {
-        expect(mockNavigate).toHaveBeenCalledWith('/today', { replace: true });
-      });
+      await waitFor(() => expect(mockNavigate).toHaveBeenCalledWith('/today', { replace: true }));
     });
 
-    it('should render nothing while redirecting', () => {
+    it('renders nothing while redirecting', () => {
       setupAuth(true, true);
-
       renderComponent();
 
       expect(screen.queryByTestId('public-content')).not.toBeInTheDocument();
       expect(screen.queryByTestId('loader')).not.toBeInTheDocument();
     });
 
-    it('should redirect even without user firstName', async () => {
+    it('redirects even if user data is undefined', async () => {
       setupAuth(true, true);
-
       renderComponent();
 
-      await waitFor(() => {
-        expect(mockNavigate).toHaveBeenCalledWith('/today', { replace: true });
-      });
-    });
-
-    it('should redirect even when user is null', async () => {
-      setupAuth(true, true);
-
-      renderComponent();
-
-      await waitFor(() => {
-        expect(mockNavigate).toHaveBeenCalledWith('/today', { replace: true });
-      });
+      await waitFor(() => expect(mockNavigate).toHaveBeenCalledWith('/today', { replace: true }));
     });
   });
 
-  describe('authentication state', () => {
-    it('should transition from loading to unauthenticated', () => {
+  describe('state transitions', () => {
+    it('transitions from loading to unauthenticated correctly', () => {
       setupAuth(false, false);
       const { rerender } = renderComponent();
-
       expect(screen.getByTestId('loader')).toBeInTheDocument();
 
       setupAuth(true, false);
@@ -149,10 +110,9 @@ describe('RedirectIfAuthenticated', () => {
       expect(mockNavigate).not.toHaveBeenCalled();
     });
 
-    it('should transition from loading to authenticated with redirect', async () => {
+    it('transitions from loading to authenticated with redirect', async () => {
       setupAuth(false, false);
       const { rerender } = renderComponent();
-
       expect(screen.getByTestId('loader')).toBeInTheDocument();
 
       setupAuth(true, true);
@@ -162,9 +122,23 @@ describe('RedirectIfAuthenticated', () => {
         </MemoryRouter>
       );
 
-      await waitFor(() => {
-        expect(mockNavigate).toHaveBeenCalledWith('/today', { replace: true });
-      });
+      await waitFor(() => expect(mockNavigate).toHaveBeenCalledWith('/today', { replace: true }));
+    });
+  });
+
+  describe('edge cases', () => {
+    it('does not break when toast hook is called', () => {
+      setupAuth(true, false);
+      renderComponent();
+
+      expect(mockToast).not.toHaveBeenCalled();
+    });
+
+    it('prevents navigation while still loading', () => {
+      setupAuth(false, true);
+      renderComponent();
+
+      expect(mockNavigate).not.toHaveBeenCalled();
     });
   });
 });
