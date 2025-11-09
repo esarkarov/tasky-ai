@@ -1,193 +1,114 @@
 import { render, screen } from '@testing-library/react';
-import { describe, expect, it } from 'vitest';
+import { describe, it, expect } from 'vitest';
 import { PageContainer, PageHeader, PageList, PageTitle } from './PageTemplate';
 
-describe('Page Components', () => {
+describe('PageTemplate Components', () => {
+  const renderWithChildren = (Component: React.FC<React.PropsWithChildren>, text = 'Test Content') =>
+    render(
+      <Component>
+        <div>{text}</div>
+      </Component>
+    );
+
   describe('PageContainer', () => {
-    it('should render children', () => {
-      render(
-        <PageContainer>
-          <div>Test Content</div>
-        </PageContainer>
-      );
-
-      expect(screen.getByText('Test Content')).toBeInTheDocument();
+    it('renders its children inside a main element', () => {
+      renderWithChildren(PageContainer);
+      const main = screen.getByRole('main');
+      expect(main).toBeInTheDocument();
+      expect(main).toHaveTextContent('Test Content');
     });
 
-    it('should render as main element', () => {
-      render(
-        <PageContainer>
-          <div>Content</div>
-        </PageContainer>
-      );
-
-      expect(screen.getByRole('main')).toBeInTheDocument();
-    });
-
-    it('should have aria-label', () => {
-      render(
-        <PageContainer>
-          <div>Content</div>
-        </PageContainer>
-      );
-
+    it('has correct attributes and styling', () => {
+      renderWithChildren(PageContainer);
       const main = screen.getByRole('main');
       expect(main).toHaveAttribute('aria-label', 'Page content');
-    });
-
-    it('should have correct styling classes', () => {
-      render(
-        <PageContainer>
-          <div>Content</div>
-        </PageContainer>
-      );
-
-      const main = screen.getByRole('main');
       expect(main).toHaveClass('container', 'md:max-w-screen-lg');
     });
 
-    it('should have correct display name', () => {
+    it('has a defined display name', () => {
       expect(PageContainer.displayName).toBe('PageContainer');
     });
   });
 
   describe('PageHeader', () => {
-    it('should render children', () => {
-      render(
-        <PageHeader>
-          <div>Header Content</div>
-        </PageHeader>
-      );
-
-      expect(screen.getByText('Header Content')).toBeInTheDocument();
+    it('renders children inside a header element', () => {
+      renderWithChildren(PageHeader);
+      const header = screen.getByRole('banner');
+      expect(header).toBeInTheDocument();
+      expect(header).toHaveTextContent('Test Content');
     });
 
-    it('should render as header element', () => {
-      render(
-        <PageHeader>
-          <div>Content</div>
-        </PageHeader>
-      );
-
-      expect(screen.getByRole('banner')).toBeInTheDocument();
-    });
-
-    it('should have aria-label', () => {
-      render(
-        <PageHeader>
-          <div>Content</div>
-        </PageHeader>
-      );
-
+    it('has correct accessibility attributes', () => {
+      renderWithChildren(PageHeader);
       const header = screen.getByRole('banner');
       expect(header).toHaveAttribute('aria-label', 'Page header');
     });
 
-    it('should have correct styling classes', () => {
-      render(
-        <PageHeader>
-          <div>Content</div>
-        </PageHeader>
-      );
-
+    it('has correct styling classes', () => {
+      renderWithChildren(PageHeader);
       const header = screen.getByRole('banner');
       expect(header).toHaveClass('pt-2', 'pb-3', 'space-y-2', 'md:px-4', 'lg:px-10', 'animate-fade-in', 'opacity-0');
     });
 
-    it('should have correct display name', () => {
+    it('has a defined display name', () => {
       expect(PageHeader.displayName).toBe('PageHeader');
     });
   });
 
   describe('PageTitle', () => {
-    it('should render children', () => {
-      render(<PageTitle>My Page Title</PageTitle>);
-
-      expect(screen.getByText('My Page Title')).toBeInTheDocument();
+    it('renders text as an h1 heading', () => {
+      render(<PageTitle>Page Title</PageTitle>);
+      const heading = screen.getByRole('heading', { level: 1 });
+      expect(heading).toBeInTheDocument();
+      expect(heading).toHaveTextContent('Page Title');
     });
 
-    it('should render as h1 heading', () => {
-      render(<PageTitle>My Page Title</PageTitle>);
-
-      expect(screen.getByRole('heading', { level: 1 })).toBeInTheDocument();
-    });
-
-    it('should have id attribute', () => {
-      render(<PageTitle>My Page Title</PageTitle>);
-
+    it('has correct id and styling classes', () => {
+      render(<PageTitle>Page Title</PageTitle>);
       const heading = screen.getByRole('heading', { level: 1 });
       expect(heading).toHaveAttribute('id', 'page-title');
-    });
-
-    it('should have correct styling classes', () => {
-      render(<PageTitle>My Page Title</PageTitle>);
-
-      const heading = screen.getByRole('heading', { level: 1 });
       expect(heading).toHaveClass('text-2xl', 'font-semibold');
     });
 
-    it('should have correct display name', () => {
+    it('has a defined display name', () => {
       expect(PageTitle.displayName).toBe('PageTitle');
     });
   });
 
   describe('PageList', () => {
-    it('should render children', () => {
-      render(
-        <PageList>
-          <div>List Content</div>
-        </PageList>
-      );
-
-      expect(screen.getByText('List Content')).toBeInTheDocument();
+    it('renders children inside a section element', () => {
+      renderWithChildren(PageList);
+      const section = screen.getByRole('region');
+      expect(section).toBeInTheDocument();
+      expect(section).toHaveTextContent('Test Content');
     });
 
-    it('should render as section element', () => {
-      render(
-        <PageList>
-          <div>Content</div>
-        </PageList>
-      );
-
-      expect(screen.getByRole('region')).toBeInTheDocument();
-    });
-
-    it('should have aria-labelledby pointing to page-title', () => {
-      render(
-        <PageList>
-          <div>Content</div>
-        </PageList>
-      );
-
+    it('links to page title for accessibility', () => {
+      renderWithChildren(PageList);
       const section = screen.getByRole('region');
       expect(section).toHaveAttribute('aria-labelledby', 'page-title');
     });
 
-    it('should have correct styling classes', () => {
-      render(
-        <PageList>
-          <div>Content</div>
-        </PageList>
-      );
-
+    it('has correct styling classes', () => {
+      renderWithChildren(PageList);
       const section = screen.getByRole('region');
       expect(section).toHaveClass('pt-2', 'pb-20', 'md:px-4', 'lg:px-10');
     });
 
-    it('should have correct display name', () => {
+    it('has a defined display name', () => {
       expect(PageList.displayName).toBe('PageList');
     });
   });
 
   describe('component composition', () => {
-    it('should work together as a complete page structure', () => {
+    it('renders a complete page structure correctly', () => {
       render(
         <PageContainer>
           <PageHeader>
             <PageTitle>Test Page</PageTitle>
           </PageHeader>
           <PageList>
-            <div>Page content goes here</div>
+            <div>Page Content</div>
           </PageList>
         </PageContainer>
       );
@@ -196,14 +117,14 @@ describe('Page Components', () => {
       expect(screen.getByRole('banner')).toBeInTheDocument();
       expect(screen.getByRole('heading', { level: 1, name: 'Test Page' })).toBeInTheDocument();
       expect(screen.getByRole('region')).toBeInTheDocument();
-      expect(screen.getByText('Page content goes here')).toBeInTheDocument();
+      expect(screen.getByText('Page Content')).toBeInTheDocument();
     });
 
-    it('should maintain correct ARIA relationships', () => {
+    it('maintains correct ARIA relationships between title and list', () => {
       render(
         <PageContainer>
           <PageHeader>
-            <PageTitle>My Title</PageTitle>
+            <PageTitle>Accessible Title</PageTitle>
           </PageHeader>
           <PageList>
             <div>Content</div>
@@ -212,56 +133,14 @@ describe('Page Components', () => {
       );
 
       const title = screen.getByRole('heading', { level: 1 });
-      const list = screen.getByRole('region');
-
+      const section = screen.getByRole('region');
       expect(title).toHaveAttribute('id', 'page-title');
-      expect(list).toHaveAttribute('aria-labelledby', 'page-title');
-    });
-  });
-
-  describe('memoization', () => {
-    it('should not re-render PageContainer when props are the same', () => {
-      const { rerender } = render(
-        <PageContainer>
-          <div>Content</div>
-        </PageContainer>
-      );
-
-      const main = screen.getByRole('main');
-      const firstRender = main;
-
-      rerender(
-        <PageContainer>
-          <div>Content</div>
-        </PageContainer>
-      );
-
-      const secondRender = screen.getByRole('main');
-      expect(firstRender).toBe(secondRender);
-    });
-
-    it('should re-render when children change', () => {
-      const { rerender } = render(
-        <PageContainer>
-          <div>Original Content</div>
-        </PageContainer>
-      );
-
-      expect(screen.getByText('Original Content')).toBeInTheDocument();
-
-      rerender(
-        <PageContainer>
-          <div>Updated Content</div>
-        </PageContainer>
-      );
-
-      expect(screen.getByText('Updated Content')).toBeInTheDocument();
-      expect(screen.queryByText('Original Content')).not.toBeInTheDocument();
+      expect(section).toHaveAttribute('aria-labelledby', 'page-title');
     });
   });
 
   describe('accessibility', () => {
-    it('should have proper semantic HTML structure', () => {
+    it('renders proper semantic HTML structure', () => {
       render(
         <PageContainer>
           <PageHeader>
@@ -279,11 +158,11 @@ describe('Page Components', () => {
       expect(screen.getByRole('region')).toBeInTheDocument();
     });
 
-    it('should have proper ARIA labels', () => {
+    it('ensures ARIA labels are correctly applied', () => {
       render(
         <PageContainer>
           <PageHeader>
-            <PageTitle>Test</PageTitle>
+            <PageTitle>ARIA Test</PageTitle>
           </PageHeader>
           <PageList>
             <div>Content</div>
@@ -294,6 +173,36 @@ describe('Page Components', () => {
       expect(screen.getByRole('main')).toHaveAttribute('aria-label', 'Page content');
       expect(screen.getByRole('banner')).toHaveAttribute('aria-label', 'Page header');
       expect(screen.getByRole('region')).toHaveAttribute('aria-labelledby', 'page-title');
+    });
+  });
+
+  describe('memoization behavior', () => {
+    it('does not re-render when props remain unchanged', () => {
+      const { rerender } = renderWithChildren(PageContainer, 'Static Content');
+      const firstRender = screen.getByRole('main');
+
+      rerender(
+        <PageContainer>
+          <div>Static Content</div>
+        </PageContainer>
+      );
+
+      const secondRender = screen.getByRole('main');
+      expect(firstRender).toBe(secondRender);
+    });
+
+    it('re-renders when children change', () => {
+      const { rerender } = renderWithChildren(PageContainer, 'Initial');
+      expect(screen.getByText('Initial')).toBeInTheDocument();
+
+      rerender(
+        <PageContainer>
+          <div>Updated</div>
+        </PageContainer>
+      );
+
+      expect(screen.getByText('Updated')).toBeInTheDocument();
+      expect(screen.queryByText('Initial')).not.toBeInTheDocument();
     });
   });
 });
