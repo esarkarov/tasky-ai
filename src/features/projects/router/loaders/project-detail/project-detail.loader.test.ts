@@ -6,8 +6,8 @@ import { projectDetailLoader } from './project-detail.loader';
 
 vi.mock('@/features/projects/services/project.service', () => ({
   projectService: {
-    getById: vi.fn(),
-    getRecent: vi.fn(),
+    findById: vi.fn(),
+    findRecent: vi.fn(),
   },
 }));
 
@@ -50,13 +50,13 @@ describe('projectDetailLoader', () => {
       const project = createMockProject();
       const projectsList = createMockProjects();
 
-      mockProjectService.getById.mockResolvedValue(project);
-      mockProjectService.getRecent.mockResolvedValue(projectsList);
+      mockProjectService.findById.mockResolvedValue(project);
+      mockProjectService.findRecent.mockResolvedValue(projectsList);
 
       const result = (await projectDetailLoader(createLoaderArgs(project.$id))) as ProjectDetailLoaderData;
 
-      expect(mockProjectService.getById).toHaveBeenCalledWith(project.$id);
-      expect(mockProjectService.getRecent).toHaveBeenCalledOnce();
+      expect(mockProjectService.findById).toHaveBeenCalledWith(project.$id);
+      expect(mockProjectService.findRecent).toHaveBeenCalledOnce();
       expect(result).toEqual({ project, projects: projectsList });
     });
 
@@ -64,8 +64,8 @@ describe('projectDetailLoader', () => {
       const customProject = createMockProject({ $id: 'other-id', name: 'Custom' });
       const projectsList = createMockProjects([customProject]);
 
-      mockProjectService.getById.mockResolvedValue(customProject);
-      mockProjectService.getRecent.mockResolvedValue(projectsList);
+      mockProjectService.findById.mockResolvedValue(customProject);
+      mockProjectService.findRecent.mockResolvedValue(projectsList);
 
       const result = (await projectDetailLoader(createLoaderArgs('other-id'))) as ProjectDetailWithRecentLoaderData;
 
@@ -78,8 +78,8 @@ describe('projectDetailLoader', () => {
       const project = createMockProject();
       const projects = createMockProjects([project]);
 
-      mockProjectService.getById.mockResolvedValue(project);
-      mockProjectService.getRecent.mockResolvedValue(projects);
+      mockProjectService.findById.mockResolvedValue(project);
+      mockProjectService.findRecent.mockResolvedValue(projects);
 
       const result = (await projectDetailLoader(createLoaderArgs(project.$id))) as ProjectDetailWithRecentLoaderData;
 
@@ -92,22 +92,22 @@ describe('projectDetailLoader', () => {
 
   describe('error handling', () => {
     it('throws if projectId is missing', async () => {
-      mockProjectService.getById.mockRejectedValue(new Error('Project ID is required'));
+      mockProjectService.findById.mockRejectedValue(new Error('Project ID is required'));
 
       await expect(projectDetailLoader(createLoaderArgs(undefined))).rejects.toThrow('Project ID is required');
     });
 
-    it('throws if getById fails', async () => {
-      mockProjectService.getById.mockRejectedValue(new Error('Failed to fetch project'));
-      mockProjectService.getRecent.mockResolvedValue(createMockProjects());
+    it('throws if findById fails', async () => {
+      mockProjectService.findById.mockRejectedValue(new Error('Failed to fetch project'));
+      mockProjectService.findRecent.mockResolvedValue(createMockProjects());
 
       await expect(projectDetailLoader(createLoaderArgs('invalid'))).rejects.toThrow('Failed to fetch project');
     });
 
-    it('throws if getRecent fails', async () => {
+    it('throws if findRecent fails', async () => {
       const project = createMockProject();
-      mockProjectService.getById.mockResolvedValue(project);
-      mockProjectService.getRecent.mockRejectedValue(new Error('Failed to fetch projects'));
+      mockProjectService.findById.mockResolvedValue(project);
+      mockProjectService.findRecent.mockRejectedValue(new Error('Failed to fetch projects'));
 
       await expect(projectDetailLoader(createLoaderArgs(project.$id))).rejects.toThrow('Failed to fetch projects');
     });

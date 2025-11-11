@@ -3,7 +3,7 @@ import { taskService } from '@/features/tasks/services/task.service';
 import type { LoaderFunction } from 'react-router';
 
 export const tasksInboxLoader: LoaderFunction = async () => {
-  const [projects, tasks] = await Promise.all([projectService.getRecent(), taskService.getInboxTasks()]);
+  const [projects, tasks] = await Promise.all([projectService.findRecent(), taskService.findInboxTasks()]);
 
   return { tasks, projects };
 };

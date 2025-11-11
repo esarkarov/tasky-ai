@@ -8,13 +8,13 @@ import { tasksInboxLoader } from './tasks-inbox.loader';
 
 vi.mock('@/features/tasks/services/task.service', () => ({
   taskService: {
-    getInboxTasks: vi.fn(),
+    findInboxTasks: vi.fn(),
   },
 }));
 
 vi.mock('@/features/projects/services/project.service', () => ({
   projectService: {
-    getRecent: vi.fn(),
+    findRecent: vi.fn(),
   },
 }));
 
@@ -80,23 +80,23 @@ describe('tasksInboxLoader', () => {
       ]);
       const projects = createMockProjects();
 
-      mockTaskService.getInboxTasks.mockResolvedValue(tasks);
-      mockProjectService.getRecent.mockResolvedValue(projects);
+      mockTaskService.findInboxTasks.mockResolvedValue(tasks);
+      mockProjectService.findRecent.mockResolvedValue(projects);
 
       const result = (await tasksInboxLoader(createLoaderArgs())) as ProjectsWithTasksLoaderData;
 
       expect(result.tasks).toEqual(tasks);
       expect(result.projects).toEqual(projects);
-      expect(mockTaskService.getInboxTasks).toHaveBeenCalledOnce();
-      expect(mockProjectService.getRecent).toHaveBeenCalledOnce();
+      expect(mockTaskService.findInboxTasks).toHaveBeenCalledOnce();
+      expect(mockProjectService.findRecent).toHaveBeenCalledOnce();
     });
 
     it('handles inbox tasks with due dates', async () => {
       const tasks = createMockTasks([createMockTask({ content: 'With date', due_date: new Date('2025-01-01') })]);
       const projects = createMockProjects();
 
-      mockTaskService.getInboxTasks.mockResolvedValue(tasks);
-      mockProjectService.getRecent.mockResolvedValue(projects);
+      mockTaskService.findInboxTasks.mockResolvedValue(tasks);
+      mockProjectService.findRecent.mockResolvedValue(projects);
 
       const result = (await tasksInboxLoader(createLoaderArgs())) as TasksLoaderData;
 
@@ -110,8 +110,8 @@ describe('tasksInboxLoader', () => {
       ]);
       const projects = createMockProjects();
 
-      mockTaskService.getInboxTasks.mockResolvedValue(tasks);
-      mockProjectService.getRecent.mockResolvedValue(projects);
+      mockTaskService.findInboxTasks.mockResolvedValue(tasks);
+      mockProjectService.findRecent.mockResolvedValue(projects);
 
       const result = (await tasksInboxLoader(createLoaderArgs())) as TasksLoaderData;
 
@@ -125,8 +125,8 @@ describe('tasksInboxLoader', () => {
       const tasks = createMockTasks([]);
       const projects = createMockProjects([]);
 
-      mockTaskService.getInboxTasks.mockResolvedValue(tasks);
-      mockProjectService.getRecent.mockResolvedValue(projects);
+      mockTaskService.findInboxTasks.mockResolvedValue(tasks);
+      mockProjectService.findRecent.mockResolvedValue(projects);
 
       const result = (await tasksInboxLoader(createLoaderArgs())) as ProjectsWithTasksLoaderData;
 
@@ -137,15 +137,15 @@ describe('tasksInboxLoader', () => {
 
   describe('error handling', () => {
     it('throws if task service fails', async () => {
-      mockTaskService.getInboxTasks.mockRejectedValue(new Error('Task service error'));
-      mockProjectService.getRecent.mockResolvedValue(createMockProjects());
+      mockTaskService.findInboxTasks.mockRejectedValue(new Error('Task service error'));
+      mockProjectService.findRecent.mockResolvedValue(createMockProjects());
 
       await expect(tasksInboxLoader(createLoaderArgs())).rejects.toThrow('Task service error');
     });
 
     it('throws if project service fails', async () => {
-      mockTaskService.getInboxTasks.mockResolvedValue(createMockTasks());
-      mockProjectService.getRecent.mockRejectedValue(new Error('Project service error'));
+      mockTaskService.findInboxTasks.mockResolvedValue(createMockTasks());
+      mockProjectService.findRecent.mockRejectedValue(new Error('Project service error'));
 
       await expect(tasksInboxLoader(createLoaderArgs())).rejects.toThrow('Project service error');
     });
@@ -156,8 +156,8 @@ describe('tasksInboxLoader', () => {
       const tasks = createMockTasks();
       const projects = createMockProjects();
 
-      mockTaskService.getInboxTasks.mockResolvedValue(tasks);
-      mockProjectService.getRecent.mockResolvedValue(projects);
+      mockTaskService.findInboxTasks.mockResolvedValue(tasks);
+      mockProjectService.findRecent.mockResolvedValue(projects);
 
       const result = (await tasksInboxLoader(createLoaderArgs())) as ProjectsWithTasksLoaderData;
 

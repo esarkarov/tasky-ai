@@ -8,13 +8,13 @@ import { tasksTodayLoader } from './tasks-today.loader';
 
 vi.mock('@/features/tasks/services/task.service', () => ({
   taskService: {
-    getTodayTasks: vi.fn(),
+    findTodayTasks: vi.fn(),
   },
 }));
 
 vi.mock('@/features/projects/services/project.service', () => ({
   projectService: {
-    getRecent: vi.fn(),
+    findRecent: vi.fn(),
   },
 }));
 
@@ -80,13 +80,13 @@ describe('tasksTodayLoader', () => {
       ]);
       const projects = createMockProjects();
 
-      mockTaskService.getTodayTasks.mockResolvedValue(tasks);
-      mockProjectService.getRecent.mockResolvedValue(projects);
+      mockTaskService.findTodayTasks.mockResolvedValue(tasks);
+      mockProjectService.findRecent.mockResolvedValue(projects);
 
       const result = (await tasksTodayLoader(createLoaderArgs())) as ProjectsWithTasksLoaderData;
 
-      expect(mockTaskService.getTodayTasks).toHaveBeenCalledOnce();
-      expect(mockProjectService.getRecent).toHaveBeenCalledOnce();
+      expect(mockTaskService.findTodayTasks).toHaveBeenCalledOnce();
+      expect(mockProjectService.findRecent).toHaveBeenCalledOnce();
       expect(result.tasks).toEqual(tasks);
       expect(result.projects).toEqual(projects);
     });
@@ -96,8 +96,8 @@ describe('tasksTodayLoader', () => {
       const tasks = createMockTasks([createMockTask({ content: 'Due today', due_date: today })]);
       const projects = createMockProjects();
 
-      mockTaskService.getTodayTasks.mockResolvedValue(tasks);
-      mockProjectService.getRecent.mockResolvedValue(projects);
+      mockTaskService.findTodayTasks.mockResolvedValue(tasks);
+      mockProjectService.findRecent.mockResolvedValue(projects);
 
       const result = (await tasksTodayLoader(createLoaderArgs())) as TasksLoaderData;
 
@@ -109,8 +109,8 @@ describe('tasksTodayLoader', () => {
       const tasks = createMockTasks([createMockTask({ content: 'Project task', projectId: project })]);
       const projects = createMockProjects();
 
-      mockTaskService.getTodayTasks.mockResolvedValue(tasks);
-      mockProjectService.getRecent.mockResolvedValue(projects);
+      mockTaskService.findTodayTasks.mockResolvedValue(tasks);
+      mockProjectService.findRecent.mockResolvedValue(projects);
 
       const result = (await tasksTodayLoader(createLoaderArgs())) as TasksLoaderData;
 
@@ -123,8 +123,8 @@ describe('tasksTodayLoader', () => {
       const tasks = createMockTasks([]);
       const projects = createMockProjects();
 
-      mockTaskService.getTodayTasks.mockResolvedValue(tasks);
-      mockProjectService.getRecent.mockResolvedValue(projects);
+      mockTaskService.findTodayTasks.mockResolvedValue(tasks);
+      mockProjectService.findRecent.mockResolvedValue(projects);
 
       const result = (await tasksTodayLoader(createLoaderArgs())) as TasksLoaderData;
 
@@ -135,15 +135,15 @@ describe('tasksTodayLoader', () => {
 
   describe('error handling', () => {
     it('throws if task service fails', async () => {
-      mockTaskService.getTodayTasks.mockRejectedValue(new Error('Task error'));
+      mockTaskService.findTodayTasks.mockRejectedValue(new Error('Task error'));
 
       await expect(tasksTodayLoader(createLoaderArgs())).rejects.toThrow('Task error');
     });
 
     it('throws if project service fails', async () => {
       const tasks = createMockTasks();
-      mockTaskService.getTodayTasks.mockResolvedValue(tasks);
-      mockProjectService.getRecent.mockRejectedValue(new Error('Project error'));
+      mockTaskService.findTodayTasks.mockResolvedValue(tasks);
+      mockProjectService.findRecent.mockRejectedValue(new Error('Project error'));
 
       await expect(tasksTodayLoader(createLoaderArgs())).rejects.toThrow('Project error');
     });
@@ -154,8 +154,8 @@ describe('tasksTodayLoader', () => {
       const tasks = createMockTasks();
       const projects = createMockProjects();
 
-      mockTaskService.getTodayTasks.mockResolvedValue(tasks);
-      mockProjectService.getRecent.mockResolvedValue(projects);
+      mockTaskService.findTodayTasks.mockResolvedValue(tasks);
+      mockProjectService.findRecent.mockResolvedValue(projects);
 
       const result = (await tasksTodayLoader(createLoaderArgs())) as TasksLoaderData;
 

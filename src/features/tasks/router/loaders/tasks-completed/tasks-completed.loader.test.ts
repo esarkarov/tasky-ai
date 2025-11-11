@@ -8,13 +8,13 @@ import { tasksCompletedLoader } from './tasks-completed.loader';
 
 vi.mock('@/features/tasks/services/task.service', () => ({
   taskService: {
-    getCompletedTasks: vi.fn(),
+    findCompletedTasks: vi.fn(),
   },
 }));
 
 vi.mock('@/features/projects/services/project.service', () => ({
   projectService: {
-    getRecent: vi.fn(),
+    findRecent: vi.fn(),
   },
 }));
 
@@ -83,13 +83,13 @@ describe('tasksCompletedLoader', () => {
       ]);
       const projects = createMockProjects();
 
-      mockTaskService.getCompletedTasks.mockResolvedValue(tasks);
-      mockProjectService.getRecent.mockResolvedValue(projects);
+      mockTaskService.findCompletedTasks.mockResolvedValue(tasks);
+      mockProjectService.findRecent.mockResolvedValue(projects);
 
       const result = (await tasksCompletedLoader(createLoaderArgs())) as ProjectsWithTasksLoaderData;
 
-      expect(mockTaskService.getCompletedTasks).toHaveBeenCalledOnce();
-      expect(mockProjectService.getRecent).toHaveBeenCalledOnce();
+      expect(mockTaskService.findCompletedTasks).toHaveBeenCalledOnce();
+      expect(mockProjectService.findRecent).toHaveBeenCalledOnce();
       expect(result.tasks).toEqual(tasks);
       expect(result.projects).toEqual(projects);
     });
@@ -99,8 +99,8 @@ describe('tasksCompletedLoader', () => {
       const tasks = createMockTasks([createMockTask({ projectId: projectRef })]);
       const projects = createMockProjects();
 
-      mockTaskService.getCompletedTasks.mockResolvedValue(tasks);
-      mockProjectService.getRecent.mockResolvedValue(projects);
+      mockTaskService.findCompletedTasks.mockResolvedValue(tasks);
+      mockProjectService.findRecent.mockResolvedValue(projects);
 
       const result = (await tasksCompletedLoader(createLoaderArgs())) as TasksLoaderData;
 
@@ -111,8 +111,8 @@ describe('tasksCompletedLoader', () => {
       const tasks = createMockTasks([createMockTask({ due_date: new Date('2023-12-31') })]);
       const projects = createMockProjects();
 
-      mockTaskService.getCompletedTasks.mockResolvedValue(tasks);
-      mockProjectService.getRecent.mockResolvedValue(projects);
+      mockTaskService.findCompletedTasks.mockResolvedValue(tasks);
+      mockProjectService.findRecent.mockResolvedValue(projects);
 
       const result = (await tasksCompletedLoader(createLoaderArgs())) as TasksLoaderData;
 
@@ -125,8 +125,8 @@ describe('tasksCompletedLoader', () => {
       const tasks = createMockTasks([], 0);
       const projects = createMockProjects();
 
-      mockTaskService.getCompletedTasks.mockResolvedValue(tasks);
-      mockProjectService.getRecent.mockResolvedValue(projects);
+      mockTaskService.findCompletedTasks.mockResolvedValue(tasks);
+      mockProjectService.findRecent.mockResolvedValue(projects);
 
       const result = (await tasksCompletedLoader(createLoaderArgs())) as TasksLoaderData;
 
@@ -137,15 +137,15 @@ describe('tasksCompletedLoader', () => {
 
   describe('error handling', () => {
     it('throws if task service fails', async () => {
-      mockTaskService.getCompletedTasks.mockRejectedValue(new Error('Task error'));
+      mockTaskService.findCompletedTasks.mockRejectedValue(new Error('Task error'));
 
       await expect(tasksCompletedLoader(createLoaderArgs())).rejects.toThrow('Task error');
     });
 
     it('throws if project service fails', async () => {
       const tasks = createMockTasks();
-      mockTaskService.getCompletedTasks.mockResolvedValue(tasks);
-      mockProjectService.getRecent.mockRejectedValue(new Error('Project error'));
+      mockTaskService.findCompletedTasks.mockResolvedValue(tasks);
+      mockProjectService.findRecent.mockRejectedValue(new Error('Project error'));
 
       await expect(tasksCompletedLoader(createLoaderArgs())).rejects.toThrow('Project error');
     });
@@ -156,8 +156,8 @@ describe('tasksCompletedLoader', () => {
       const tasks = createMockTasks();
       const projects = createMockProjects();
 
-      mockTaskService.getCompletedTasks.mockResolvedValue(tasks);
-      mockProjectService.getRecent.mockResolvedValue(projects);
+      mockTaskService.findCompletedTasks.mockResolvedValue(tasks);
+      mockProjectService.findRecent.mockResolvedValue(projects);
 
       const result = (await tasksCompletedLoader(createLoaderArgs())) as TasksLoaderData;
 
@@ -170,8 +170,8 @@ describe('tasksCompletedLoader', () => {
       const tasks = createMockTasks([createMockTask({ completed: true }), createMockTask({ completed: true })]);
       const projects = createMockProjects();
 
-      mockTaskService.getCompletedTasks.mockResolvedValue(tasks);
-      mockProjectService.getRecent.mockResolvedValue(projects);
+      mockTaskService.findCompletedTasks.mockResolvedValue(tasks);
+      mockProjectService.findRecent.mockResolvedValue(projects);
 
       const result = (await tasksCompletedLoader(createLoaderArgs())) as TasksLoaderData;
 

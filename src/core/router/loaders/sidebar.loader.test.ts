@@ -8,13 +8,13 @@ import { SidebarLoaderData } from '@/shared/types';
 
 vi.mock('@/features/projects/services/project.service', () => ({
   projectService: {
-    getRecent: vi.fn(),
+    findRecent: vi.fn(),
   },
 }));
 
 vi.mock('@/features/tasks/services/task.service', () => ({
   taskService: {
-    getTaskCounts: vi.fn(),
+    countTasks: vi.fn(),
   },
 }));
 
@@ -59,21 +59,21 @@ describe('sidebarLoader', () => {
     it('returns recent projects and task counts', async () => {
       const mockProjects = createMockProjects();
       const mockTaskCounts = createMockTaskCounts();
-      mockProjectService.getRecent.mockResolvedValue(mockProjects);
-      mockTaskService.getTaskCounts.mockResolvedValue(mockTaskCounts);
+      mockProjectService.findRecent.mockResolvedValue(mockProjects);
+      mockTaskService.countTasks.mockResolvedValue(mockTaskCounts);
 
       const result = await sidebarLoader(createLoaderArgs());
 
-      expect(mockProjectService.getRecent).toHaveBeenCalledOnce();
-      expect(mockTaskService.getTaskCounts).toHaveBeenCalledOnce();
+      expect(mockProjectService.findRecent).toHaveBeenCalledOnce();
+      expect(mockTaskService.countTasks).toHaveBeenCalledOnce();
       expect(result).toEqual({ projects: mockProjects, taskCounts: mockTaskCounts });
     });
 
     it('returns empty projects and zero task counts', async () => {
       const emptyProjects = createMockProjects([]);
       const zeroCounts = createMockTaskCounts(0, 0);
-      mockProjectService.getRecent.mockResolvedValue(emptyProjects);
-      mockTaskService.getTaskCounts.mockResolvedValue(zeroCounts);
+      mockProjectService.findRecent.mockResolvedValue(emptyProjects);
+      mockTaskService.countTasks.mockResolvedValue(zeroCounts);
 
       const result = await sidebarLoader(createLoaderArgs());
 
@@ -83,11 +83,11 @@ describe('sidebarLoader', () => {
     it('calls both services in parallel', async () => {
       const projects = createMockProjects();
       const taskCounts = createMockTaskCounts();
-      const getRecentSpy = vi.spyOn(projectService, 'getRecent');
-      const getCountsSpy = vi.spyOn(taskService, 'getTaskCounts');
+      const getRecentSpy = vi.spyOn(projectService, 'findRecent');
+      const getCountsSpy = vi.spyOn(taskService, 'countTasks');
 
-      mockProjectService.getRecent.mockResolvedValue(projects);
-      mockTaskService.getTaskCounts.mockResolvedValue(taskCounts);
+      mockProjectService.findRecent.mockResolvedValue(projects);
+      mockTaskService.countTasks.mockResolvedValue(taskCounts);
 
       const result = await sidebarLoader(createLoaderArgs());
 
@@ -100,28 +100,28 @@ describe('sidebarLoader', () => {
   describe('error handling', () => {
     it('throws if projectService fails', async () => {
       const error = new Error('Failed to fetch projects');
-      mockProjectService.getRecent.mockRejectedValue(error);
-      mockTaskService.getTaskCounts.mockResolvedValue({ todayTasks: 0, inboxTasks: 0 });
+      mockProjectService.findRecent.mockRejectedValue(error);
+      mockTaskService.countTasks.mockResolvedValue({ todayTasks: 0, inboxTasks: 0 });
 
       await expect(sidebarLoader(createLoaderArgs())).rejects.toThrow('Failed to fetch projects');
 
-      expect(mockProjectService.getRecent).toHaveBeenCalledOnce();
-      expect(mockTaskService.getTaskCounts).toHaveBeenCalledOnce();
+      expect(mockProjectService.findRecent).toHaveBeenCalledOnce();
+      expect(mockTaskService.countTasks).toHaveBeenCalledOnce();
     });
 
     it('throws if taskService fails', async () => {
       const projects = createMockProjects();
-      mockProjectService.getRecent.mockResolvedValue(projects);
-      mockTaskService.getTaskCounts.mockRejectedValue(new Error('Failed to fetch tasks'));
+      mockProjectService.findRecent.mockResolvedValue(projects);
+      mockTaskService.countTasks.mockRejectedValue(new Error('Failed to fetch tasks'));
 
       await expect(sidebarLoader(createLoaderArgs())).rejects.toThrow('Failed to fetch tasks');
-      expect(mockProjectService.getRecent).toHaveBeenCalledOnce();
-      expect(mockTaskService.getTaskCounts).toHaveBeenCalledOnce();
+      expect(mockProjectService.findRecent).toHaveBeenCalledOnce();
+      expect(mockTaskService.countTasks).toHaveBeenCalledOnce();
     });
 
     it('throws the first error if both services fail', async () => {
-      mockProjectService.getRecent.mockRejectedValue(new Error('Project error'));
-      mockTaskService.getTaskCounts.mockRejectedValue(new Error('Task error'));
+      mockProjectService.findRecent.mockRejectedValue(new Error('Project error'));
+      mockTaskService.countTasks.mockRejectedValue(new Error('Task error'));
 
       await expect(sidebarLoader(createLoaderArgs())).rejects.toThrow('Project error');
     });
@@ -129,8 +129,8 @@ describe('sidebarLoader', () => {
 
   describe('edge cases', () => {
     it('handles empty responses gracefully', async () => {
-      mockProjectService.getRecent.mockResolvedValue({ total: 0, documents: [] });
-      mockTaskService.getTaskCounts.mockResolvedValue({ todayTasks: 0, inboxTasks: 0 });
+      mockProjectService.findRecent.mockResolvedValue({ total: 0, documents: [] });
+      mockTaskService.countTasks.mockResolvedValue({ todayTasks: 0, inboxTasks: 0 });
 
       const result = (await sidebarLoader(createLoaderArgs())) as SidebarLoaderData;
       expect(result.projects.total).toBe(0);
@@ -141,15 +141,15 @@ describe('sidebarLoader', () => {
       const mockProjects = createMockProjects();
       const mockCounts = createMockTaskCounts();
 
-      mockProjectService.getRecent.mockResolvedValue(mockProjects);
-      mockTaskService.getTaskCounts.mockResolvedValue(mockCounts);
+      mockProjectService.findRecent.mockResolvedValue(mockProjects);
+      mockTaskService.countTasks.mockResolvedValue(mockCounts);
 
       const first = await sidebarLoader(createLoaderArgs());
       const second = await sidebarLoader(createLoaderArgs());
 
       expect(first).toEqual(second);
-      expect(mockProjectService.getRecent).toHaveBeenCalledTimes(2);
-      expect(mockTaskService.getTaskCounts).toHaveBeenCalledTimes(2);
+      expect(mockProjectService.findRecent).toHaveBeenCalledTimes(2);
+      expect(mockTaskService.countTasks).toHaveBeenCalledTimes(2);
     });
   });
 });

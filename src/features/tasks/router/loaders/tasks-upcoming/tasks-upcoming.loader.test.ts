@@ -8,13 +8,13 @@ import { tasksUpcomingLoader } from './tasks-upcoming.loader';
 
 vi.mock('@/features/tasks/services/task.service', () => ({
   taskService: {
-    getUpcomingTasks: vi.fn(),
+    findUpcomingTasks: vi.fn(),
   },
 }));
 
 vi.mock('@/features/projects/services/project.service', () => ({
   projectService: {
-    getRecent: vi.fn(),
+    findRecent: vi.fn(),
   },
 }));
 
@@ -77,23 +77,23 @@ describe('tasksUpcomingLoader', () => {
       const tasks = createMockTasks();
       const projects = createMockProjects();
 
-      mockTaskService.getUpcomingTasks.mockResolvedValue(tasks);
-      mockProjectService.getRecent.mockResolvedValue(projects);
+      mockTaskService.findUpcomingTasks.mockResolvedValue(tasks);
+      mockProjectService.findRecent.mockResolvedValue(projects);
 
       const result = (await tasksUpcomingLoader(createLoaderArgs())) as ProjectsWithTasksLoaderData;
 
       expect(result.tasks).toEqual(tasks);
       expect(result.projects).toEqual(projects);
-      expect(mockTaskService.getUpcomingTasks).toHaveBeenCalledOnce();
-      expect(mockProjectService.getRecent).toHaveBeenCalledOnce();
+      expect(mockTaskService.findUpcomingTasks).toHaveBeenCalledOnce();
+      expect(mockProjectService.findRecent).toHaveBeenCalledOnce();
     });
 
     it('handles empty task and project responses', async () => {
       const emptyTasks = createMockTasks([]);
       const emptyProjects = createMockProjects([]);
 
-      mockTaskService.getUpcomingTasks.mockResolvedValue(emptyTasks);
-      mockProjectService.getRecent.mockResolvedValue(emptyProjects);
+      mockTaskService.findUpcomingTasks.mockResolvedValue(emptyTasks);
+      mockProjectService.findRecent.mockResolvedValue(emptyProjects);
 
       const result = (await tasksUpcomingLoader(createLoaderArgs())) as ProjectsWithTasksLoaderData;
 
@@ -106,8 +106,8 @@ describe('tasksUpcomingLoader', () => {
       const tasks = createMockTasks([createMockTask({ due_date: dueDate })]);
       const projects = createMockProjects();
 
-      mockTaskService.getUpcomingTasks.mockResolvedValue(tasks);
-      mockProjectService.getRecent.mockResolvedValue(projects);
+      mockTaskService.findUpcomingTasks.mockResolvedValue(tasks);
+      mockProjectService.findRecent.mockResolvedValue(projects);
 
       const result = (await tasksUpcomingLoader(createLoaderArgs())) as TasksLoaderData;
 
@@ -119,8 +119,8 @@ describe('tasksUpcomingLoader', () => {
       const tasks = createMockTasks([createMockTask({ projectId: project })]);
       const projects = createMockProjects([project]);
 
-      mockTaskService.getUpcomingTasks.mockResolvedValue(tasks);
-      mockProjectService.getRecent.mockResolvedValue(projects);
+      mockTaskService.findUpcomingTasks.mockResolvedValue(tasks);
+      mockProjectService.findRecent.mockResolvedValue(projects);
 
       const result = (await tasksUpcomingLoader(createLoaderArgs())) as TasksLoaderData;
 
@@ -133,8 +133,8 @@ describe('tasksUpcomingLoader', () => {
       const tasks = createMockTasks([]);
       const projects = createMockProjects();
 
-      mockTaskService.getUpcomingTasks.mockResolvedValue(tasks);
-      mockProjectService.getRecent.mockResolvedValue(projects);
+      mockTaskService.findUpcomingTasks.mockResolvedValue(tasks);
+      mockProjectService.findRecent.mockResolvedValue(projects);
 
       const result = (await tasksUpcomingLoader(createLoaderArgs())) as TasksLoaderData;
 
@@ -144,16 +144,16 @@ describe('tasksUpcomingLoader', () => {
   });
 
   describe('failure cases', () => {
-    it('throws if getUpcomingTasks fails', async () => {
-      mockTaskService.getUpcomingTasks.mockRejectedValue(new Error('Task error'));
-      mockProjectService.getRecent.mockResolvedValue(createMockProjects());
+    it('throws if findUpcomingTasks fails', async () => {
+      mockTaskService.findUpcomingTasks.mockRejectedValue(new Error('Task error'));
+      mockProjectService.findRecent.mockResolvedValue(createMockProjects());
 
       await expect(tasksUpcomingLoader(createLoaderArgs())).rejects.toThrow('Task error');
     });
 
-    it('throws if getRecent fails', async () => {
-      mockTaskService.getUpcomingTasks.mockResolvedValue(createMockTasks());
-      mockProjectService.getRecent.mockRejectedValue(new Error('Project error'));
+    it('throws if findRecent fails', async () => {
+      mockTaskService.findUpcomingTasks.mockResolvedValue(createMockTasks());
+      mockProjectService.findRecent.mockRejectedValue(new Error('Project error'));
 
       await expect(tasksUpcomingLoader(createLoaderArgs())).rejects.toThrow('Project error');
     });
@@ -164,8 +164,8 @@ describe('tasksUpcomingLoader', () => {
       const tasks = createMockTasks();
       const projects = createMockProjects();
 
-      mockTaskService.getUpcomingTasks.mockResolvedValue(tasks);
-      mockProjectService.getRecent.mockResolvedValue(projects);
+      mockTaskService.findUpcomingTasks.mockResolvedValue(tasks);
+      mockProjectService.findRecent.mockResolvedValue(projects);
 
       const result = (await tasksUpcomingLoader(createLoaderArgs())) as ProjectsWithTasksLoaderData;
 
