@@ -10,11 +10,11 @@ vi.mock('@clerk/clerk-react', () => ({
   useAuth: () => mockUseAuth(),
 }));
 
-vi.mock('@/components/atoms/Head/Head', () => ({
+vi.mock('@/shared/components/atoms/Head/Head', () => ({
   Head: ({ title }: { title: string }) => <title data-testid="meta-title">{title}</title>,
 }));
 
-vi.mock('@/components/ui/button', () => ({
+vi.mock('@/shared/components/ui/button', () => ({
   Button: ({ children, ...props }: { children: ReactNode }) => (
     <button
       data-testid="button"
@@ -24,7 +24,7 @@ vi.mock('@/components/ui/button', () => ({
   ),
 }));
 
-vi.mock('@/constants/routes', () => ({
+vi.mock('@/shared/constants/routes', () => ({
   ROUTES: {
     TODAY: '/today',
     REGISTER: '/register',

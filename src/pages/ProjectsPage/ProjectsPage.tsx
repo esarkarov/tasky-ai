@@ -1,18 +1,23 @@
-import { Head } from '@/components/atoms/Head/Head';
-import { ItemList } from '@/components/atoms/List/List';
-import { LoadMoreButton } from '@/components/atoms/LoadMoreButton/LoadMoreButton';
-import { TotalCounter } from '@/components/atoms/TotalCounter/TotalCounter';
-import { ProjectSearchField } from '@/components/molecules/ProjectSearchField/ProjectSearchField';
-import { ProjectCard } from '@/components/organisms/ProjectCard';
-import { ProjectFormDialog } from '@/components/organisms/ProjectFormDialog';
-import { TopAppBar } from '@/components/organisms/TopAppBar';
-import { PageContainer, PageHeader, PageList, PageTitle } from '@/components/templates/PageTemplate/PageTemplate';
-import { Button } from '@/components/ui/button';
-import { ROUTES } from '@/constants/routes';
-import { useLoadMore } from '@/hooks/use-load-more';
-import { useProjectOperations } from '@/hooks/use-project-operations';
-import { ProjectsLoaderData } from '@/types/loaders.types';
-import { cn } from '@/utils/ui/ui.utils';
+import { ProjectSearchField } from '@/features/projects/components/molecules/ProjectSearchField/ProjectSearchField';
+import { ProjectCard } from '@/features/projects/components/organisms/ProjectCard/ProjectCard';
+import { ProjectFormDialog } from '@/features/projects/components/organisms/ProjectFormDialog/ProjectFormDialog';
+import { useProjectOperations } from '@/features/projects/hooks/use-project-operations';
+import { Head } from '@/shared/components/atoms/Head/Head';
+import { ItemList } from '@/shared/components/atoms/List/List';
+import { LoadMoreButton } from '@/shared/components/atoms/LoadMoreButton/LoadMoreButton';
+import { TotalCounter } from '@/shared/components/atoms/TotalCounter/TotalCounter';
+import { AppTopBar } from '@/shared/components/organisms/AppTopBar/AppTopBar';
+import {
+  PageContainer,
+  PageHeader,
+  PageList,
+  PageTitle,
+} from '@/shared/components/templates/PageTemplate/PageTemplate';
+import { Button } from '@/shared/components/ui/button';
+import { ROUTES } from '@/shared/constants/routes';
+import { useLoadMore } from '@/shared/hooks/use-load-more';
+import { ProjectsLoaderData } from '@/shared/types';
+import { cn } from '@/shared/utils/ui/ui.utils';
 import { FolderKanban, Plus } from 'lucide-react';
 import { useLoaderData } from 'react-router';
 
@@ -34,7 +39,7 @@ export const ProjectsPage = () => {
     <>
       <Head title="Tasky AI | My Projects" />
 
-      <TopAppBar
+      <AppTopBar
         title="My Projects"
         totalCount={total}
         label="project"

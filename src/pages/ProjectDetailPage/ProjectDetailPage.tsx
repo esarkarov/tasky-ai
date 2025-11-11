@@ -1,19 +1,24 @@
-import { AddTaskButton } from '@/components/atoms/AddTaskButton/AddTaskButton';
-import { Head } from '@/components/atoms/Head/Head';
-import { ItemList } from '@/components/atoms/List/List';
-import { LoadMoreButton } from '@/components/atoms/LoadMoreButton/LoadMoreButton';
-import { TotalCounter } from '@/components/atoms/TotalCounter/TotalCounter';
-import { EmptyStateMessage } from '@/components/organisms/EmptyStateMessage';
-import { ProjectActionMenu } from '@/components/organisms/ProjectActionMenu';
-import { TaskCard } from '@/components/organisms/TaskCard';
-import { TaskForm } from '@/components/organisms/TaskForm';
-import { TopAppBar } from '@/components/organisms/TopAppBar';
-import { PageContainer, PageHeader, PageList, PageTitle } from '@/components/templates/PageTemplate/PageTemplate';
-import { Button } from '@/components/ui/button';
-import { useLoadMore } from '@/hooks/use-load-more';
-import { useTaskOperations } from '@/hooks/use-task-operations';
-import { ProjectDetailLoaderData } from '@/types/loaders.types';
-import { TaskEntity } from '@/types/tasks.types';
+import { ProjectActionMenu } from '@/features/projects/components/organisms/ProjectActionMenu/ProjectActionMenu';
+import { AddTaskButton } from '@/features/tasks/components/atoms/AddTaskButton/AddTaskButton';
+import { TaskCard } from '@/features/tasks/components/organisms/TaskCard/TaskCard';
+import { TaskForm } from '@/features/tasks/components/organisms/TaskForm/TaskForm';
+import { useTaskOperations } from '@/features/tasks/hooks/use-task-operations';
+import { TaskEntity } from '@/features/tasks/types';
+import { Head } from '@/shared/components/atoms/Head/Head';
+import { ItemList } from '@/shared/components/atoms/List/List';
+import { LoadMoreButton } from '@/shared/components/atoms/LoadMoreButton/LoadMoreButton';
+import { TotalCounter } from '@/shared/components/atoms/TotalCounter/TotalCounter';
+import { AppTopBar } from '@/shared/components/organisms/AppTopBar/AppTopBar';
+import { EmptyStateMessage } from '@/shared/components/organisms/EmptyStateMessage/EmptyStateMessage';
+import {
+  PageContainer,
+  PageHeader,
+  PageList,
+  PageTitle,
+} from '@/shared/components/templates/PageTemplate/PageTemplate';
+import { Button } from '@/shared/components/ui/button';
+import { useLoadMore } from '@/shared/hooks/use-load-more';
+import { ProjectDetailLoaderData } from '@/shared/types';
 import { ClipboardCheck, MoreHorizontal } from 'lucide-react';
 import { useMemo, useState } from 'react';
 import { useLoaderData } from 'react-router';
@@ -50,7 +55,7 @@ export const ProjectDetailPage = () => {
     <>
       <Head title={`Tasky AI | ${name}`} />
 
-      <TopAppBar
+      <AppTopBar
         title={name}
         totalCount={filteredProjectTasks?.length}
       />

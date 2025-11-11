@@ -1,16 +1,21 @@
-import { Head } from '@/components/atoms/Head/Head';
-import { ItemList } from '@/components/atoms/List/List';
-import { LoadMoreButton } from '@/components/atoms/LoadMoreButton/LoadMoreButton';
-import { TotalCounter } from '@/components/atoms/TotalCounter/TotalCounter';
-import { EmptyStateMessage } from '@/components/organisms/EmptyStateMessage';
-import { FilterSelect } from '@/components/organisms/FilterSelect';
-import { TaskCard } from '@/components/organisms/TaskCard';
-import { TopAppBar } from '@/components/organisms/TopAppBar';
-import { PageContainer, PageHeader, PageList, PageTitle } from '@/components/templates/PageTemplate/PageTemplate';
-import { useLoadMore } from '@/hooks/use-load-more';
-import { useProjectFilter } from '@/hooks/use-project-filter';
-import { ProjectTaskLoaderData } from '@/types/loaders.types';
-import { ProjectEntity } from '@/types/projects.types';
+import { useProjectFilter } from '@/features/projects/hooks/use-project-filter';
+import { ProjectEntity } from '@/features/projects/types';
+import { TaskCard } from '@/features/tasks/components/organisms/TaskCard/TaskCard';
+import { Head } from '@/shared/components/atoms/Head/Head';
+import { ItemList } from '@/shared/components/atoms/List/List';
+import { LoadMoreButton } from '@/shared/components/atoms/LoadMoreButton/LoadMoreButton';
+import { TotalCounter } from '@/shared/components/atoms/TotalCounter/TotalCounter';
+import { AppTopBar } from '@/shared/components/organisms/AppTopBar/AppTopBar';
+import { EmptyStateMessage } from '@/shared/components/organisms/EmptyStateMessage/EmptyStateMessage';
+import { FilterSelect } from '@/shared/components/organisms/FilterSelect/FilterSelect';
+import {
+  PageContainer,
+  PageHeader,
+  PageList,
+  PageTitle,
+} from '@/shared/components/templates/PageTemplate/PageTemplate';
+import { useLoadMore } from '@/shared/hooks/use-load-more';
+import { ProjectsWithTasksLoaderData } from '@/shared/types';
 import { ClipboardCheck } from 'lucide-react';
 import { useLoaderData } from 'react-router';
 
@@ -18,7 +23,7 @@ export const UpcomingPage = () => {
   const {
     tasks: { total, documents: taskDocs },
     projects: { documents: projectDocs },
-  } = useLoaderData<ProjectTaskLoaderData>();
+  } = useLoaderData<ProjectsWithTasksLoaderData>();
   const { filteredTasks, filteredCount, value, setValue } = useProjectFilter({
     tasks: taskDocs,
   });
@@ -35,7 +40,7 @@ export const UpcomingPage = () => {
     <>
       <Head title="Tasky AI | Upcoming" />
 
-      <TopAppBar
+      <AppTopBar
         title="Upcoming"
         totalCount={total}
       />

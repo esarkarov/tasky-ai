@@ -1,32 +1,32 @@
-import type { ProjectsLoaderData } from '@/types/loaders.types';
-import type { ProjectEntity } from '@/types/projects.types';
+import { ProjectEntity } from '@/features/projects/types';
+import { ProjectsLoaderData } from '@/shared/types';
 import { render, screen, waitFor } from '@testing-library/react';
 import { userEvent } from '@testing-library/user-event';
+import { PropsWithChildren } from 'react';
+import { useLoaderData } from 'react-router';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { ProjectsPage } from './ProjectsPage';
-import { useLoaderData } from 'react-router';
-import { PropsWithChildren } from 'react';
 
 vi.mock('react-router', () => ({
   useLoaderData: vi.fn(),
 }));
 
-vi.mock('@/components/atoms/Head/Head', () => ({
+vi.mock('@/shared/components/atoms/Head/Head', () => ({
   Head: ({ title }: { title: string }) => <title>{title}</title>,
 }));
 
-vi.mock('@/components/templates/PageTemplate/PageTemplate', () => ({
+vi.mock('@/shared/components/templates/PageTemplate/PageTemplate', () => ({
   PageContainer: ({ children, ...props }: { children: React.ReactNode }) => <div {...props}>{children}</div>,
   PageHeader: ({ children }: { children: React.ReactNode }) => <header>{children}</header>,
   PageList: ({ children, ...props }: { children: React.ReactNode }) => <ul {...props}>{children}</ul>,
   PageTitle: ({ children }: { children: React.ReactNode }) => <h1 id="projects-page-title">{children}</h1>,
 }));
 
-vi.mock('@/components/atoms/List/List', () => ({
+vi.mock('@/shared/components/atoms/List/List', () => ({
   ItemList: ({ children }: { children: React.ReactNode }) => <li>{children}</li>,
 }));
 
-vi.mock('@/components/atoms/TotalCounter/TotalCounter', () => ({
+vi.mock('@/shared/components/atoms/TotalCounter/TotalCounter', () => ({
   TotalCounter: ({ totalCount, label }: { totalCount: number; label: string }) => (
     <span data-testid="total-counter">
       {totalCount} {label}
@@ -34,8 +34,8 @@ vi.mock('@/components/atoms/TotalCounter/TotalCounter', () => ({
   ),
 }));
 
-vi.mock('@/components/organisms/TopAppBar', () => ({
-  TopAppBar: ({ title, totalCount, label }: { title: string; totalCount: number; label: string }) => (
+vi.mock('@/shared/components/organisms/AppTopBar/AppTopBar', () => ({
+  AppTopBar: ({ title, totalCount, label }: { title: string; totalCount: number; label: string }) => (
     <div data-testid="top-app-bar">
       <span>{title}</span>
       <span data-testid="top-app-bar-count">{totalCount}</span>
@@ -44,13 +44,13 @@ vi.mock('@/components/organisms/TopAppBar', () => ({
   ),
 }));
 
-vi.mock('@/components/organisms/ProjectFormDialog', () => ({
+vi.mock('@/features/projects/components/organisms/ProjectFormDialog/ProjectFormDialog', () => ({
   ProjectFormDialog: ({ children }: { children: React.ReactNode }) => (
     <div data-testid="project-form-dialog">{children}</div>
   ),
 }));
 
-vi.mock('@/components/molecules/ProjectSearchField/ProjectSearchField', () => ({
+vi.mock('@/features/projects/components/molecules/ProjectSearchField/ProjectSearchField', () => ({
   ProjectSearchField: ({ onChange, searchStatus }: { onChange: () => void; searchStatus: string }) => (
     <input
       data-testid="search-field"
@@ -61,13 +61,13 @@ vi.mock('@/components/molecules/ProjectSearchField/ProjectSearchField', () => ({
   ),
 }));
 
-vi.mock('@/components/organisms/ProjectCard', () => ({
+vi.mock('@/features/projects/components/organisms/ProjectCard/ProjectCard', () => ({
   ProjectCard: ({ project }: { project: ProjectEntity }) => (
     <div data-testid={`project-card-${project.$id}`}>{project.name}</div>
   ),
 }));
 
-vi.mock('@/components/atoms/LoadMoreButton/LoadMoreButton', () => ({
+vi.mock('@/shared/components/atoms/LoadMoreButton/LoadMoreButton', () => ({
   LoadMoreButton: ({ loading, onClick }: { loading: boolean; onClick: () => void }) => (
     <button
       data-testid="load-more-button"
@@ -79,12 +79,12 @@ vi.mock('@/components/atoms/LoadMoreButton/LoadMoreButton', () => ({
 }));
 
 const mockUseProjectOperations = vi.fn();
-vi.mock('@/hooks/use-project-operations', () => ({
+vi.mock('@/features/projects/hooks/use-project-operations', () => ({
   useProjectOperations: () => mockUseProjectOperations(),
 }));
 
 const mockUseLoadMore = vi.fn();
-vi.mock('@/hooks/use-load-more', () => ({
+vi.mock('@/shared/hooks/use-load-more', () => ({
   useLoadMore: (projects: ProjectEntity[]) => mockUseLoadMore(projects),
 }));
 

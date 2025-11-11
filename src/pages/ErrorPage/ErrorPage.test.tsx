@@ -17,11 +17,11 @@ vi.mock('react-router', async () => {
   };
 });
 
-vi.mock('@/components/atoms/Head/Head', () => ({
+vi.mock('@/shared/components/atoms/Head/Head', () => ({
   Head: ({ title }: { title: string }) => <title>{title}</title>,
 }));
 
-vi.mock('@/components/ui/button', () => ({
+vi.mock('@/shared/components/ui/button', () => ({
   Button: ({ children, variant, ...props }: { children: ReactNode; variant?: string }) => (
     <button
       data-testid="button"
@@ -32,7 +32,7 @@ vi.mock('@/components/ui/button', () => ({
   ),
 }));
 
-vi.mock('@/constants/routes', () => ({
+vi.mock('@/shared/constants/routes', () => ({
   ROUTES: {
     HOME: '/',
     INBOX: '/inbox',

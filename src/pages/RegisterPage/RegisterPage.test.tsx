@@ -2,11 +2,11 @@ import { render, screen } from '@testing-library/react';
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { RegisterPage } from './RegisterPage';
 
-vi.mock('@/components/atoms/Head/Head', () => ({
+vi.mock('@/shared/components/atoms/Head/Head', () => ({
   Head: ({ title }: { title: string }) => <title data-testid="meta-title">{title}</title>,
 }));
 
-vi.mock('@/constants/routes', () => ({
+vi.mock('@/shared/constants/routes', () => ({
   ROUTES: {
     TODAY: '/today',
     LOGIN: '/login',

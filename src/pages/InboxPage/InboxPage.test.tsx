@@ -1,35 +1,35 @@
-import type { TasksLoaderData } from '@/types/loaders.types';
-import type { TaskEntity } from '@/types/tasks.types';
 import { render, screen } from '@testing-library/react';
 import { userEvent } from '@testing-library/user-event';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { InboxPage } from './InboxPage';
 import { useLoaderData } from 'react-router';
+import { TaskEntity } from '@/features/tasks/types';
+import { TasksLoaderData } from '@/shared/types';
 
 vi.mock('react-router', () => ({
   useLoaderData: vi.fn(),
 }));
 
-vi.mock('@/components/atoms/Head/Head', () => ({
+vi.mock('@/shared/components/atoms/Head/Head', () => ({
   Head: ({ title }: { title: string }) => <title>{title}</title>,
 }));
 
-vi.mock('@/components/templates/PageTemplate/PageTemplate', () => ({
+vi.mock('@/shared/components/templates/PageTemplate/PageTemplate', () => ({
   PageContainer: ({ children, ...props }: { children: React.ReactNode }) => <div {...props}>{children}</div>,
   PageHeader: ({ children }: { children: React.ReactNode }) => <header>{children}</header>,
   PageList: ({ children, ...props }: { children: React.ReactNode }) => <ul {...props}>{children}</ul>,
   PageTitle: ({ children }: { children: React.ReactNode }) => <h1 id="inbox-page-title">{children}</h1>,
 }));
 
-vi.mock('@/components/atoms/List/List', () => ({
+vi.mock('@/shared/components/atoms/List/List', () => ({
   ItemList: ({ children }: { children: React.ReactNode }) => <li>{children}</li>,
 }));
 
-vi.mock('@/components/atoms/TotalCounter/TotalCounter', () => ({
+vi.mock('@/shared/components/atoms/TotalCounter/TotalCounter', () => ({
   TotalCounter: ({ totalCount }: { totalCount: number }) => <span data-testid="total-counter">{totalCount}</span>,
 }));
 
-vi.mock('@/components/atoms/AddTaskButton/AddTaskButton', () => ({
+vi.mock('@/features/tasks/components/atoms/AddTaskButton/AddTaskButton', () => ({
   AddTaskButton: ({ onClick }: { onClick: () => void }) => (
     <button
       data-testid="add-task-button"
@@ -39,8 +39,8 @@ vi.mock('@/components/atoms/AddTaskButton/AddTaskButton', () => ({
   ),
 }));
 
-vi.mock('@/components/organisms/TopAppBar', () => ({
-  TopAppBar: ({ title, totalCount }: { title: string; totalCount: number }) => (
+vi.mock('@/shared/components/organisms/AppTopBar/AppTopBar', () => ({
+  AppTopBar: ({ title, totalCount }: { title: string; totalCount: number }) => (
     <div data-testid="top-app-bar">
       <span>{title}</span>
       <span data-testid="top-app-bar-count">{totalCount}</span>
@@ -48,11 +48,11 @@ vi.mock('@/components/organisms/TopAppBar', () => ({
   ),
 }));
 
-vi.mock('@/components/organisms/TaskCard', () => ({
+vi.mock('@/features/tasks/components/organisms/TaskCard/TaskCard', () => ({
   TaskCard: ({ id, content }: { id: string; content: string }) => <div data-testid={`task-card-${id}`}>{content}</div>,
 }));
 
-vi.mock('@/components/organisms/TaskForm', () => ({
+vi.mock('@/features/tasks/components/organisms/TaskForm/TaskForm', () => ({
   TaskForm: ({ handleCancel, onSubmit }: { handleCancel: () => void; onSubmit: () => void }) => (
     <form data-testid="task-form">
       <button
@@ -71,7 +71,7 @@ vi.mock('@/components/organisms/TaskForm', () => ({
   ),
 }));
 
-vi.mock('@/components/organisms/EmptyStateMessage', () => ({
+vi.mock('@/shared/components/organisms/EmptyStateMessage/EmptyStateMessage', () => ({
   EmptyStateMessage: ({ variant }: { variant: string }) => (
     <div
       data-testid="empty-state"
@@ -81,7 +81,7 @@ vi.mock('@/components/organisms/EmptyStateMessage', () => ({
   ),
 }));
 
-vi.mock('@/components/atoms/LoadMoreButton/LoadMoreButton', () => ({
+vi.mock('@/shared/components/atoms/LoadMoreButton/LoadMoreButton', () => ({
   LoadMoreButton: ({ loading, onClick }: { loading: boolean; onClick: () => void }) => (
     <button
       data-testid="load-more-button"
@@ -93,12 +93,12 @@ vi.mock('@/components/atoms/LoadMoreButton/LoadMoreButton', () => ({
 }));
 
 const mockUseTaskOperations = vi.fn();
-vi.mock('@/hooks/use-task-operations', () => ({
+vi.mock('@/features/tasks/hooks/use-task-operations', () => ({
   useTaskOperations: () => mockUseTaskOperations(),
 }));
 
 const mockUseLoadMore = vi.fn();
-vi.mock('@/hooks/use-load-more', () => ({
+vi.mock('@/shared/hooks/use-load-more', () => ({
   useLoadMore: (tasks: TaskEntity[]) => mockUseLoadMore(tasks),
 }));
 
