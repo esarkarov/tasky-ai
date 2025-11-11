@@ -1,6 +1,6 @@
 import { TaskFormInput, UseTaskOperationsParams, UseTaskOperationsResult } from '@/features/tasks/types';
 import { ToastAction } from '@/shared/components/ui/toast';
-import { HTTP_METHODS } from '@/shared/constants/http-methods';
+import { HTTP_METHODS } from '@/shared/constants/http';
 import { ROUTES } from '@/shared/constants/routes';
 import { TIMING } from '@/shared/constants/timing';
 import { TASK_TOAST_CONTENTS } from '@/shared/constants/ui-contents';

@@ -1,7 +1,7 @@
-import { HTTP_METHODS, HTTP_STATUS } from '@/shared/constants/http-methods';
+import { projectActionHandlers } from '@/features/projects/services/projectAction.handlers';
+import { HTTP_METHODS, HTTP_STATUS } from '@/shared/constants/http';
 import { errorResponse } from '@/shared/utils/response/response.utils';
 import type { ActionFunction } from 'react-router';
-import { projectActionHandlers } from '@/features/projects/services/projectAction.handlers';
 
 export const projectAction: ActionFunction = async ({ request }) => {
   const method = request.method;

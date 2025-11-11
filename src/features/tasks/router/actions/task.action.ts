@@ -1,4 +1,4 @@
-import { HTTP_METHODS, HTTP_STATUS } from '@/shared/constants/http-methods';
+import { HTTP_METHODS, HTTP_STATUS } from '@/shared/constants/http';
 import { errorResponse } from '@/shared/utils/response/response.utils';
 import { ActionFunction } from 'react-router';
 import { taskActionHandlers } from '@/features/tasks/services/taskAction.handlers';

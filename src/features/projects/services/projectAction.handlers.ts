@@ -1,7 +1,7 @@
 import { aiService } from '@/features/ai/services/ai.service';
 import type { ProjectFormInput } from '@/features/projects/types';
 import { taskService } from '@/features/tasks/services/task.service';
-import { HTTP_STATUS } from '@/shared/constants/http-methods';
+import { HTTP_STATUS } from '@/shared/constants/http';
 import { ROUTES } from '@/shared/constants/routes';
 import { errorResponse, successResponse } from '@/shared/utils/response/response.utils';
 import { redirect } from 'react-router';

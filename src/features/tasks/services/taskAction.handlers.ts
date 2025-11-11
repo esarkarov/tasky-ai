@@ -1,7 +1,7 @@
-import { taskService } from './task.service';
-import type { TaskFormInput } from '../types';
+import type { TaskFormInput } from '@/features/tasks/types';
+import { HTTP_STATUS } from '@/shared/constants/http';
 import { errorResponse, successResponse } from '@/shared/utils/response/response.utils';
-import { HTTP_STATUS } from '@/shared/constants/http-methods';
+import { taskService } from './task.service';
 
 export const taskActionHandlers = {
   async handleCreate(request: Request) {
