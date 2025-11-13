@@ -44,12 +44,8 @@ export interface UseProjectModalOptions {
   onSuccess?: () => void;
 }
 export interface UseProjectModalResult {
-  openModal: () => void;
-  closeModal: () => void;
   handleSave: (data: ProjectFormInput) => Promise<void>;
   handleDelete: (id: string, name: string) => Promise<void>;
-  setIsOpen: (value: boolean) => void;
-  isOpen: boolean;
   isLoading: boolean;
 }
 

@@ -13,3 +13,10 @@ export interface UseLoadMoreResult<T> {
   getItemClassName: (index: number) => string;
   getItemStyle: (index: number) => React.CSSProperties;
 }
+
+export interface UseDisclosureResult {
+  isOpen: boolean;
+  setIsOpen: (value: boolean) => void;
+  open: () => void;
+  close: () => void;
+}

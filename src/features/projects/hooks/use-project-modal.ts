@@ -1,19 +1,20 @@
 import type { ProjectFormInput, UseProjectModalOptions, UseProjectModalResult } from '@/features/projects/types';
 import { ROUTES } from '@/shared/constants/routes';
-import { useCallback, useState } from 'react';
+import { useCallback } from 'react';
 import { useLocation, useNavigate } from 'react-router';
 import { useProjectMutation } from './use-project-mutation';
+import { useDisclosure } from '@/shared/hooks/use-disclosure';
 
 export const useProjectModal = ({ mode = 'create', onSuccess }: UseProjectModalOptions = {}): UseProjectModalResult => {
-  const [isOpen, setIsOpen] = useState(false);
   const navigate = useNavigate();
   const { pathname } = useLocation();
   const isViewingProject = pathname.startsWith('/projects/');
+  const { close: closeModal } = useDisclosure();
 
   const { createProject, updateProject, deleteProject, isLoading } = useProjectMutation({
     onSuccess: () => {
       onSuccess?.();
-      setIsOpen(false);
+      closeModal();
     },
   });
 
@@ -37,16 +38,10 @@ export const useProjectModal = ({ mode = 'create', onSuccess }: UseProjectModalO
     },
     [deleteProject, isViewingProject, navigate, pathname]
   );
-  const openModal = useCallback(() => setIsOpen(true), []);
-  const closeModal = useCallback(() => setIsOpen(false), []);
 
   return {
     handleSave,
     handleDelete,
-    openModal,
-    closeModal,
-    setIsOpen,
-    isOpen,
     isLoading,
   };
 };

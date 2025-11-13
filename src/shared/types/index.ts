@@ -10,7 +10,7 @@ export type {
   OperationResult,
   TriggerVariant,
 } from './common.types';
-export type { UseLoadMoreParams, UseLoadMoreResult } from './hook.types';
+export type { UseLoadMoreParams, UseLoadMoreResult, UseDisclosureResult } from './hook.types';
 export type {
   SidebarLoaderData,
   ProjectDetailLoaderData,

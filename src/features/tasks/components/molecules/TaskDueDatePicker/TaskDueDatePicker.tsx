@@ -2,10 +2,10 @@ import { RemoveDueDateButton } from '@/shared/components/atoms/RemoveDueDateButt
 import { Button } from '@/shared/components/ui/button';
 import { Calendar } from '@/shared/components/ui/calendar';
 import { Popover, PopoverContent, PopoverTrigger } from '@/shared/components/ui/popover';
+import { useDisclosure } from '@/shared/hooks/use-disclosure';
 import { formatCustomDate } from '@/shared/utils/date/date.utils';
 import { cn, getTaskDueDateColorClass } from '@/shared/utils/ui/ui.utils';
 import { CalendarIcon } from 'lucide-react';
-import { useState } from 'react';
 
 interface TaskDueDatePickerProps {
   dueDate: Date | null;
@@ -20,11 +20,10 @@ export const TaskDueDatePicker = ({
   handleDateSelect,
   handleDateRemove,
 }: TaskDueDatePickerProps) => {
-  const [isOpen, setIsOpen] = useState<boolean>(false);
-
+  const { isOpen: open, setIsOpen: onOpenChange, close: closeSelect } = useDisclosure();
   const onDateSelect = (selectedDate: Date | undefined) => {
     handleDateSelect(selectedDate || null);
-    setIsOpen(false);
+    closeSelect();
   };
 
   return (
@@ -32,15 +31,15 @@ export const TaskDueDatePicker = ({
       className="max-w-max rounded-md ring-1 ring-border"
       aria-label="Due date selector">
       <Popover
-        open={isOpen}
-        onOpenChange={setIsOpen}>
+        open={open}
+        onOpenChange={onOpenChange}>
         <PopoverTrigger asChild>
           <Button
             type="button"
             variant="ghost"
             size="sm"
             aria-haspopup="dialog"
-            aria-expanded={isOpen}
+            aria-expanded={open}
             aria-controls="due-date-calendar"
             className={cn(getTaskDueDateColorClass(dueDate, false))}
             disabled={disabled}>

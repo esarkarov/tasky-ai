@@ -4,8 +4,8 @@ import { Button } from '@/shared/components/ui/button';
 import { Command, CommandEmpty, CommandGroup, CommandInput, CommandList } from '@/shared/components/ui/command';
 import { Popover, PopoverContent, PopoverTrigger } from '@/shared/components/ui/popover';
 import { ScrollArea } from '@/shared/components/ui/scroll-area';
+import { useDisclosure } from '@/shared/hooks/use-disclosure';
 import { ChevronDown, Hash, Inbox } from 'lucide-react';
-import { useState } from 'react';
 
 interface ProjectPickerProps {
   onValueChange: (project: SelectedProject) => void;
@@ -15,7 +15,7 @@ interface ProjectPickerProps {
 }
 
 export const ProjectPicker = ({ value, projects, onValueChange, disabled }: ProjectPickerProps) => {
-  const [open, setOpen] = useState(false);
+  const { isOpen: open, setIsOpen: onOpenChange, close: closePicker } = useDisclosure();
 
   const handleProjectSelect = (project: ProjectListItem | null) => {
     if (project) {
@@ -26,13 +26,13 @@ export const ProjectPicker = ({ value, projects, onValueChange, disabled }: Proj
         colorHex: isDeselecting ? '' : project.color_hex,
       });
     }
-    setOpen(false);
+    closePicker();
   };
 
   return (
     <Popover
       open={open}
-      onOpenChange={setOpen}
+      onOpenChange={onOpenChange}
       modal>
       <PopoverTrigger asChild>
         <Button

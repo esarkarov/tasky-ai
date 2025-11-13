@@ -2,6 +2,7 @@ import { ProjectForm } from '@/features/projects/components/organisms/ProjectFor
 import { useProjectModal } from '@/features/projects/hooks/use-project-modal';
 import { ProjectInput } from '@/features/projects/types';
 import { Dialog, DialogContent, DialogTrigger } from '@/shared/components/ui/dialog';
+import { useDisclosure } from '@/shared/hooks/use-disclosure';
 import { HttpMethod } from '@/shared/types';
 import { ReactNode } from 'react';
 
@@ -12,7 +13,8 @@ interface ProjectFormDialogProps {
 }
 
 export const ProjectFormDialog = ({ defaultValues, children, method }: ProjectFormDialogProps) => {
-  const { isLoading, handleSave, isOpen: open, setIsOpen: onOpenChange, closeModal } = useProjectModal();
+  const { isLoading, handleSave } = useProjectModal();
+  const { isOpen: open, setIsOpen: onOpenChange, close: closeModal } = useDisclosure();
   const isPostMethod = method === 'POST';
 
   return (

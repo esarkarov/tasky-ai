@@ -19,12 +19,10 @@ export const useLoadMore = <T>(allItems: T[], params: UseLoadMoreParams = {}): U
       setIsLoading(false);
     }, TIMING.LOAD_DELAY);
   }, [pageSize]);
-
   const handleReset = useCallback(() => {
     setCount(initialCount);
     setIsLoading(false);
   }, [initialCount]);
-
   const getItemClassName = useCallback(
     (index: number) => {
       const isNewlyAdded = index >= count - pageSize;
@@ -32,7 +30,6 @@ export const useLoadMore = <T>(allItems: T[], params: UseLoadMoreParams = {}): U
     },
     [count, pageSize]
   );
-
   const getItemStyle = useCallback(
     (index: number): CSSProperties => {
       const isNewlyAdded = index >= count - pageSize;
