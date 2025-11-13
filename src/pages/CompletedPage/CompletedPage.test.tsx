@@ -141,8 +141,8 @@ describe('CompletedPage', () => {
     mockUseProjectFilter.mockReturnValue({
       filteredTasks: tasks,
       filteredCount: tasks.length,
-      value: '',
-      setValue: vi.fn(),
+      filterValue: '',
+      setFilterValue: vi.fn(),
     });
 
     mockUseLoadMore.mockReturnValue({
@@ -263,8 +263,8 @@ describe('CompletedPage', () => {
       mockUseProjectFilter.mockReturnValue({
         filteredTasks,
         filteredCount: filteredTasks.length,
-        value: MOCK_PROJECT_ID,
-        setValue: vi.fn(),
+        filterValue: MOCK_PROJECT_ID,
+        setFilterValue: vi.fn(),
       });
 
       mockUseLoadMore.mockReturnValue({
@@ -290,8 +290,8 @@ describe('CompletedPage', () => {
       mockUseProjectFilter.mockReturnValue({
         filteredTasks: [createMockTask()],
         filteredCount: 1,
-        value: '',
-        setValue: mockSetValue,
+        filterValue: '',
+        setFilterValue: mockSetValue,
       });
 
       mockUseLoadMore.mockReturnValue({
@@ -320,8 +320,8 @@ describe('CompletedPage', () => {
       mockUseProjectFilter.mockReturnValue({
         filteredTasks: [],
         filteredCount: 0,
-        value: '',
-        setValue: vi.fn(),
+        filterValue: '',
+        setFilterValue: vi.fn(),
       });
 
       mockUseLoadMore.mockReturnValue({
@@ -358,8 +358,8 @@ describe('CompletedPage', () => {
       mockUseProjectFilter.mockReturnValue({
         filteredTasks: [createMockTask()],
         filteredCount: 1,
-        value: '',
-        setValue: vi.fn(),
+        filterValue: '',
+        setFilterValue: vi.fn(),
       });
 
       mockUseLoadMore.mockReturnValue({
@@ -395,8 +395,8 @@ describe('CompletedPage', () => {
       mockUseProjectFilter.mockReturnValue({
         filteredTasks: [createMockTask()],
         filteredCount: 1,
-        value: '',
-        setValue: vi.fn(),
+        filterValue: '',
+        setFilterValue: vi.fn(),
       });
 
       mockUseLoadMore.mockReturnValue({
@@ -423,8 +423,8 @@ describe('CompletedPage', () => {
       mockUseProjectFilter.mockReturnValue({
         filteredTasks: [createMockTask()],
         filteredCount: 1,
-        value: '',
-        setValue: vi.fn(),
+        filterValue: '',
+        setFilterValue: vi.fn(),
       });
 
       mockUseLoadMore.mockReturnValue({

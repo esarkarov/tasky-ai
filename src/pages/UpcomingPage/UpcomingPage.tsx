@@ -24,7 +24,12 @@ export const UpcomingPage = () => {
     tasks: { total, documents: taskDocs },
     projects: { documents: projectDocs },
   } = useLoaderData<ProjectsWithTasksLoaderData>();
-  const { filteredTasks, filteredCount, value, setValue } = useProjectFilter({
+  const {
+    filteredTasks,
+    filteredCount,
+    filterValue: value,
+    setFilterValue: handleValueChange,
+  } = useProjectFilter({
     tasks: taskDocs,
   });
   const {
@@ -60,7 +65,7 @@ export const UpcomingPage = () => {
             <FilterSelect
               projects={projectDocs}
               value={value}
-              handleValueChange={setValue}
+              handleValueChange={handleValueChange}
             />
           </div>
         </PageHeader>

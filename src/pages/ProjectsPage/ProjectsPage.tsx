@@ -1,7 +1,7 @@
 import { ProjectSearchField } from '@/features/projects/components/molecules/ProjectSearchField/ProjectSearchField';
 import { ProjectCard } from '@/features/projects/components/organisms/ProjectCard/ProjectCard';
 import { ProjectFormDialog } from '@/features/projects/components/organisms/ProjectFormDialog/ProjectFormDialog';
-import { useProjectOperations } from '@/features/projects/hooks/use-project-operations';
+import { useProjectSearch } from '@/features/projects/hooks/use-project-search';
 import { Head } from '@/shared/components/atoms/Head/Head';
 import { ItemList } from '@/shared/components/atoms/List/List';
 import { LoadMoreButton } from '@/shared/components/atoms/LoadMoreButton/LoadMoreButton';
@@ -19,10 +19,11 @@ import { useLoadMore } from '@/shared/hooks/use-load-more';
 import { ProjectsLoaderData } from '@/shared/types';
 import { cn } from '@/shared/utils/ui/ui.utils';
 import { FolderKanban, Plus } from 'lucide-react';
-import { useLoaderData } from 'react-router';
+import { useFetcher, useLoaderData } from 'react-router';
 
 export const ProjectsPage = () => {
-  const { fetcher, searchStatus, handleSearchProjects } = useProjectOperations();
+  const fetcher = useFetcher();
+  const { isSearching, isIdle, handleSearchChange } = useProjectSearch();
   const {
     projects: { total, documents: projectDocs },
   } = useLoaderData<ProjectsLoaderData>();
@@ -66,8 +67,8 @@ export const ProjectsPage = () => {
             action={ROUTES.PROJECTS}
             role="search">
             <ProjectSearchField
-              onChange={handleSearchProjects}
-              searchStatus={searchStatus}
+              onChange={handleSearchChange}
+              isLoading={isIdle}
             />
           </fetcher.Form>
         </PageHeader>
@@ -81,7 +82,7 @@ export const ProjectsPage = () => {
             />
           </div>
 
-          <div className={cn(searchStatus === 'searching' && 'opacity-25')}>
+          <div className={cn(isSearching && 'opacity-25')}>
             {visibleProjects.map((project, index) => (
               <ItemList
                 key={project.$id}

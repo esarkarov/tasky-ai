@@ -212,7 +212,7 @@ describe('ConfirmationDialog', () => {
       await user.click(screen.getByRole('button', { name: /confirm deletion/i }));
 
       await waitFor(() => {
-        expect(mockHandleDelete).toHaveBeenCalledWith('task-1');
+        expect(mockHandleDelete).toHaveBeenCalledWith('task-1', 'Test Task');
         expect(mockHandleDelete).toHaveBeenCalledTimes(1);
       });
     });

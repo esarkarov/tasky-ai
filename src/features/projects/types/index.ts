@@ -1,6 +1,6 @@
 import { TaskEntity } from '@/features/tasks/types';
-import { BaseEntity, HttpMethod, PaginatedResponse, SearchStatus } from '@/shared/types';
-import { useFetcher } from 'react-router';
+import { BaseEntity, CrudMode, PaginatedResponse } from '@/shared/types';
+import { ChangeEvent } from 'react';
 
 export interface ProjectEntity extends BaseEntity {
   userId: string;
@@ -39,11 +39,38 @@ export interface ColorValue {
 export type ProjectUpdateInput = ProjectInput;
 export type ProjectsListResponse = PaginatedResponse<ProjectListItem>;
 
-export interface UseProjectOperationsParams {
-  method?: HttpMethod;
-  projectData?: ProjectInput;
+export interface UseProjectModalOptions {
+  mode?: CrudMode;
   onSuccess?: () => void;
 }
+export interface UseProjectModalResult {
+  openModal: () => void;
+  closeModal: () => void;
+  handleSave: (data: ProjectFormInput) => Promise<void>;
+  handleDelete: (id: string, name: string) => Promise<void>;
+  setIsOpen: (value: boolean) => void;
+  isOpen: boolean;
+  isLoading: boolean;
+}
+
+export interface UseProjectMutationOptions {
+  onSuccess?: () => void;
+}
+
+export interface UseProjectMutationResult {
+  createProject: (data: ProjectFormInput) => Promise<void>;
+  updateProject: (data: ProjectFormInput) => Promise<void>;
+  deleteProject: (id: string, name: string) => Promise<void>;
+  isLoading: boolean;
+}
+
+export interface useProjectSearchResult {
+  handleSearch: (searchValue: string) => void;
+  handleSearchChange: (e: ChangeEvent<HTMLInputElement>) => void;
+  isSearching: boolean;
+  isIdle: boolean;
+}
+
 export interface UseProjectFilterParams {
   tasks: TaskEntity[];
 }
@@ -51,21 +78,11 @@ export interface UseProjectFormParams {
   defaultValues: ProjectInput;
   onSubmit: (formData: ProjectFormInput) => Promise<void>;
 }
-
-export interface UseProjectOperationsResult {
-  handleSaveProject: (data: ProjectFormInput) => Promise<void>;
-  handleDeleteProject: () => Promise<void>;
-  handleSearchProjects: (e: React.ChangeEvent<HTMLInputElement>) => void;
-  searchStatus: SearchStatus;
-  fetcher: ReturnType<typeof useFetcher>;
-  formState: boolean;
-}
-
 export interface UseProjectFilterResult {
   filteredTasks: TaskEntity[] | undefined;
   filteredCount: number;
-  value: string | null;
-  setValue: (value: string | null) => void;
+  filterValue: string | null;
+  setFilterValue: (value: string | null) => void;
 }
 
 export interface UseProjectFormResult {

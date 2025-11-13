@@ -41,13 +41,11 @@ export const useProjectForm = ({ defaultValues, onSubmit }: UseProjectFormParams
     setColorPickerOpen(false);
     setIsSubmitting(false);
   }, [defaultValues.name, defaultValues.color_name, defaultValues.color_hex]);
-
   const handleColorSelect = useCallback((value: string) => {
     const [colorName, colorHex] = value.split('=');
     setColor({ name: colorName, hex: colorHex });
     setColorPickerOpen(false);
   }, []);
-
   const handleSubmit = useCallback(async () => {
     if (isSubmitting || !isValid) return;
 

@@ -22,7 +22,7 @@ interface ConfirmationDialogProps {
   label: string;
   title: string;
   variant: TriggerVariant;
-  handleDelete: (id: string) => Promise<void>;
+  handleDelete: (id: string, name: string) => Promise<void>;
   disabled?: boolean;
 }
 
@@ -48,14 +48,14 @@ export const ConfirmationDialog = ({
 
     setIsDeleting(true);
     try {
-      await handleDelete(id);
+      await handleDelete(id, label);
       setOpen(false);
     } catch (error) {
       console.error('Delete failed', error);
     } finally {
       setIsDeleting(false);
     }
-  }, [isPending, handleDelete, id]);
+  }, [isPending, handleDelete, id, label]);
 
   const trigger = isIconVariant ? (
     <Button

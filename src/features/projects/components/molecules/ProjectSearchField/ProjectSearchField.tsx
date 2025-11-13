@@ -1,17 +1,14 @@
 import { Input } from '@/shared/components/ui/input';
-import { SearchStatus } from '@/shared/types';
 import { cn } from '@/shared/utils/ui/ui.utils';
 import { Loader2, Search } from 'lucide-react';
 import { ChangeEvent } from 'react';
 
 interface ProjectSearchFieldProps {
   onChange: (event: ChangeEvent<HTMLInputElement>) => void;
-  searchStatus: SearchStatus;
+  isLoading: boolean;
 }
 
-export const ProjectSearchField = ({ onChange, searchStatus }: ProjectSearchFieldProps) => {
-  const isLoading = searchStatus !== 'idle';
-
+export const ProjectSearchField = ({ onChange, isLoading }: ProjectSearchFieldProps) => {
   return (
     <div className="relative">
       <label

@@ -2,29 +2,28 @@ import { UseProjectFilterParams, UseProjectFilterResult } from '@/features/proje
 import { useMemo, useState } from 'react';
 
 export const useProjectFilter = ({ tasks }: UseProjectFilterParams): UseProjectFilterResult => {
-  const [value, setValue] = useState<string | null>(null);
+  const [filterValue, setFilterValue] = useState<string | null>(null);
 
   const filteredTasks = useMemo(() => {
-    if (!value || value === 'all') {
+    if (!filterValue || filterValue === 'all') {
       return tasks;
     }
 
-    if (value === 'inbox') {
+    if (filterValue === 'inbox') {
       return tasks?.filter((task) => !task.projectId);
     }
 
     return tasks?.filter((task) => {
       const taskProjectId = typeof task.projectId === 'object' ? task.projectId?.$id : task.projectId;
-      return taskProjectId === value;
+      return taskProjectId === filterValue;
     });
-  }, [value, tasks]);
-
+  }, [filterValue, tasks]);
   const filteredCount = filteredTasks?.length || 0;
 
   return {
     filteredTasks,
     filteredCount,
-    value,
-    setValue,
+    filterValue,
+    setFilterValue,
   };
 };

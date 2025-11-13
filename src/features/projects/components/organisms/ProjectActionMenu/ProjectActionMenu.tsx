@@ -1,5 +1,5 @@
 import { ProjectFormDialog } from '@/features/projects/components/organisms/ProjectFormDialog/ProjectFormDialog';
-import { useProjectOperations } from '@/features/projects/hooks/use-project-operations';
+import { useProjectModal } from '@/features/projects/hooks/use-project-modal';
 import { ProjectInput } from '@/features/projects/types';
 import { ConfirmationDialog } from '@/shared/components/molecules/ConfirmationDialog/ConfirmationDialog';
 import { Button } from '@/shared/components/ui/button';
@@ -17,9 +17,7 @@ interface ProjectActionMenuProps extends DropdownMenuContentProps {
 }
 
 export const ProjectActionMenu = ({ children, defaultValues, ...props }: ProjectActionMenuProps) => {
-  const { handleDeleteProject } = useProjectOperations({
-    projectData: defaultValues,
-  });
+  const { handleDelete } = useProjectModal();
 
   return (
     <DropdownMenu>
@@ -45,7 +43,7 @@ export const ProjectActionMenu = ({ children, defaultValues, ...props }: Project
           <ConfirmationDialog
             id={defaultValues.id as string}
             label={defaultValues.name}
-            handleDelete={handleDeleteProject}
+            handleDelete={handleDelete}
             variant="menu-item"
             title="Delete Project?"
           />

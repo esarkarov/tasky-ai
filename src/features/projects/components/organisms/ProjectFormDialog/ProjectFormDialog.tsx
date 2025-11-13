@@ -1,9 +1,9 @@
 import { ProjectForm } from '@/features/projects/components/organisms/ProjectForm/ProjectForm';
-import { useProjectOperations } from '@/features/projects/hooks/use-project-operations';
+import { useProjectModal } from '@/features/projects/hooks/use-project-modal';
 import { ProjectInput } from '@/features/projects/types';
 import { Dialog, DialogContent, DialogTrigger } from '@/shared/components/ui/dialog';
 import { HttpMethod } from '@/shared/types';
-import { ReactNode, useState } from 'react';
+import { ReactNode } from 'react';
 
 interface ProjectFormDialogProps {
   defaultValues?: ProjectInput;
@@ -12,17 +12,13 @@ interface ProjectFormDialogProps {
 }
 
 export const ProjectFormDialog = ({ defaultValues, children, method }: ProjectFormDialogProps) => {
-  const [open, setOpen] = useState(false);
-  const { handleSaveProject, formState } = useProjectOperations({
-    onSuccess: () => setOpen(false),
-    method,
-  });
+  const { isLoading, handleSave, isOpen: open, setIsOpen: onOpenChange, closeModal } = useProjectModal();
   const isPostMethod = method === 'POST';
 
   return (
     <Dialog
       open={open}
-      onOpenChange={setOpen}>
+      onOpenChange={onOpenChange}>
       <DialogTrigger asChild>{children}</DialogTrigger>
       <DialogContent
         className="p-0 border-0 !rounded-xl"
@@ -30,9 +26,9 @@ export const ProjectFormDialog = ({ defaultValues, children, method }: ProjectFo
         <ProjectForm
           mode={isPostMethod ? 'create' : 'update'}
           defaultValues={defaultValues}
-          handleCancel={() => setOpen(false)}
-          onSubmit={handleSaveProject}
-          isSubmitting={formState}
+          handleCancel={closeModal}
+          onSubmit={handleSave}
+          isSubmitting={isLoading}
         />
       </DialogContent>
     </Dialog>

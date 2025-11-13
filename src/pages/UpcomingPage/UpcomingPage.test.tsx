@@ -247,8 +247,8 @@ describe('UpcomingPage', () => {
       mockUseProjectFilter.mockReturnValue({
         filteredTasks,
         filteredCount: filteredTasks.length,
-        value: MOCK_PROJECT_ID,
-        setValue: vi.fn(),
+        filterValue: MOCK_PROJECT_ID,
+        setFilterValue: vi.fn(),
       });
 
       setupDefaultMocks(filteredTasks);
@@ -261,14 +261,14 @@ describe('UpcomingPage', () => {
     it('should handle filter value changes', async () => {
       const user = userEvent.setup();
       const mockData = createMockLoaderData();
-      const mockSetValue = vi.fn();
+      const mockSetFilterValue = vi.fn();
       mockedUseLoaderData.mockReturnValue(mockData);
 
       mockUseProjectFilter.mockReturnValue({
         filteredTasks: [createMockTask()],
         filteredCount: 1,
-        value: '',
-        setValue: mockSetValue,
+        filterValue: '',
+        setFilterValue: mockSetFilterValue,
       });
 
       mockUseLoadMore.mockReturnValue({
@@ -284,7 +284,7 @@ describe('UpcomingPage', () => {
       const filterSelect = screen.getByTestId('filter-select');
       await user.selectOptions(filterSelect, MOCK_PROJECT_ID);
 
-      expect(mockSetValue).toHaveBeenCalledWith(MOCK_PROJECT_ID);
+      expect(mockSetFilterValue).toHaveBeenCalledWith(MOCK_PROJECT_ID);
     });
   });
 
@@ -296,8 +296,8 @@ describe('UpcomingPage', () => {
       mockUseProjectFilter.mockReturnValue({
         filteredTasks: [],
         filteredCount: 0,
-        value: '',
-        setValue: vi.fn(),
+        filterValue: '',
+        setFilterValue: vi.fn(),
       });
 
       mockUseLoadMore.mockReturnValue({
@@ -333,8 +333,8 @@ describe('UpcomingPage', () => {
       mockUseProjectFilter.mockReturnValue({
         filteredTasks: [createMockTask()],
         filteredCount: 1,
-        value: '',
-        setValue: vi.fn(),
+        filterValue: '',
+        setFilterValue: vi.fn(),
       });
 
       mockUseLoadMore.mockReturnValue({
@@ -370,8 +370,8 @@ describe('UpcomingPage', () => {
       mockUseProjectFilter.mockReturnValue({
         filteredTasks: [createMockTask()],
         filteredCount: 1,
-        value: '',
-        setValue: vi.fn(),
+        filterValue: '',
+        setFilterValue: vi.fn(),
       });
 
       mockUseLoadMore.mockReturnValue({
@@ -397,8 +397,8 @@ describe('UpcomingPage', () => {
       mockUseProjectFilter.mockReturnValue({
         filteredTasks: [createMockTask()],
         filteredCount: 1,
-        value: '',
-        setValue: vi.fn(),
+        filterValue: '',
+        setFilterValue: vi.fn(),
       });
 
       mockUseLoadMore.mockReturnValue({
