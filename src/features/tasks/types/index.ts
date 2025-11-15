@@ -1,4 +1,4 @@
-import { ProjectEntity } from '@/features/projects/types';
+import { ProjectEntity, ProjectListItem } from '@/features/projects/types';
 import { BaseEntity, PaginatedResponse } from '@/shared/types';
 
 export interface TaskEntity extends BaseEntity {
@@ -40,28 +40,14 @@ export interface UseTaskCompletionParams {
   onSuccess?: () => void;
 }
 export interface UseTaskFormCompositeParams {
-  defaultValues?: {
-    id?: string;
-    content?: string;
-    due_date?: Date | null;
-    projectId?: string | null;
-  };
-  projects?: Array<{
-    $id: string;
-    name: string;
-    color_hex: string;
-  }>;
+  defaultValues?: TaskFormInput;
+  projects: ProjectListItem[];
+  onCancel: () => void;
   onSubmit?: (formData: TaskFormInput, taskId?: string) => Promise<void>;
-  onCancel?: () => void;
   enableChronoParsing?: boolean;
 }
 export interface UseTaskFormStateParams {
-  defaultValues?: {
-    id?: string;
-    content?: string;
-    due_date?: Date | null;
-    projectId?: string | null;
-  };
+  defaultValues?: TaskFormInput;
 }
 export interface UseTaskMutationParams {
   onSuccess?: () => void;

@@ -48,15 +48,19 @@ export interface UseProjectMutationParams {
 export interface UseProjectFilterParams {
   tasks: TaskEntity[];
 }
-export interface UseProjectFormParams {
-  defaultValues: ProjectInput;
-  onSubmit: (formData: ProjectFormInput) => Promise<void>;
-}
 export interface UseProjectSelectionParams {
   defaultProjectId?: string | null;
-  projects?: Array<{
-    $id: string;
-    name: string;
-    color_hex: string;
-  }>;
+  projects: ProjectListItem[];
+}
+export interface UseProjectFormCompositeParams {
+  defaultValues?: ProjectInput;
+  onSubmit: (data: ProjectFormInput) => Promise<void>;
+  enableAI?: boolean;
+}
+export interface UseProjectFormStateParams {
+  defaultValues?: ProjectInput;
+}
+export interface UseColorPickerParams {
+  defaultColor: ColorValue;
+  onColorChange: (color: ColorValue) => void;
 }

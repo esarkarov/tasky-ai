@@ -2,7 +2,7 @@ import { AITaskGenerator } from '@/features/ai/components/molecules/AITaskGenera
 import { CancelProjectButton } from '@/features/projects/components/atoms/CancelProjectButton/CancelProjectButton';
 import { SubmitProjectButton } from '@/features/projects/components/atoms/SubmitProjectButton/SubmitProjectButton';
 import { ProjectNameInput } from '@/features/projects/components/molecules/ProjectNameInput/ProjectNameInput';
-import { useProjectForm } from '@/features/projects/hooks/use-project-form';
+import { useProjectFormComposite } from '@/features/projects/hooks/use-project-form-composite';
 import { ProjectFormInput, ProjectInput } from '@/features/projects/types';
 import { ColorPicker } from '@/shared/components/molecules/ColorPicker/ColorPicker';
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from '@/shared/components/ui/card';
@@ -40,7 +40,7 @@ export const ProjectForm = ({
     setColorPickerOpen,
     handleColorSelect,
     handleSubmit,
-  } = useProjectForm({
+  } = useProjectFormComposite({
     defaultValues,
     onSubmit,
   });
