@@ -100,9 +100,9 @@ vi.mock('@/shared/components/atoms/LoadMoreButton/LoadMoreButton', () => ({
   ),
 }));
 
-const mockUseTaskOperations = vi.fn();
-vi.mock('@/features/tasks/hooks/use-task-operations', () => ({
-  useTaskOperations: () => mockUseTaskOperations(),
+const mockUseTaskMutation = vi.fn();
+vi.mock('@/features/tasks/hooks/use-task-mutation', () => ({
+  useTaskMutation: () => mockUseTaskMutation(),
 }));
 
 const mockUseLoadMore = vi.fn();
@@ -153,10 +153,10 @@ describe('ProjectDetailPage', () => {
   });
 
   const setupDefaultMocks = (tasks: TaskEntity[] = [createMockTask()]) => {
-    mockUseTaskOperations.mockReturnValue({
-      handleCreateTask: vi.fn(),
-      handleUpdateTask: vi.fn(),
-      handleDeleteTask: vi.fn(),
+    mockUseTaskMutation.mockReturnValue({
+      handleCreate: vi.fn(),
+      handleUpdate: vi.fn(),
+      handleDelete: vi.fn(),
     });
 
     mockUseLoadMore.mockReturnValue({
@@ -366,15 +366,15 @@ describe('ProjectDetailPage', () => {
 
     it('should call handleCreateTask when form is submitted', async () => {
       const user = userEvent.setup();
-      const mockHandleCreateTask = vi.fn();
+      const mockHandleCreate = vi.fn();
       const project = createMockProject({ tasks: [] });
       const mockData = createMockLoaderData(project);
       mockedUseLoaderData.mockReturnValue(mockData);
 
-      mockUseTaskOperations.mockReturnValue({
-        handleCreateTask: mockHandleCreateTask,
-        handleUpdateTask: vi.fn(),
-        handleDeleteTask: vi.fn(),
+      mockUseTaskMutation.mockReturnValue({
+        handleCreate: mockHandleCreate,
+        handleUpdate: vi.fn(),
+        handleDelete: vi.fn(),
       });
 
       mockUseLoadMore.mockReturnValue({
@@ -391,7 +391,7 @@ describe('ProjectDetailPage', () => {
       await user.click(screen.getByTestId('add-task-button'));
       await user.click(screen.getByTestId('submit-button'));
 
-      expect(mockHandleCreateTask).toHaveBeenCalled();
+      expect(mockHandleCreate).toHaveBeenCalled();
     });
   });
 
@@ -442,10 +442,10 @@ describe('ProjectDetailPage', () => {
       const mockData = createMockLoaderData(project);
       mockedUseLoaderData.mockReturnValue(mockData);
 
-      mockUseTaskOperations.mockReturnValue({
-        handleCreateTask: vi.fn(),
-        handleUpdateTask: vi.fn(),
-        handleDeleteTask: vi.fn(),
+      mockUseTaskMutation.mockReturnValue({
+        handleCreate: vi.fn(),
+        handleUpdate: vi.fn(),
+        handleDelete: vi.fn(),
       });
 
       mockUseLoadMore.mockReturnValue({
@@ -482,10 +482,10 @@ describe('ProjectDetailPage', () => {
       const mockData = createMockLoaderData(project);
       mockedUseLoaderData.mockReturnValue(mockData);
 
-      mockUseTaskOperations.mockReturnValue({
-        handleCreateTask: vi.fn(),
-        handleUpdateTask: vi.fn(),
-        handleDeleteTask: vi.fn(),
+      mockUseTaskMutation.mockReturnValue({
+        handleCreate: vi.fn(),
+        handleUpdate: vi.fn(),
+        handleDelete: vi.fn(),
       });
 
       mockUseLoadMore.mockReturnValue({
@@ -511,10 +511,10 @@ describe('ProjectDetailPage', () => {
       const mockData = createMockLoaderData(project);
       mockedUseLoaderData.mockReturnValue(mockData);
 
-      mockUseTaskOperations.mockReturnValue({
-        handleCreateTask: vi.fn(),
-        handleUpdateTask: vi.fn(),
-        handleDeleteTask: vi.fn(),
+      mockUseTaskMutation.mockReturnValue({
+        handleCreate: vi.fn(),
+        handleUpdate: vi.fn(),
+        handleDelete: vi.fn(),
       });
 
       mockUseLoadMore.mockReturnValue({

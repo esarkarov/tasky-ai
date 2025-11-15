@@ -21,6 +21,7 @@ export const taskRepository = {
     );
     return total;
   },
+
   findCompletedTasks: (userId: string): Promise<TasksResponse> =>
     databases.listDocuments<TaskEntity>(
       env.appwriteDatabaseId,

@@ -14,7 +14,7 @@ interface ProjectFormDialogProps {
 
 export const ProjectFormDialog = ({ defaultValues, children, method }: ProjectFormDialogProps) => {
   const { isLoading, handleSave } = useProjectModal();
-  const { isOpen: open, setIsOpen: onOpenChange, close: closeModal } = useDisclosure();
+  const { isOpen: open, setIsOpen: onOpenChange, close: cancelForm } = useDisclosure();
   const isPostMethod = method === 'POST';
 
   return (
@@ -28,7 +28,7 @@ export const ProjectFormDialog = ({ defaultValues, children, method }: ProjectFo
         <ProjectForm
           mode={isPostMethod ? 'create' : 'update'}
           defaultValues={defaultValues}
-          handleCancel={closeModal}
+          handleCancel={cancelForm}
           onSubmit={handleSave}
           isSubmitting={isLoading}
         />

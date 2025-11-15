@@ -15,7 +15,7 @@ interface ProjectPickerProps {
 }
 
 export const ProjectPicker = ({ value, projects, onValueChange, disabled }: ProjectPickerProps) => {
-  const { isOpen: open, setIsOpen: onOpenChange, close: closePicker } = useDisclosure();
+  const { isOpen: open, setIsOpen: onOpenChange, close: closeSelect } = useDisclosure();
 
   const handleProjectSelect = (project: ProjectListItem | null) => {
     if (project) {
@@ -26,7 +26,7 @@ export const ProjectPicker = ({ value, projects, onValueChange, disabled }: Proj
         colorHex: isDeselecting ? '' : project.color_hex,
       });
     }
-    closePicker();
+    closeSelect();
   };
 
   return (

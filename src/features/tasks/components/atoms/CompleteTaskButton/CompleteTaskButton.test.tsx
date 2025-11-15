@@ -4,10 +4,10 @@ import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { CompleteTaskButton } from './CompleteTaskButton';
 import { ReactNode } from 'react';
 
-const mockToggleTaskComplete = vi.fn();
-vi.mock('@/features/tasks/hooks/use-task-operations', () => ({
-  useTaskOperations: () => ({
-    toggleTaskComplete: mockToggleTaskComplete,
+const mockToggleComplete = vi.fn();
+vi.mock('@/features/tasks/hooks/use-task-completion', () => ({
+  useTaskCompletion: () => ({
+    toggleComplete: mockToggleComplete,
   }),
 }));
 
@@ -135,23 +135,23 @@ describe('CompleteTaskButton', () => {
   describe('user interactions', () => {
     it('calls toggleTaskComplete(true) when incomplete task clicked', async () => {
       const { user, button, taskId } = await setup({ completed: false });
-      mockToggleTaskComplete.mockResolvedValue(undefined);
+      mockToggleComplete.mockResolvedValue(undefined);
 
       await user.click(button);
 
       await waitFor(() => {
-        expect(mockToggleTaskComplete).toHaveBeenCalledWith(taskId, true);
+        expect(mockToggleComplete).toHaveBeenCalledWith(taskId, true);
       });
     });
 
     it('calls toggleTaskComplete(false) when completed task clicked', async () => {
       const { user, button, taskId } = await setup({ completed: true });
-      mockToggleTaskComplete.mockResolvedValue(undefined);
+      mockToggleComplete.mockResolvedValue(undefined);
 
       await user.click(button);
 
       await waitFor(() => {
-        expect(mockToggleTaskComplete).toHaveBeenCalledWith(taskId, false);
+        expect(mockToggleComplete).toHaveBeenCalledWith(taskId, false);
       });
     });
   });
@@ -159,14 +159,14 @@ describe('CompleteTaskButton', () => {
   describe('accessibility', () => {
     it('is keyboard accessible with Enter and Space', async () => {
       const { user, button, taskId } = await setup({ completed: false });
-      mockToggleTaskComplete.mockResolvedValue(undefined);
+      mockToggleComplete.mockResolvedValue(undefined);
 
       button.focus();
       await user.keyboard('{Enter}');
       await user.keyboard(' ');
 
       await waitFor(() => {
-        expect(mockToggleTaskComplete).toHaveBeenCalledWith(taskId, true);
+        expect(mockToggleComplete).toHaveBeenCalledWith(taskId, true);
       });
     });
 

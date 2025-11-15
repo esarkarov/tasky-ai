@@ -2,7 +2,7 @@ import { ProjectActionMenu } from '@/features/projects/components/organisms/Proj
 import { AddTaskButton } from '@/features/tasks/components/atoms/AddTaskButton/AddTaskButton';
 import { TaskCard } from '@/features/tasks/components/organisms/TaskCard/TaskCard';
 import { TaskForm } from '@/features/tasks/components/organisms/TaskForm/TaskForm';
-import { useTaskOperations } from '@/features/tasks/hooks/use-task-operations';
+import { useTaskMutation } from '@/features/tasks/hooks/use-task-mutation';
 import { TaskEntity } from '@/features/tasks/types';
 import { Head } from '@/shared/components/atoms/Head/Head';
 import { ItemList } from '@/shared/components/atoms/List/List';
@@ -17,17 +17,20 @@ import {
   PageTitle,
 } from '@/shared/components/templates/PageTemplate/PageTemplate';
 import { Button } from '@/shared/components/ui/button';
+import { useDisclosure } from '@/shared/hooks/use-disclosure';
 import { useLoadMore } from '@/shared/hooks/use-load-more';
 import { ProjectDetailLoaderData } from '@/shared/types';
 import { ClipboardCheck, MoreHorizontal } from 'lucide-react';
-import { useMemo, useState } from 'react';
+import { useMemo } from 'react';
 import { useLoaderData } from 'react-router';
 
 export const ProjectDetailPage = () => {
-  const [isFormShow, setIsFormShow] = useState(false);
+  const { isOpen, open: openForm, close: cancelForm } = useDisclosure();
   const { project } = useLoaderData<ProjectDetailLoaderData>();
   const { tasks, name, color_hex, color_name, $id } = project;
-  const { handleCreateTask } = useTaskOperations();
+  const { handleCreate } = useTaskMutation({
+    onSuccess: cancelForm,
+  });
 
   const filteredProjectTasks = useMemo(() => {
     const incompleteTasks = tasks?.filter((task) => !task.completed) as TaskEntity[];
@@ -107,16 +110,16 @@ export const ProjectDetailPage = () => {
             </ItemList>
           ))}
 
-          {!isFormShow && (
+          {!isOpen && (
             <AddTaskButton
-              onClick={() => setIsFormShow(true)}
+              onClick={openForm}
               aria-label="Add new task to this project"
             />
           )}
 
-          {!filteredProjectTasks?.length && !isFormShow && <EmptyStateMessage variant="project" />}
+          {!filteredProjectTasks?.length && !isOpen && <EmptyStateMessage variant="project" />}
 
-          {isFormShow && (
+          {isOpen && (
             <TaskForm
               className="mt-1"
               mode="create"
@@ -125,8 +128,8 @@ export const ProjectDetailPage = () => {
                 due_date: null,
                 projectId: $id,
               }}
-              handleCancel={() => setIsFormShow(false)}
-              onSubmit={handleCreateTask}
+              handleCancel={cancelForm}
+              onSubmit={handleCreate}
             />
           )}
 

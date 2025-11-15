@@ -2,8 +2,8 @@ import { ProjectPicker } from '@/features/projects/components/molecules/ProjectP
 import { TaskContentInput } from '@/features/tasks/components/molecules/TaskContentInput/TaskContentInput';
 import { TaskDueDatePicker } from '@/features/tasks/components/molecules/TaskDueDatePicker/TaskDueDatePicker';
 import { TaskFormActions } from '@/features/tasks/components/molecules/TaskFormActions/TaskFormActions';
-import { useTaskForm } from '@/features/tasks/hooks/use-task-form';
-import { useTaskOperations } from '@/features/tasks/hooks/use-task-operations';
+import { useTaskFormComposite } from '@/features/tasks/hooks/use-task-form-composite';
+import { useTaskMutation } from '@/features/tasks/hooks/use-task-mutation';
 import { TaskFormInput } from '@/features/tasks/types';
 import { Card, CardContent, CardFooter } from '@/shared/components/ui/card';
 import { Separator } from '@/shared/components/ui/separator';
@@ -28,7 +28,7 @@ export const TaskForm = ({
   handleCancel,
   onSubmit,
 }: TaskFormProps) => {
-  const { formState } = useTaskOperations({
+  const { isLoading } = useTaskMutation({
     onSuccess: handleCancel,
   });
   const {
@@ -46,13 +46,13 @@ export const TaskForm = ({
     handleProjectChange,
     removeDueDate,
     handleSubmit,
-  } = useTaskForm({
+  } = useTaskFormComposite({
     projects: projectDocs,
     defaultValues,
     onSubmit,
-    handleCancel,
+    onCancel: handleCancel,
   });
-  const isPending = isSubmitting || formState;
+  const isPending = isSubmitting || isLoading;
 
   return (
     <Card

@@ -1,5 +1,5 @@
+import { useTaskCompletion } from '@/features/tasks/hooks/use-task-completion';
 import { Button } from '@/shared/components/ui/button';
-import { useTaskOperations } from '@/features/tasks/hooks/use-task-operations';
 import { cn } from '@/shared/utils/ui/ui.utils';
 import { Check } from 'lucide-react';
 
@@ -9,7 +9,11 @@ interface CompleteTaskButtonProps {
 }
 
 export const CompleteTaskButton = ({ taskId, completed }: CompleteTaskButtonProps) => {
-  const { toggleTaskComplete } = useTaskOperations();
+  const { toggleComplete } = useTaskCompletion();
+
+  const handleClick = async () => {
+    await toggleComplete(taskId, !completed);
+  };
 
   return (
     <Button
@@ -20,9 +24,7 @@ export const CompleteTaskButton = ({ taskId, completed }: CompleteTaskButtonProp
       role="checkbox"
       aria-checked={completed}
       aria-label={`Mark task as ${completed ? 'incomplete' : 'complete'}`}
-      onClick={async () => {
-        await toggleTaskComplete(taskId, !completed);
-      }}>
+      onClick={handleClick}>
       <Check
         strokeWidth={4}
         className={cn(

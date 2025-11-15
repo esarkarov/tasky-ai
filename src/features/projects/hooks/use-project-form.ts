@@ -1,7 +1,7 @@
-import { ColorValue, ProjectFormInput, UseProjectFormParams, UseProjectFormResult } from '@/features/projects/types';
+import { ColorValue, ProjectFormInput, UseProjectFormParams } from '@/features/projects/types';
 import { useCallback, useMemo, useState } from 'react';
 
-export const useProjectForm = ({ defaultValues, onSubmit }: UseProjectFormParams): UseProjectFormResult => {
+export const useProjectForm = ({ defaultValues, onSubmit }: UseProjectFormParams) => {
   const [name, setName] = useState(defaultValues.name);
   const [color, setColor] = useState<ColorValue>({
     name: defaultValues.color_name,
@@ -69,6 +69,7 @@ export const useProjectForm = ({ defaultValues, onSubmit }: UseProjectFormParams
     colorPickerOpen,
     isSubmitting,
     isValid,
+
     setName,
     setColor,
     setAiEnabled,

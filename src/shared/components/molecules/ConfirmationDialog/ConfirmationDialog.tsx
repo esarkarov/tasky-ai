@@ -1,4 +1,4 @@
-import { useTaskOperations } from '@/features/tasks/hooks/use-task-operations';
+import { useTaskMutation } from '@/features/tasks/hooks/use-task-mutation';
 import {
   AlertDialog,
   AlertDialogAction,
@@ -35,13 +35,13 @@ export const ConfirmationDialog = ({
   disabled = false,
   title,
 }: ConfirmationDialogProps) => {
-  const { formState } = useTaskOperations();
+  const { isLoading } = useTaskMutation();
   const [isDeleting, setIsDeleting] = useState(false);
   const { isOpen: open, setIsOpen: onOpenChange } = useDisclosure();
 
   const isIconVariant = variant === 'icon';
-  const isPending = isDeleting || formState;
-  const isDisabled = isDeleting || formState || disabled;
+  const isPending = isDeleting || isLoading;
+  const isDisabled = isDeleting || isLoading || disabled;
   const description = `The '${truncateString(label, 48)}' will be permanently deleted.`;
 
   const handleClick = useCallback(async () => {

@@ -3,7 +3,7 @@ import { ProjectEntity } from '@/features/projects/types';
 import { AddTaskButton } from '@/features/tasks/components/atoms/AddTaskButton/AddTaskButton';
 import { TaskCard } from '@/features/tasks/components/organisms/TaskCard/TaskCard';
 import { TaskForm } from '@/features/tasks/components/organisms/TaskForm/TaskForm';
-import { useTaskOperations } from '@/features/tasks/hooks/use-task-operations';
+import { useTaskMutation } from '@/features/tasks/hooks/use-task-mutation';
 import { Head } from '@/shared/components/atoms/Head/Head';
 import { ItemList } from '@/shared/components/atoms/List/List';
 import { LoadMoreButton } from '@/shared/components/atoms/LoadMoreButton/LoadMoreButton';
@@ -17,15 +17,15 @@ import {
   PageList,
   PageTitle,
 } from '@/shared/components/templates/PageTemplate/PageTemplate';
+import { useDisclosure } from '@/shared/hooks/use-disclosure';
 import { useLoadMore } from '@/shared/hooks/use-load-more';
 import { ProjectsWithTasksLoaderData } from '@/shared/types';
 import { startOfToday } from 'date-fns';
 import { ClipboardCheck } from 'lucide-react';
-import { useState } from 'react';
 import { useLoaderData } from 'react-router';
 
 export const TodayPage = () => {
-  const [isFormOpen, setIsFormOpen] = useState<boolean>(false);
+  const { isOpen, open: openForm, close: cancelForm } = useDisclosure();
   const {
     tasks: { total, documents: taskDocs },
     projects: { documents: projectDocs },
@@ -46,7 +46,9 @@ export const TodayPage = () => {
     getItemClassName,
     getItemStyle,
   } = useLoadMore(filteredTasks || []);
-  const { handleCreateTask } = useTaskOperations();
+  const { handleCreate } = useTaskMutation({
+    onSuccess: cancelForm,
+  });
 
   return (
     <>
@@ -94,16 +96,16 @@ export const TodayPage = () => {
             </ItemList>
           ))}
 
-          {!isFormOpen && (
+          {!isOpen && (
             <AddTaskButton
-              onClick={() => setIsFormOpen(true)}
+              onClick={openForm}
               aria-label="Add new task for today"
             />
           )}
 
-          {!filteredCount && !isFormOpen && <EmptyStateMessage variant="today" />}
+          {!filteredCount && !isOpen && <EmptyStateMessage variant="today" />}
 
-          {isFormOpen && (
+          {isOpen && (
             <TaskForm
               defaultValues={{
                 content: '',
@@ -112,8 +114,8 @@ export const TodayPage = () => {
               }}
               className="mt-1"
               mode="create"
-              handleCancel={() => setIsFormOpen(false)}
-              onSubmit={handleCreateTask}
+              handleCancel={cancelForm}
+              onSubmit={handleCreate}
             />
           )}
 

@@ -12,6 +12,7 @@ export const taskQueries = {
   orderByDueDateAsc: () => Query.orderAsc('due_date'),
   orderByUpdatedDesc: () => Query.orderDesc('$updatedAt'),
   limit: (count: number) => Query.limit(count),
+
   forTodayTasks: (todayDate: string, tomorrowDate: string, userId: string) => [
     taskQueries.byUserId(userId),
     taskQueries.byCompleted(false),

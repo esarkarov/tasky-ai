@@ -1,9 +1,11 @@
 import { ProjectEntity } from '@/features/projects/types';
 import { TaskForm } from '@/features/tasks/components/organisms/TaskForm/TaskForm';
 import { TaskItem } from '@/features/tasks/components/organisms/TaskItem/TaskItem';
-import { useTaskOperations } from '@/features/tasks/hooks/use-task-operations';
+import { useTaskMutation } from '@/features/tasks/hooks/use-task-mutation';
 import { TaskEntity } from '@/features/tasks/types';
-import { memo, useState } from 'react';
+import { useDisclosure } from '@/shared/hooks/use-disclosure';
+import { memo } from 'react';
+import { useFetcher } from 'react-router';
 
 interface TaskCardProps {
   id: string;
@@ -14,9 +16,10 @@ interface TaskCardProps {
 }
 
 export const TaskCard = memo(({ id, content, completed, dueDate, project }: TaskCardProps) => {
-  const [isEditing, setIsEditing] = useState(false);
-  const { handleUpdateTask, fetcher } = useTaskOperations({
-    onSuccess: () => setIsEditing(false),
+  const fetcher = useFetcher();
+  const { isOpen, open: openForm, close: cancelForm } = useDisclosure();
+  const { handleUpdate } = useTaskMutation({
+    onSuccess: cancelForm,
   });
 
   const task: TaskEntity = Object.assign(
@@ -36,11 +39,11 @@ export const TaskCard = memo(({ id, content, completed, dueDate, project }: Task
       role="listitem"
       aria-label={`Task: ${task.content}`}
       aria-checked={task.completed}>
-      {!isEditing ? (
+      {!isOpen ? (
         <TaskItem
           task={task}
           project={project}
-          handleEdit={() => setIsEditing(true)}
+          handleEdit={openForm}
         />
       ) : (
         <TaskForm
@@ -50,8 +53,8 @@ export const TaskCard = memo(({ id, content, completed, dueDate, project }: Task
             projectId: project && project?.$id,
           }}
           mode="update"
-          handleCancel={() => setIsEditing(false)}
-          onSubmit={handleUpdateTask}
+          handleCancel={openForm}
+          onSubmit={handleUpdate}
         />
       )}
     </article>

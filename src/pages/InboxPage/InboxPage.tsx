@@ -2,7 +2,7 @@ import { ProjectEntity } from '@/features/projects/types';
 import { AddTaskButton } from '@/features/tasks/components/atoms/AddTaskButton/AddTaskButton';
 import { TaskCard } from '@/features/tasks/components/organisms/TaskCard/TaskCard';
 import { TaskForm } from '@/features/tasks/components/organisms/TaskForm/TaskForm';
-import { useTaskOperations } from '@/features/tasks/hooks/use-task-operations';
+import { useTaskMutation } from '@/features/tasks/hooks/use-task-mutation';
 import { Head } from '@/shared/components/atoms/Head/Head';
 import { ItemList } from '@/shared/components/atoms/List/List';
 import { LoadMoreButton } from '@/shared/components/atoms/LoadMoreButton/LoadMoreButton';
@@ -15,14 +15,14 @@ import {
   PageList,
   PageTitle,
 } from '@/shared/components/templates/PageTemplate/PageTemplate';
+import { useDisclosure } from '@/shared/hooks/use-disclosure';
 import { useLoadMore } from '@/shared/hooks/use-load-more';
 import { TasksLoaderData } from '@/shared/types';
 import { ClipboardCheck } from 'lucide-react';
-import { useState } from 'react';
 import { useLoaderData } from 'react-router';
 
 export const InboxPage = () => {
-  const [isFormOpen, setIsFormOpen] = useState(false);
+  const { isOpen, open: openForm, close: cancelForm } = useDisclosure();
   const {
     tasks: { total, documents: taskDocs },
   } = useLoaderData<TasksLoaderData>();
@@ -34,7 +34,9 @@ export const InboxPage = () => {
     getItemClassName,
     getItemStyle,
   } = useLoadMore(taskDocs || []);
-  const { handleCreateTask } = useTaskOperations();
+  const { handleCreate } = useTaskMutation({
+    onSuccess: cancelForm,
+  });
 
   return (
     <>
@@ -73,16 +75,16 @@ export const InboxPage = () => {
             </ItemList>
           ))}
 
-          {!isFormOpen && <AddTaskButton onClick={() => setIsFormOpen(true)} />}
+          {!isOpen && <AddTaskButton onClick={openForm} />}
 
-          {!total && !isFormOpen && <EmptyStateMessage variant="inbox" />}
+          {!total && !isOpen && <EmptyStateMessage variant="inbox" />}
 
-          {isFormOpen && (
+          {isOpen && (
             <TaskForm
               className="mt-1"
               mode="create"
-              handleCancel={() => setIsFormOpen(false)}
-              onSubmit={handleCreateTask}
+              handleCancel={cancelForm}
+              onSubmit={handleCreate}
             />
           )}
 

@@ -4,11 +4,10 @@ import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { ConfirmationDialog } from './ConfirmationDialog';
 import { ReactNode } from 'react';
 
-const mockFormState = vi.fn(() => false);
-
-vi.mock('@/features/tasks/hooks/use-task-operations', () => ({
-  useTaskOperations: () => ({
-    formState: mockFormState(),
+const mockIsLoading = vi.fn(() => false);
+vi.mock('@/features/tasks/hooks/use-task-mutation', () => ({
+  useTaskMutation: () => ({
+    isLoading: mockIsLoading(),
   }),
 }));
 
@@ -108,7 +107,7 @@ describe('ConfirmationDialog', () => {
 
   beforeEach(() => {
     vi.clearAllMocks();
-    mockFormState.mockReturnValue(false);
+    mockIsLoading.mockReturnValue(false);
   });
 
   describe('basic rendering', () => {
@@ -288,7 +287,7 @@ describe('ConfirmationDialog', () => {
     });
 
     it('should disable trigger when formState is pending', () => {
-      mockFormState.mockReturnValue(true);
+      mockIsLoading.mockReturnValue(true);
       render(<ConfirmationDialog {...defaultProps} />);
 
       expect(screen.getByRole('button', { name: /delete/i })).toBeDisabled();

@@ -114,9 +114,9 @@ vi.mock('@/shared/hooks/use-load-more', () => ({
   useLoadMore: (tasks: TaskEntity[]) => mockUseLoadMore(tasks),
 }));
 
-const mockUseTaskOperations = vi.fn();
-vi.mock('@/features/tasks/hooks/use-task-operations', () => ({
-  useTaskOperations: () => mockUseTaskOperations(),
+const mockUseTaskMutation = vi.fn();
+vi.mock('@/features/tasks/hooks/use-task-mutation', () => ({
+  useTaskMutation: () => mockUseTaskMutation(),
 }));
 
 vi.mock('date-fns', () => ({
@@ -191,8 +191,8 @@ describe('TodayPage', () => {
       getItemStyle: () => ({}),
     });
 
-    mockUseTaskOperations.mockReturnValue({
-      handleCreateTask: vi.fn(),
+    mockUseTaskMutation.mockReturnValue({
+      handleCreate: vi.fn(),
     });
   };
 
@@ -316,7 +316,7 @@ describe('TodayPage', () => {
     it('should call handleCreateTask when form is submitted', async () => {
       const user = userEvent.setup();
       const mockData = createMockLoaderData();
-      const mockHandleCreateTask = vi.fn();
+      const mockHandleCreate = vi.fn();
       mockedUseLoaderData.mockReturnValue(mockData);
 
       mockUseProjectFilter.mockReturnValue({
@@ -335,8 +335,8 @@ describe('TodayPage', () => {
         getItemStyle: () => ({}),
       });
 
-      mockUseTaskOperations.mockReturnValue({
-        handleCreateTask: mockHandleCreateTask,
+      mockUseTaskMutation.mockReturnValue({
+        handleCreate: mockHandleCreate,
       });
 
       render(<TodayPage />);
@@ -344,7 +344,7 @@ describe('TodayPage', () => {
       const submitButton = screen.getByTestId('submit-button');
       await user.click(submitButton);
 
-      expect(mockHandleCreateTask).toHaveBeenCalledWith({ content: 'New task' });
+      expect(mockHandleCreate).toHaveBeenCalledWith({ content: 'New task' });
     });
 
     it('should hide empty state when form is open', async () => {
@@ -368,8 +368,8 @@ describe('TodayPage', () => {
         getItemStyle: () => ({}),
       });
 
-      mockUseTaskOperations.mockReturnValue({
-        handleCreateTask: vi.fn(),
+      mockUseTaskMutation.mockReturnValue({
+        handleCreate: vi.fn(),
       });
 
       render(<TodayPage />);
@@ -414,8 +414,8 @@ describe('TodayPage', () => {
         getItemStyle: () => ({}),
       });
 
-      mockUseTaskOperations.mockReturnValue({
-        handleCreateTask: vi.fn(),
+      mockUseTaskMutation.mockReturnValue({
+        handleCreate: vi.fn(),
       });
 
       render(<TodayPage />);
@@ -445,8 +445,8 @@ describe('TodayPage', () => {
         getItemStyle: () => ({}),
       });
 
-      mockUseTaskOperations.mockReturnValue({
-        handleCreateTask: vi.fn(),
+      mockUseTaskMutation.mockReturnValue({
+        handleCreate: vi.fn(),
       });
 
       render(<TodayPage />);
@@ -478,8 +478,8 @@ describe('TodayPage', () => {
         getItemStyle: () => ({}),
       });
 
-      mockUseTaskOperations.mockReturnValue({
-        handleCreateTask: vi.fn(),
+      mockUseTaskMutation.mockReturnValue({
+        handleCreate: vi.fn(),
       });
 
       render(<TodayPage />);
@@ -519,8 +519,8 @@ describe('TodayPage', () => {
         getItemStyle: () => ({}),
       });
 
-      mockUseTaskOperations.mockReturnValue({
-        handleCreateTask: vi.fn(),
+      mockUseTaskMutation.mockReturnValue({
+        handleCreate: vi.fn(),
       });
 
       render(<TodayPage />);
@@ -560,8 +560,8 @@ describe('TodayPage', () => {
         getItemStyle: () => ({}),
       });
 
-      mockUseTaskOperations.mockReturnValue({
-        handleCreateTask: vi.fn(),
+      mockUseTaskMutation.mockReturnValue({
+        handleCreate: vi.fn(),
       });
 
       render(<TodayPage />);
@@ -591,8 +591,8 @@ describe('TodayPage', () => {
         getItemStyle: () => ({}),
       });
 
-      mockUseTaskOperations.mockReturnValue({
-        handleCreateTask: vi.fn(),
+      mockUseTaskMutation.mockReturnValue({
+        handleCreate: vi.fn(),
       });
 
       render(<TodayPage />);

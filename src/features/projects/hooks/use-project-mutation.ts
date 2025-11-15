@@ -1,4 +1,4 @@
-import type { ProjectFormInput, UseProjectMutationOptions, UseProjectMutationResult } from '@/features/projects/types';
+import type { ProjectFormInput, UseProjectMutationParams } from '@/features/projects/types';
 import { HTTP_METHODS } from '@/shared/constants/http';
 import { ROUTES } from '@/shared/constants/routes';
 import { PROJECT_TOAST_CONTENTS } from '@/shared/constants/ui-contents';
@@ -6,7 +6,7 @@ import { useToast } from '@/shared/hooks/use-toast';
 import { executeWithToast } from '@/shared/utils/operation/operation.utils';
 import { useFetcher } from 'react-router';
 
-export const useProjectMutation = (options?: UseProjectMutationOptions): UseProjectMutationResult => {
+export const useProjectMutation = ({ onSuccess }: UseProjectMutationParams = {}) => {
   const fetcher = useFetcher();
   const { toast } = useToast();
   const isLoading = fetcher.state !== 'idle';
@@ -23,7 +23,7 @@ export const useProjectMutation = (options?: UseProjectMutationOptions): UseProj
       ? `Project "${data.name}" created with AI-generated tasks`
       : `Project "${data.name}" created successfully`;
 
-    await executeWithToast(operation, toast, PROJECT_TOAST_CONTENTS.CREATE, description, options?.onSuccess);
+    await executeWithToast(operation, toast, PROJECT_TOAST_CONTENTS.CREATE, description, onSuccess);
   };
   const updateProject = async (data: ProjectFormInput) => {
     const operation = () =>
@@ -35,7 +35,7 @@ export const useProjectMutation = (options?: UseProjectMutationOptions): UseProj
 
     const description = `Project "${data.name}" updated successfully`;
 
-    await executeWithToast(operation, toast, PROJECT_TOAST_CONTENTS.UPDATE, description, options?.onSuccess);
+    await executeWithToast(operation, toast, PROJECT_TOAST_CONTENTS.UPDATE, description, onSuccess);
   };
   const deleteProject = async (id: string, name: string) => {
     const operation = () =>
@@ -47,13 +47,14 @@ export const useProjectMutation = (options?: UseProjectMutationOptions): UseProj
 
     const description = `Project "${name}" deleted successfully`;
 
-    await executeWithToast(operation, toast, PROJECT_TOAST_CONTENTS.DELETE, description, options?.onSuccess);
+    await executeWithToast(operation, toast, PROJECT_TOAST_CONTENTS.DELETE, description, onSuccess);
   };
 
   return {
     createProject,
     updateProject,
     deleteProject,
+
     isLoading,
   };
 };

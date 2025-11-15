@@ -1,5 +1,5 @@
 import { EditTaskButton } from '@/features/tasks/components/atoms/EditTaskButton/EditTaskButton';
-import { useTaskOperations } from '@/features/tasks/hooks/use-task-operations';
+import { useTaskMutation } from '@/features/tasks/hooks/use-task-mutation';
 import { TaskEntity } from '@/features/tasks/types';
 import { ConfirmationDialog } from '@/shared/components/molecules/ConfirmationDialog/ConfirmationDialog';
 
@@ -9,7 +9,7 @@ interface TaskActionsProps {
 }
 
 export const TaskActions = ({ task, handleEdit }: TaskActionsProps) => {
-  const { handleDeleteTask } = useTaskOperations();
+  const { handleDelete } = useTaskMutation();
 
   return (
     <div
@@ -20,7 +20,7 @@ export const TaskActions = ({ task, handleEdit }: TaskActionsProps) => {
       <ConfirmationDialog
         id={task.id}
         label={task.content}
-        handleDelete={handleDeleteTask}
+        handleDelete={handleDelete}
         variant="icon"
         title="Delete task?"
       />

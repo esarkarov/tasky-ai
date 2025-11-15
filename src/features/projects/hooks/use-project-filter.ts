@@ -1,7 +1,7 @@
-import { UseProjectFilterParams, UseProjectFilterResult } from '@/features/projects/types';
+import { UseProjectFilterParams } from '@/features/projects/types';
 import { useMemo, useState } from 'react';
 
-export const useProjectFilter = ({ tasks }: UseProjectFilterParams): UseProjectFilterResult => {
+export const useProjectFilter = ({ tasks }: UseProjectFilterParams) => {
   const [filterValue, setFilterValue] = useState<string | null>(null);
 
   const filteredTasks = useMemo(() => {
@@ -18,12 +18,14 @@ export const useProjectFilter = ({ tasks }: UseProjectFilterParams): UseProjectF
       return taskProjectId === filterValue;
     });
   }, [filterValue, tasks]);
+
   const filteredCount = filteredTasks?.length || 0;
 
   return {
     filteredTasks,
     filteredCount,
     filterValue,
+
     setFilterValue,
   };
 };

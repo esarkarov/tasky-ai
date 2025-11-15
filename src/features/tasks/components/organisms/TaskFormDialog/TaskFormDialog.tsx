@@ -1,5 +1,5 @@
 import { TaskForm } from '@/features/tasks/components/organisms/TaskForm/TaskForm';
-import { useTaskOperations } from '@/features/tasks/hooks/use-task-operations';
+import { useTaskMutation } from '@/features/tasks/hooks/use-task-mutation';
 import { Dialog, DialogContent, DialogTrigger } from '@/shared/components/ui/dialog';
 import { ROUTES } from '@/shared/constants/routes';
 import { useDisclosure } from '@/shared/hooks/use-disclosure';
@@ -8,9 +8,9 @@ import type { PropsWithChildren } from 'react';
 import { useLocation } from 'react-router';
 
 export const TaskFormDialog: React.FC<PropsWithChildren> = ({ children }) => {
-  const { isOpen: open, setIsOpen: onOpenChange, close: closeModal } = useDisclosure();
-  const { handleCreateTask } = useTaskOperations({
-    onSuccess: closeModal,
+  const { isOpen: open, setIsOpen: onOpenChange, close: cancelForm } = useDisclosure();
+  const { handleCreate } = useTaskMutation({
+    onSuccess: cancelForm,
   });
   const { pathname } = useLocation();
   const isToday = pathname === ROUTES.TODAY;
@@ -30,8 +30,8 @@ export const TaskFormDialog: React.FC<PropsWithChildren> = ({ children }) => {
             projectId: null,
           }}
           mode="create"
-          handleCancel={closeModal}
-          onSubmit={handleCreateTask}
+          handleCancel={cancelForm}
+          onSubmit={handleCreate}
         />
       </DialogContent>
     </Dialog>

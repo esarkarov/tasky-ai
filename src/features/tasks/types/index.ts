@@ -1,6 +1,5 @@
-import { ProjectEntity, ProjectListItem, SelectedProject } from '@/features/projects/types';
+import { ProjectEntity } from '@/features/projects/types';
 import { BaseEntity, PaginatedResponse } from '@/shared/types';
-import { useFetcher } from 'react-router';
 
 export interface TaskEntity extends BaseEntity {
   id: string;
@@ -31,36 +30,39 @@ export interface TaskUpdateInput extends Omit<TaskInput, 'completed'> {
 }
 export type TasksResponse = PaginatedResponse<TaskEntity>;
 
-export interface UseTaskOperationsParams {
-  onSuccess?: () => void;
-  enableUndo?: boolean;
-}
-export interface UseTaskOperationsResult {
-  handleCreateTask: (formData: TaskFormInput) => Promise<void>;
-  handleUpdateTask: (formData: TaskFormInput, taskId?: string) => Promise<void>;
-  toggleTaskComplete: (taskId: string, completed: boolean) => Promise<void>;
-  handleDeleteTask: (taskId: string) => Promise<void>;
-  fetcher: ReturnType<typeof useFetcher>;
-  formState: boolean;
-}
-
-export interface UseTaskFormParams {
-  defaultValues: TaskFormInput;
-  projects?: ProjectListItem[];
-  onSubmit?: (formData: TaskFormInput, taskId?: string) => Promise<void>;
-  handleCancel: () => void;
-}
-export interface UseTaskFormResult {
+export interface UseChronoDateParserParams {
   content: string;
-  dueDate: Date | null;
-  selectedProject: SelectedProject;
-  isSubmitting: boolean;
-  isValid: boolean;
-  formValues: TaskFormInput;
-  setContent: (content: string) => void;
-  setDueDate: (date: Date | null) => void;
-  handleProjectChange: (project: SelectedProject) => void;
-  removeDueDate: () => void;
-  handleSubmit: () => Promise<void>;
-  handleReset: () => void;
+  onDateParsed: (date: Date) => void;
+  enabled?: boolean;
+}
+export interface UseTaskCompletionParams {
+  enableUndo?: boolean;
+  onSuccess?: () => void;
+}
+export interface UseTaskFormCompositeParams {
+  defaultValues?: {
+    id?: string;
+    content?: string;
+    due_date?: Date | null;
+    projectId?: string | null;
+  };
+  projects?: Array<{
+    $id: string;
+    name: string;
+    color_hex: string;
+  }>;
+  onSubmit?: (formData: TaskFormInput, taskId?: string) => Promise<void>;
+  onCancel?: () => void;
+  enableChronoParsing?: boolean;
+}
+export interface UseTaskFormStateParams {
+  defaultValues?: {
+    id?: string;
+    content?: string;
+    due_date?: Date | null;
+    projectId?: string | null;
+  };
+}
+export interface UseTaskMutationParams {
+  onSuccess?: () => void;
 }

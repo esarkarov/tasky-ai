@@ -6,6 +6,7 @@ export const projectQueries = {
   searchByName: (searchTerm: string) => Query.contains('name', searchTerm),
   orderByCreatedDesc: () => Query.orderDesc('$createdAt'),
   limit: (count: number) => Query.limit(count),
+
   forUserProjectsList: (userId: string, options?: { search?: string; limit?: number }) => {
     const queries = [
       projectQueries.selectListFields(),

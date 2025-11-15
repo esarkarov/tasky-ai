@@ -1,32 +1,32 @@
-import type { ProjectFormInput, UseProjectModalOptions, UseProjectModalResult } from '@/features/projects/types';
+import type { ProjectFormInput, UseProjectModalParams } from '@/features/projects/types';
 import { ROUTES } from '@/shared/constants/routes';
+import { useDisclosure } from '@/shared/hooks/use-disclosure';
 import { useCallback } from 'react';
 import { useLocation, useNavigate } from 'react-router';
 import { useProjectMutation } from './use-project-mutation';
-import { useDisclosure } from '@/shared/hooks/use-disclosure';
 
-export const useProjectModal = ({ mode = 'create', onSuccess }: UseProjectModalOptions = {}): UseProjectModalResult => {
+export const useProjectModal = ({ mode = 'create', onSuccess }: UseProjectModalParams = {}) => {
   const navigate = useNavigate();
   const { pathname } = useLocation();
+  const { close: cancelModal } = useDisclosure();
   const isViewingProject = pathname.startsWith('/projects/');
-  const { close: closeModal } = useDisclosure();
 
-  const { createProject, updateProject, deleteProject, isLoading } = useProjectMutation({
+  const projectMutation = useProjectMutation({
     onSuccess: () => {
       onSuccess?.();
-      closeModal();
+      cancelModal();
     },
   });
 
   const handleSave = useCallback(
     async (data: ProjectFormInput) => {
       if (mode === 'create') {
-        await createProject(data);
+        await projectMutation.createProject(data);
       } else {
-        await updateProject(data);
+        await projectMutation.updateProject(data);
       }
     },
-    [mode, createProject, updateProject]
+    [mode, projectMutation]
   );
   const handleDelete = useCallback(
     async (id: string, name: string) => {
@@ -34,14 +34,15 @@ export const useProjectModal = ({ mode = 'create', onSuccess }: UseProjectModalO
         navigate(ROUTES.INBOX);
       }
 
-      await deleteProject(id, name);
+      await projectMutation.deleteProject(id, name);
     },
-    [deleteProject, isViewingProject, navigate, pathname]
+    [isViewingProject, navigate, pathname, projectMutation]
   );
 
   return {
     handleSave,
     handleDelete,
-    isLoading,
+
+    isLoading: projectMutation.isLoading,
   };
 };

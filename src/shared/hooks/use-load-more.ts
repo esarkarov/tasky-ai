@@ -45,6 +45,7 @@ export const useLoadMore = <T>(allItems: T[], params: UseLoadMoreParams = {}): U
     count,
     isLoading,
     hasMore,
+
     handleLoadMore,
     handleReset,
     getItemClassName,

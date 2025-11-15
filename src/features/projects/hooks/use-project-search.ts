@@ -1,4 +1,3 @@
-import { useProjectSearchResult } from '@/features/projects/types';
 import { ROUTES } from '@/shared/constants/routes';
 import { TIMING } from '@/shared/constants/timing';
 import type { SearchStatus } from '@/shared/types';
@@ -6,7 +5,7 @@ import { buildSearchUrl } from '@/shared/utils/operation/operation.utils';
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { useNavigate } from 'react-router';
 
-export const useProjectSearch = (): useProjectSearchResult => {
+export const useProjectSearch = () => {
   const [searchStatus, setSearchStatus] = useState<SearchStatus>('idle');
   const searchTimeoutRef = useRef<NodeJS.Timeout | null>(null);
   const lastSearchValueRef = useRef<string>('');
@@ -22,7 +21,7 @@ export const useProjectSearch = (): useProjectSearchResult => {
     };
   }, []);
 
-  const handleSearch = useCallback(
+  const searchProjects = useCallback(
     (searchValue: string) => {
       if (searchValue === lastSearchValueRef.current) {
         return;
@@ -53,17 +52,17 @@ export const useProjectSearch = (): useProjectSearchResult => {
     },
     [navigate]
   );
-
   const handleSearchChange = useCallback(
     (e: React.ChangeEvent<HTMLInputElement>) => {
-      handleSearch(e.target.value.trim());
+      searchProjects(e.target.value.trim());
     },
-    [handleSearch]
+    [searchProjects]
   );
 
   return {
-    handleSearch,
+    searchProjects,
     handleSearchChange,
+
     isSearching,
     isIdle,
   };
