@@ -1,4 +1,4 @@
-import { aiRepository } from '@/features/ai/repositories/ai.repository';
+import { geminiClient } from '@/features/ai/clients/gemini.client';
 import { AIGeneratedTask } from '@/features/ai/types';
 import { buildTaskGenerationPrompt } from '@/features/ai/utils/ai.utils';
 
@@ -7,7 +7,7 @@ export const aiService = {
     if (!prompt?.trim()) return [];
 
     try {
-      const contentResponse = await aiRepository.generateContent(buildTaskGenerationPrompt(prompt));
+      const contentResponse = await geminiClient.generateContent(buildTaskGenerationPrompt(prompt));
       const contentResponseText = contentResponse.text?.trim();
 
       if (!contentResponseText) return [];

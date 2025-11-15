@@ -1,8 +1,8 @@
 import { genAI } from '@/core/lib/google-ai';
-import { aiRepository } from '@/features/ai/repositories/ai.repository';
 import { DEFAULT_GEMINI_MODEL } from '@/shared/constants/defaults';
 import { GenerateContentResponse } from '@google/genai';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
+import { geminiClient } from './gemini.client';
 
 vi.mock('@/shared/constants/defaults', () => ({
   DEFAULT_GEMINI_MODEL: 'gemini-pro',
@@ -19,7 +19,7 @@ vi.mock('@/core/lib/google-ai', () => ({
 const mockedGenAI = vi.mocked(genAI);
 const mockedGenerateContent = vi.mocked(mockedGenAI.models.generateContent);
 
-describe('aiRepository', () => {
+describe('gemini client', () => {
   const MOCK_CONTENTS = 'Test prompt content';
 
   const createMockResponse = (overrides?: Partial<GenerateContentResponse>): GenerateContentResponse => ({
@@ -51,7 +51,7 @@ describe('aiRepository', () => {
       const mockResponse = createMockResponse();
       mockedGenerateContent.mockResolvedValue(mockResponse);
 
-      const result = await aiRepository.generateContent(MOCK_CONTENTS);
+      const result = await geminiClient.generateContent(MOCK_CONTENTS);
 
       expectGenerateContentCalledWith(MOCK_CONTENTS);
       expect(result).toEqual(mockResponse);
@@ -62,7 +62,7 @@ describe('aiRepository', () => {
       const mockResponse = createMockResponse();
       mockedGenerateContent.mockResolvedValue(mockResponse);
 
-      await aiRepository.generateContent(emptyContents);
+      await geminiClient.generateContent(emptyContents);
 
       expectGenerateContentCalledWith(emptyContents);
     });
@@ -70,7 +70,7 @@ describe('aiRepository', () => {
     it('should propagate errors when API fails', async () => {
       mockedGenerateContent.mockRejectedValue(new Error('API error'));
 
-      await expect(aiRepository.generateContent(MOCK_CONTENTS)).rejects.toThrow('API error');
+      await expect(geminiClient.generateContent(MOCK_CONTENTS)).rejects.toThrow('API error');
       expectGenerateContentCalledWith(MOCK_CONTENTS);
     });
   });

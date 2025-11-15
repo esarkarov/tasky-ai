@@ -1,11 +1,11 @@
-import { aiRepository } from '@/features/ai/repositories/ai.repository';
+import { geminiClient } from '@/features/ai/clients/gemini.client';
 import { aiService } from '@/features/ai/services/ai.service';
 import { AIGeneratedTask } from '@/features/ai/types';
 import { buildTaskGenerationPrompt } from '@/features/ai/utils/ai.utils';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 
-vi.mock('@/features/ai/repositories/ai.repository', () => ({
-  aiRepository: {
+vi.mock('@/features/ai/clients/gemini.client', () => ({
+  geminiClient: {
     generateContent: vi.fn(),
   },
 }));
@@ -13,7 +13,7 @@ vi.mock('@/features/ai/utils/ai.utils', () => ({
   buildTaskGenerationPrompt: vi.fn(),
 }));
 
-const mockedAiRepository = vi.mocked(aiRepository);
+const mockedGeminiClient = vi.mocked(geminiClient);
 const mockedbuildTaskGenerationPrompt = vi.mocked(buildTaskGenerationPrompt);
 
 describe('aiService', () => {
@@ -57,7 +57,7 @@ describe('aiService', () => {
 
         expect(result).toEqual([]);
         expect(mockedbuildTaskGenerationPrompt).not.toHaveBeenCalled();
-        expect(mockedAiRepository.generateContent).not.toHaveBeenCalled();
+        expect(mockedGeminiClient.generateContent).not.toHaveBeenCalled();
       });
     });
 
@@ -66,12 +66,12 @@ describe('aiService', () => {
         const mockTasks = createMockTasks();
         const mockResponse = createMockResponse(JSON.stringify(mockTasks));
         mockedbuildTaskGenerationPrompt.mockReturnValue(MOCK_GENERATED_CONTENTS);
-        mockedAiRepository.generateContent.mockResolvedValue(mockResponse);
+        mockedGeminiClient.generateContent.mockResolvedValue(mockResponse);
 
         const result = await aiService.generateProjectTasks(MOCK_PROMPT);
 
         expect(mockedbuildTaskGenerationPrompt).toHaveBeenCalledWith(MOCK_PROMPT);
-        expect(mockedAiRepository.generateContent).toHaveBeenCalledWith(MOCK_GENERATED_CONTENTS);
+        expect(mockedGeminiClient.generateContent).toHaveBeenCalledWith(MOCK_GENERATED_CONTENTS);
         expect(result).toEqual(mockTasks);
       });
     });
@@ -88,7 +88,7 @@ describe('aiService', () => {
         async ({ responseText }) => {
           const mockResponse = createMockResponse(responseText);
           mockedbuildTaskGenerationPrompt.mockReturnValue(MOCK_GENERATED_CONTENTS);
-          mockedAiRepository.generateContent.mockResolvedValue(mockResponse);
+          mockedGeminiClient.generateContent.mockResolvedValue(mockResponse);
 
           const result = await aiService.generateProjectTasks(MOCK_PROMPT);
 
@@ -100,7 +100,7 @@ describe('aiService', () => {
     describe('when repository fails', () => {
       it('should return empty array', async () => {
         mockedbuildTaskGenerationPrompt.mockReturnValue(MOCK_GENERATED_CONTENTS);
-        mockedAiRepository.generateContent.mockRejectedValue(new Error('API error'));
+        mockedGeminiClient.generateContent.mockRejectedValue(new Error('API error'));
 
         const result = await aiService.generateProjectTasks(MOCK_PROMPT);
 
