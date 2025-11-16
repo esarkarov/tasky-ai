@@ -17,8 +17,8 @@ import {
   PageTitle,
 } from '@/shared/components/templates/PageTemplate/PageTemplate';
 import { Button } from '@/shared/components/ui/button';
-import { useDisclosure } from '@/shared/hooks/use-disclosure';
-import { useLoadMore } from '@/shared/hooks/use-load-more';
+import { useDisclosure } from '@/shared/hooks/use-disclosure/use-disclosure';
+import { useLoadMore } from '@/shared/hooks/use-load-more/use-load-more';
 import { ProjectDetailLoaderData } from '@/shared/types';
 import { ClipboardCheck, MoreHorizontal } from 'lucide-react';
 import { useMemo } from 'react';

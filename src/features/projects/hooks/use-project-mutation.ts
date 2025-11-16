@@ -2,7 +2,7 @@ import type { ProjectFormInput, UseProjectMutationParams } from '@/features/proj
 import { HTTP_METHODS } from '@/shared/constants/http';
 import { ROUTES } from '@/shared/constants/routes';
 import { PROJECT_TOAST_CONTENTS } from '@/shared/constants/ui-contents';
-import { useToast } from '@/shared/hooks/use-toast';
+import { useToast } from '@/shared/hooks/use-toast/use-toast';
 import { executeWithToast } from '@/shared/utils/operation/operation.utils';
 import { useFetcher } from 'react-router';
 

@@ -15,7 +15,7 @@ import {
 } from '@/shared/components/templates/PageTemplate/PageTemplate';
 import { Button } from '@/shared/components/ui/button';
 import { ROUTES } from '@/shared/constants/routes';
-import { useLoadMore } from '@/shared/hooks/use-load-more';
+import { useLoadMore } from '@/shared/hooks/use-load-more/use-load-more';
 import { ProjectsLoaderData } from '@/shared/types';
 import { cn } from '@/shared/utils/ui/ui.utils';
 import { FolderKanban, Plus } from 'lucide-react';

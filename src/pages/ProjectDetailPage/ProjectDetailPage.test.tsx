@@ -106,7 +106,7 @@ vi.mock('@/features/tasks/hooks/use-task-mutation', () => ({
 }));
 
 const mockUseLoadMore = vi.fn();
-vi.mock('@/shared/hooks/use-load-more', () => ({
+vi.mock('@/shared/hooks/use-load-more/use-load-more', () => ({
   useLoadMore: (tasks: TaskEntity[]) => mockUseLoadMore(tasks),
 }));
 

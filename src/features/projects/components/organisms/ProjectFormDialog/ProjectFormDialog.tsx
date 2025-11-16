@@ -2,7 +2,7 @@ import { ProjectForm } from '@/features/projects/components/organisms/ProjectFor
 import { useProjectModal } from '@/features/projects/hooks/use-project-modal';
 import { ProjectInput } from '@/features/projects/types';
 import { Dialog, DialogContent, DialogTrigger } from '@/shared/components/ui/dialog';
-import { useDisclosure } from '@/shared/hooks/use-disclosure';
+import { useDisclosure } from '@/shared/hooks/use-disclosure/use-disclosure';
 import { HttpMethod } from '@/shared/types';
 import { ReactNode } from 'react';
 

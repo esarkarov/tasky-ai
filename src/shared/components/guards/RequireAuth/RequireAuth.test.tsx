@@ -20,7 +20,7 @@ vi.mock('react-router', async () => {
 });
 
 const mockToast = vi.fn();
-vi.mock('@/shared/hooks/use-toast', () => ({
+vi.mock('@/shared/hooks/use-toast/use-toast', () => ({
   useToast: () => ({ toast: mockToast }),
 }));
 

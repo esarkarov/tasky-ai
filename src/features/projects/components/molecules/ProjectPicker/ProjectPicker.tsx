@@ -4,7 +4,7 @@ import { Button } from '@/shared/components/ui/button';
 import { Command, CommandEmpty, CommandGroup, CommandInput, CommandList } from '@/shared/components/ui/command';
 import { Popover, PopoverContent, PopoverTrigger } from '@/shared/components/ui/popover';
 import { ScrollArea } from '@/shared/components/ui/scroll-area';
-import { useDisclosure } from '@/shared/hooks/use-disclosure';
+import { useDisclosure } from '@/shared/hooks/use-disclosure/use-disclosure';
 import { ChevronDown, Hash, Inbox } from 'lucide-react';
 
 interface ProjectPickerProps {

@@ -2,7 +2,7 @@ import { RemoveDueDateButton } from '@/shared/components/atoms/RemoveDueDateButt
 import { Button } from '@/shared/components/ui/button';
 import { Calendar } from '@/shared/components/ui/calendar';
 import { Popover, PopoverContent, PopoverTrigger } from '@/shared/components/ui/popover';
-import { useDisclosure } from '@/shared/hooks/use-disclosure';
+import { useDisclosure } from '@/shared/hooks/use-disclosure/use-disclosure';
 import { formatCustomDate } from '@/shared/utils/date/date.utils';
 import { cn, getTaskDueDateColorClass } from '@/shared/utils/ui/ui.utils';
 import { CalendarIcon } from 'lucide-react';

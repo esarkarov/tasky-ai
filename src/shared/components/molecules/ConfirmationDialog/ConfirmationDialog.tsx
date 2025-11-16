@@ -12,7 +12,7 @@ import {
 } from '@/shared/components/ui/alert-dialog';
 import { Button } from '@/shared/components/ui/button';
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/shared/components/ui/tooltip';
-import { useDisclosure } from '@/shared/hooks/use-disclosure';
+import { useDisclosure } from '@/shared/hooks/use-disclosure/use-disclosure';
 import { TriggerVariant } from '@/shared/types';
 import { truncateString } from '@/shared/utils/text/text.utils';
 import { Loader2, Trash2 } from 'lucide-react';

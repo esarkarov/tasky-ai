@@ -3,7 +3,7 @@ import { TaskForm } from '@/features/tasks/components/organisms/TaskForm/TaskFor
 import { TaskItem } from '@/features/tasks/components/organisms/TaskItem/TaskItem';
 import { useTaskMutation } from '@/features/tasks/hooks/use-task-mutation';
 import { TaskEntity } from '@/features/tasks/types';
-import { useDisclosure } from '@/shared/hooks/use-disclosure';
+import { useDisclosure } from '@/shared/hooks/use-disclosure/use-disclosure';
 import { memo } from 'react';
 import { useFetcher } from 'react-router';
 

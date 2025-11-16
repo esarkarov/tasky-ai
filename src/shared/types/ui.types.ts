@@ -1,4 +1,4 @@
-import { ToasterToast } from '@/shared/hooks/use-toast';
+import { ToasterToast } from '@/shared/hooks/use-toast/use-toast';
 
 interface Img {
   src: string;

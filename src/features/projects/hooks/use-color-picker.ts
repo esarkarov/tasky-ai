@@ -1,4 +1,4 @@
-import { useDisclosure } from '@/shared/hooks/use-disclosure';
+import { useDisclosure } from '@/shared/hooks/use-disclosure/use-disclosure';
 import { useCallback, useState } from 'react';
 import type { ColorValue, UseColorPickerParams } from '../types';
 

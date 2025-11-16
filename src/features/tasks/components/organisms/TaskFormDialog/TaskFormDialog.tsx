@@ -2,7 +2,7 @@ import { TaskForm } from '@/features/tasks/components/organisms/TaskForm/TaskFor
 import { useTaskMutation } from '@/features/tasks/hooks/use-task-mutation';
 import { Dialog, DialogContent, DialogTrigger } from '@/shared/components/ui/dialog';
 import { ROUTES } from '@/shared/constants/routes';
-import { useDisclosure } from '@/shared/hooks/use-disclosure';
+import { useDisclosure } from '@/shared/hooks/use-disclosure/use-disclosure';
 import { startOfToday } from 'date-fns';
 import type { PropsWithChildren } from 'react';
 import { useLocation } from 'react-router';

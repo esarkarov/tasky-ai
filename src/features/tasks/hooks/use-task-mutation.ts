@@ -5,7 +5,7 @@ import { buildTaskSuccessDescription, executeWithToast } from '@/shared/utils/op
 import { useCallback } from 'react';
 import { TaskFormInput, UseTaskMutationParams } from '../types';
 import { useFetcher } from 'react-router';
-import { useToast } from '@/shared/hooks/use-toast';
+import { useToast } from '@/shared/hooks/use-toast/use-toast';
 
 export const useTaskMutation = ({ onSuccess }: UseTaskMutationParams = {}) => {
   const fetcher = useFetcher();

@@ -14,7 +14,7 @@ import {
   PageList,
   PageTitle,
 } from '@/shared/components/templates/PageTemplate/PageTemplate';
-import { useLoadMore } from '@/shared/hooks/use-load-more';
+import { useLoadMore } from '@/shared/hooks/use-load-more/use-load-more';
 import { ProjectsWithTasksLoaderData } from '@/shared/types';
 import { ClipboardCheck } from 'lucide-react';
 import { useLoaderData } from 'react-router';

@@ -76,7 +76,7 @@ vi.mock('@/features/projects/hooks/use-project-filter', () => ({
 }));
 
 const mockUseLoadMore = vi.fn();
-vi.mock('@/shared/hooks/use-load-more', () => ({
+vi.mock('@/shared/hooks/use-load-more/use-load-more', () => ({
   useLoadMore: (tasks: TaskEntity[]) => mockUseLoadMore(tasks),
 }));
 
