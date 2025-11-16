@@ -1,10 +1,10 @@
 import { TaskCounts } from '@/features/tasks/types';
 import { ROUTES } from '@/shared/constants/routes';
+import { cn, getBadgeCount, getTaskDueDateColorClass } from '@/shared/utils/ui/ui.utils';
 import clsx from 'clsx';
 import { isBefore, isToday, isTomorrow, startOfToday } from 'date-fns';
 import { twMerge } from 'tailwind-merge';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
-import { cn, getBadgeCount, getTaskDueDateColorClass } from './ui.utils';
 
 vi.mock('clsx');
 vi.mock('tailwind-merge', () => ({

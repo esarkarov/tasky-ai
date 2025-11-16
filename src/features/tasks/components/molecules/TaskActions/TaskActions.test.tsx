@@ -40,7 +40,7 @@ vi.mock('@/shared/components/molecules/ConfirmationDialog/ConfirmationDialog', (
   ),
 }));
 
-vi.mock('@/features/tasks/hooks/use-task-mutation', () => ({
+vi.mock('@/features/tasks/hooks/use-task-mutation/use-task-mutation', () => ({
   useTaskMutation: () => ({
     handleDelete: vi.fn(),
   }),

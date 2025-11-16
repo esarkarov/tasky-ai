@@ -1,8 +1,8 @@
+import { AppSidebar } from '@/shared/components/organisms/AppSidebar/AppSidebar';
 import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
-import { describe, it, expect, vi, beforeEach } from 'vitest';
-import { AppSidebar } from './AppSidebar';
 import { MemoryRouter } from 'react-router';
+import { beforeEach, describe, expect, it, vi } from 'vitest';
 
 const mockSetOpenMobile = vi.fn();
 let mockIsMobile = false;

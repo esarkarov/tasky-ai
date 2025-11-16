@@ -1,7 +1,7 @@
 import { INITIAL_COUNT, PAGE_SIZE } from '@/shared/constants/pagination';
+import { useLoadMore } from '@/shared/hooks/use-load-more/use-load-more';
 import { act, renderHook } from '@testing-library/react';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
-import { useLoadMore } from './use-load-more';
 
 describe('useLoadMore', () => {
   beforeEach(() => {

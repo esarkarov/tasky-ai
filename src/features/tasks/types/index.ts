@@ -42,7 +42,7 @@ export interface UseTaskCompletionParams {
 export interface UseTaskFormCompositeParams {
   defaultValues?: TaskFormInput;
   projects: ProjectListItem[];
-  onCancel: () => void;
+  onCancel?: () => void;
   onSubmit?: (formData: TaskFormInput, taskId?: string) => Promise<void>;
   enableChronoParsing?: boolean;
 }

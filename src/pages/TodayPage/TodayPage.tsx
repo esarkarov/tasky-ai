@@ -3,7 +3,7 @@ import { ProjectEntity } from '@/features/projects/types';
 import { AddTaskButton } from '@/features/tasks/components/atoms/AddTaskButton/AddTaskButton';
 import { TaskCard } from '@/features/tasks/components/organisms/TaskCard/TaskCard';
 import { TaskForm } from '@/features/tasks/components/organisms/TaskForm/TaskForm';
-import { useTaskMutation } from '@/features/tasks/hooks/use-task-mutation';
+import { useTaskMutation } from '@/features/tasks/hooks/use-task-mutation/use-task-mutation';
 import { Head } from '@/shared/components/atoms/Head/Head';
 import { ItemList } from '@/shared/components/atoms/List/List';
 import { LoadMoreButton } from '@/shared/components/atoms/LoadMoreButton/LoadMoreButton';

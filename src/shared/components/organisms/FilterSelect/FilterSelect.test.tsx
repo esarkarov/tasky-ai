@@ -1,8 +1,8 @@
 import { ProjectListItem } from '@/features/projects/types';
+import { FilterSelect } from '@/shared/components/organisms/FilterSelect/FilterSelect';
 import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
-import { FilterSelect } from './FilterSelect';
 
 let mockOnValueChange: ((value: string) => void) | null = null;
 

@@ -1,8 +1,8 @@
+import { RootTemplate } from '@/shared/components/templates/RootTemplate/RootTemplate';
 import { NavigationState } from '@/shared/types';
 import { render, screen } from '@testing-library/react';
 import { MemoryRouter } from 'react-router';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
-import { RootTemplate } from './RootTemplate';
 
 vi.mock('@/shared/components/organisms/Header/Header', () => ({
   Header: () => <header data-testid="header">Header</header>,

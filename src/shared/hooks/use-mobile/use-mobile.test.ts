@@ -1,6 +1,6 @@
+import { useIsMobile } from '@/shared/hooks/use-mobile/use-mobile';
 import { renderHook, waitFor } from '@testing-library/react';
-import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
-import { useIsMobile } from './use-mobile';
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
 describe('useIsMobile', () => {
   const originalInnerWidth = window.innerWidth;

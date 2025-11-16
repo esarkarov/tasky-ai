@@ -1,6 +1,11 @@
+import {
+  PageContainer,
+  PageHeader,
+  PageList,
+  PageTitle,
+} from '@/shared/components/templates/PageTemplate/PageTemplate';
 import { render, screen } from '@testing-library/react';
-import { describe, it, expect } from 'vitest';
-import { PageContainer, PageHeader, PageList, PageTitle } from './PageTemplate';
+import { describe, expect, it } from 'vitest';
 
 describe('PageTemplate Components', () => {
   const renderWithChildren = (Component: React.FC<React.PropsWithChildren>, text = 'Test Content') =>

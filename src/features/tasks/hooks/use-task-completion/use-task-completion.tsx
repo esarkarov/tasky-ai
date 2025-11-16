@@ -6,7 +6,7 @@ import { TASK_TOAST_CONTENTS } from '@/shared/constants/ui-contents';
 import { useToast } from '@/shared/hooks/use-toast/use-toast';
 import { useCallback } from 'react';
 import { useFetcher } from 'react-router';
-import { UseTaskCompletionParams } from '../types';
+import { UseTaskCompletionParams } from '../../types';
 
 export const useTaskCompletion = ({ enableUndo = true, onSuccess }: UseTaskCompletionParams = {}) => {
   const fetcher = useFetcher();

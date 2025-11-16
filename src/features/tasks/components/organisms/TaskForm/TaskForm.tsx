@@ -2,8 +2,8 @@ import { ProjectPicker } from '@/features/projects/components/molecules/ProjectP
 import { TaskContentInput } from '@/features/tasks/components/molecules/TaskContentInput/TaskContentInput';
 import { TaskDueDatePicker } from '@/features/tasks/components/molecules/TaskDueDatePicker/TaskDueDatePicker';
 import { TaskFormActions } from '@/features/tasks/components/molecules/TaskFormActions/TaskFormActions';
-import { useTaskFormComposite } from '@/features/tasks/hooks/use-task-form-composite';
-import { useTaskMutation } from '@/features/tasks/hooks/use-task-mutation';
+import { useTaskFormComposite } from '@/features/tasks/hooks/use-task-form-composite/use-task-form-composite';
+import { useTaskMutation } from '@/features/tasks/hooks/use-task-mutation/use-task-mutation';
 import { TaskFormInput } from '@/features/tasks/types';
 import { Card, CardContent, CardFooter } from '@/shared/components/ui/card';
 import { Separator } from '@/shared/components/ui/separator';

@@ -1,7 +1,7 @@
-import { render, screen, waitFor } from '@testing-library/react';
-import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
-import { AppTopBar } from './AppTopBar';
+import { AppTopBar } from '@/shared/components/organisms/AppTopBar/AppTopBar';
 import { TIMING } from '@/shared/constants/timing';
+import { render, screen, waitFor } from '@testing-library/react';
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
 vi.mock('@/shared/components/atoms/AppBarTitle/AppBarTitle', () => ({
   AppBarTitle: ({

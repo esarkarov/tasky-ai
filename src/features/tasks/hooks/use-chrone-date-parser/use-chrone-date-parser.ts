@@ -1,6 +1,6 @@
 import * as chrono from 'chrono-node';
 import { useEffect } from 'react';
-import { UseChronoDateParserParams } from '../types';
+import { UseChronoDateParserParams } from '../../types';
 
 export const useChronoDateParser = ({ content, onDateParsed, enabled = true }: UseChronoDateParserParams) => {
   useEffect(() => {

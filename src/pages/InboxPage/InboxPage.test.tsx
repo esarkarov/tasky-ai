@@ -1,10 +1,10 @@
-import { render, screen } from '@testing-library/react';
-import { userEvent } from '@testing-library/user-event';
-import { beforeEach, describe, expect, it, vi } from 'vitest';
-import { InboxPage } from './InboxPage';
-import { useLoaderData } from 'react-router';
 import { TaskEntity } from '@/features/tasks/types';
 import { TasksLoaderData } from '@/shared/types';
+import { render, screen } from '@testing-library/react';
+import { userEvent } from '@testing-library/user-event';
+import { useLoaderData } from 'react-router';
+import { beforeEach, describe, expect, it, vi } from 'vitest';
+import { InboxPage } from './InboxPage';
 
 vi.mock('react-router', () => ({
   useLoaderData: vi.fn(),
@@ -93,7 +93,7 @@ vi.mock('@/shared/components/atoms/LoadMoreButton/LoadMoreButton', () => ({
 }));
 
 const mockUseTaskMutation = vi.fn();
-vi.mock('@/features/tasks/hooks/use-task-mutation', () => ({
+vi.mock('@/features/tasks/hooks/use-task-mutation/use-task-mutation', () => ({
   useTaskMutation: () => mockUseTaskMutation(),
 }));
 

@@ -2,7 +2,7 @@ import { ProjectActionMenu } from '@/features/projects/components/organisms/Proj
 import { AddTaskButton } from '@/features/tasks/components/atoms/AddTaskButton/AddTaskButton';
 import { TaskCard } from '@/features/tasks/components/organisms/TaskCard/TaskCard';
 import { TaskForm } from '@/features/tasks/components/organisms/TaskForm/TaskForm';
-import { useTaskMutation } from '@/features/tasks/hooks/use-task-mutation';
+import { useTaskMutation } from '@/features/tasks/hooks/use-task-mutation/use-task-mutation';
 import { TaskEntity } from '@/features/tasks/types';
 import { Head } from '@/shared/components/atoms/Head/Head';
 import { ItemList } from '@/shared/components/atoms/List/List';

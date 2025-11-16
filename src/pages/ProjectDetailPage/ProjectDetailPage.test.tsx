@@ -101,7 +101,7 @@ vi.mock('@/shared/components/atoms/LoadMoreButton/LoadMoreButton', () => ({
 }));
 
 const mockUseTaskMutation = vi.fn();
-vi.mock('@/features/tasks/hooks/use-task-mutation', () => ({
+vi.mock('@/features/tasks/hooks/use-task-mutation/use-task-mutation', () => ({
   useTaskMutation: () => mockUseTaskMutation(),
 }));
 

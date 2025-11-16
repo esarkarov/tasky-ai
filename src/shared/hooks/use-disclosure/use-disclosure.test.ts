@@ -1,6 +1,6 @@
-import { renderHook, act } from '@testing-library/react';
-import { describe, it, expect } from 'vitest';
-import { useDisclosure } from './use-disclosure';
+import { useDisclosure } from '@/shared/hooks/use-disclosure/use-disclosure';
+import { act, renderHook } from '@testing-library/react';
+import { describe, expect, it } from 'vitest';
 
 describe('useDisclosure', () => {
   describe('initial state', () => {

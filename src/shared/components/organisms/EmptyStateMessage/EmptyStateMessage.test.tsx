@@ -1,6 +1,6 @@
+import { EmptyStateMessage } from '@/shared/components/organisms/EmptyStateMessage/EmptyStateMessage';
 import { render, screen } from '@testing-library/react';
-import { describe, it, expect, vi } from 'vitest';
-import { EmptyStateMessage } from './EmptyStateMessage';
+import { describe, expect, it, vi } from 'vitest';
 
 vi.mock('@/shared/constants/ui-contents', () => ({
   EMPTY_STATE_CONTENTS: {

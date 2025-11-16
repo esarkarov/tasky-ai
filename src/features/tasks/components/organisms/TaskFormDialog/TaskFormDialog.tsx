@@ -1,5 +1,5 @@
 import { TaskForm } from '@/features/tasks/components/organisms/TaskForm/TaskForm';
-import { useTaskMutation } from '@/features/tasks/hooks/use-task-mutation';
+import { useTaskMutation } from '@/features/tasks/hooks/use-task-mutation/use-task-mutation';
 import { Dialog, DialogContent, DialogTrigger } from '@/shared/components/ui/dialog';
 import { ROUTES } from '@/shared/constants/routes';
 import { useDisclosure } from '@/shared/hooks/use-disclosure/use-disclosure';

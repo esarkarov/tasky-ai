@@ -1,8 +1,8 @@
 import { useCallback, useMemo, useState } from 'react';
-import type { TaskFormInput, UseTaskFormCompositeParams } from '../types';
-import { useTaskFormState } from './use-task-form-state';
+import type { TaskFormInput, UseTaskFormCompositeParams } from '../../types';
+import { useTaskFormState } from '../use-task-form-state/use-task-form-state';
 import { useProjectSelection } from '@/features/projects/hooks/use-project-selection';
-import { useChronoDateParser } from './use-chrone-date-parser';
+import { useChronoDateParser } from '../use-chrone-date-parser/use-chrone-date-parser';
 
 export const useTaskFormComposite = ({
   defaultValues,

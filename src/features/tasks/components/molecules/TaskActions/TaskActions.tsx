@@ -1,5 +1,5 @@
 import { EditTaskButton } from '@/features/tasks/components/atoms/EditTaskButton/EditTaskButton';
-import { useTaskMutation } from '@/features/tasks/hooks/use-task-mutation';
+import { useTaskMutation } from '@/features/tasks/hooks/use-task-mutation/use-task-mutation';
 import { TaskEntity } from '@/features/tasks/types';
 import { ConfirmationDialog } from '@/shared/components/molecules/ConfirmationDialog/ConfirmationDialog';
 

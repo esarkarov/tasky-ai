@@ -1,4 +1,4 @@
-import { useTaskCompletion } from '@/features/tasks/hooks/use-task-completion';
+import { useTaskCompletion } from '@/features/tasks/hooks/use-task-completion/use-task-completion';
 import { Button } from '@/shared/components/ui/button';
 import { cn } from '@/shared/utils/ui/ui.utils';
 import { Check } from 'lucide-react';

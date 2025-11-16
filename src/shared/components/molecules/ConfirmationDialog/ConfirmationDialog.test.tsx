@@ -5,7 +5,7 @@ import { ConfirmationDialog } from './ConfirmationDialog';
 import { ReactNode } from 'react';
 
 const mockIsLoading = vi.fn(() => false);
-vi.mock('@/features/tasks/hooks/use-task-mutation', () => ({
+vi.mock('@/features/tasks/hooks/use-task-mutation/use-task-mutation', () => ({
   useTaskMutation: () => ({
     isLoading: mockIsLoading(),
   }),

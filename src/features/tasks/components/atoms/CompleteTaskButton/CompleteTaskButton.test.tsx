@@ -5,7 +5,7 @@ import { CompleteTaskButton } from './CompleteTaskButton';
 import { ReactNode } from 'react';
 
 const mockToggleComplete = vi.fn();
-vi.mock('@/features/tasks/hooks/use-task-completion', () => ({
+vi.mock('@/features/tasks/hooks/use-task-completion/use-task-completion', () => ({
   useTaskCompletion: () => ({
     toggleComplete: mockToggleComplete,
   }),

@@ -1,8 +1,8 @@
+import { AppTemplate } from '@/shared/components/templates/AppTemplate/AppTemplate';
 import { NavigationState } from '@/shared/types';
 import { render, screen } from '@testing-library/react';
 import { MemoryRouter } from 'react-router';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
-import { AppTemplate } from './AppTemplate';
 
 vi.mock('@/shared/components/organisms/AppSidebar/AppSidebar', () => ({
   AppSidebar: () => <aside data-testid="app-sidebar">Sidebar</aside>,
