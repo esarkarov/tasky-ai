@@ -1,8 +1,13 @@
 import { useAITaskGeneration } from '@/features/ai/hooks/use-ai-task-generations';
 import { useCallback, useMemo, useState } from 'react';
-import type { ProjectFormInput, UseProjectFormCompositeParams } from '../types';
+import type { ProjectFormInput, ProjectInput } from '../types';
 import { useColorPicker } from './use-color-picker';
 import { useProjectFormState } from './use-project-form-state';
+export interface UseProjectFormCompositeParams {
+  defaultValues?: ProjectInput;
+  onSubmit: (data: ProjectFormInput) => Promise<void>;
+  enableAI?: boolean;
+}
 
 export const useProjectFormComposite = ({
   defaultValues,

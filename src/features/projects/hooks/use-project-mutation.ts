@@ -1,10 +1,13 @@
-import type { ProjectFormInput, UseProjectMutationParams } from '@/features/projects/types';
+import type { ProjectFormInput } from '@/features/projects/types';
 import { HTTP_METHODS } from '@/shared/constants/http';
 import { ROUTES } from '@/shared/constants/routes';
 import { PROJECT_TOAST_CONTENTS } from '@/shared/constants/ui-contents';
 import { useToast } from '@/shared/hooks/use-toast/use-toast';
 import { executeWithToast } from '@/shared/utils/operation/operation.utils';
 import { useFetcher } from 'react-router';
+export interface UseProjectMutationParams {
+  onSuccess?: () => void;
+}
 
 export const useProjectMutation = ({ onSuccess }: UseProjectMutationParams = {}) => {
   const fetcher = useFetcher();

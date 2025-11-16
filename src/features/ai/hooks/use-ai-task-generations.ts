@@ -1,5 +1,7 @@
 import { useState, useCallback, useMemo } from 'react';
-import { UseAITaskGenerationParams } from '../types';
+export interface UseAITaskGenerationParams {
+  enabled?: boolean;
+}
 
 export const useAITaskGeneration = ({ enabled }: UseAITaskGenerationParams = {}) => {
   const [aiEnabled, setAiEnabled] = useState(enabled ?? false);

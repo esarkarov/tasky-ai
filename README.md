@@ -26,8 +26,7 @@ It combines **Clerk authentication**, **Appwrite persistence**, and **Google Gem
 - [Tech Stack](#tech-stack)
 - [Getting Started](#getting-started)
 - [Usage](#usage)
-- [Folder Structure & Architecture](#folder-structure--architecture)
-- [Core Services & Modules](#core-services--modules)
+- [Folder Structure](#folder-structure)
 - [Author](#author)
 
 ---
@@ -123,48 +122,15 @@ Additional scripts are available for coverage, lint fixing, and auto-formatting.
 
 ---
 
-## 🏗️ Folder Structure & Architecture
+## 🏗️ Folder Structure
 
 ```bash
 src/
-├── assets/          # Static assets for marketing and app surfaces
-├── components/      # Reusable UI blocks (atoms → organisms → templates)
-├── config/          # Runtime configuration (environment schema)
-├── constants/       # Shared constants (routes, defaults)
-├── hooks/           # Custom React hooks
-├── lib/             # External clients (Appwrite, Google Gemini)
-├── pages/           # Route-level screens
-├── queries/         # Appwrite query builder utilities
-├── repositories/    # Data-access abstractions over Appwrite
-├── router/          # Route definitions, loaders, actions
-├── services/        # Domain logic orchestrating repositories & utilities
-├── types/           # Shared TypeScript types & interfaces
-├── utils/           # Cross-cutting helpers (auth, text, responses)
-└── tests/           # Global Vitest / jsdom setup
+├── core/          # Infrastructure
+├── features/      # Business features
+├── pages/         # Route-level pages
+├── shared/        # Shared resources
 ```
-
-### Architectural Layers
-
-- **Routing layer:** `src/router` — centralizes public/protected routes, lazy components, loaders, and actions.
-- **Service layer:** `src/services` — encapsulates business logic like AI-assisted project creation and bulk persistence.
-- **Data access:** `src/repositories` — wraps Appwrite operations with consistent filtering/query logic.
-- **Infrastructure clients:** `src/lib` — configures external SDKs (Appwrite, Google Gemini).
-- **Presentation layer:** `src/pages` — responsive UI integrated with Clerk session handling.
-
----
-
-## 🧩 Core Modules
-
-- **Authentication shell (`src/App.tsx`)** — wraps the router with `ClerkProvider`, adds theming and global toasts.
-- **Task service (`src/services/task/task.service.ts`)** — aggregates counts, filters by context, and mutates Appwrite documents.
-- **Project service (`src/services/project/project.service.ts`)** — manages project creation, updates, deletion, and track recent projects.
-- **AI service (`src/services/ai/ai.service.ts`)** — handles Gemini requests, parses JSON responses, and validates structure.
-- **Action handlers (`src/router/actions/*`)** — manages create/update/delete actions and AI-generated task wiring.
-- **State loaders (`src/router/loaders/*`)** — fetch and normalize route data before render (SSR-like).
-- **Third party libraries (`src/lib/*`)** — centralized clients and adapters for external services
-- **Appwrite repositories (`src/repositories/*`)** — provide reusable CRUD operations for tasks/projects.
-
----
 
 ## 👨‍💻 Author
 

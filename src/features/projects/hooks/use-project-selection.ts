@@ -1,5 +1,9 @@
-import type { SelectedProject, UseProjectSelectionParams } from '@/features/projects/types';
+import type { ProjectListItem, SelectedProject } from '@/features/projects/types';
 import { useCallback, useEffect, useState } from 'react';
+export interface UseProjectSelectionParams {
+  defaultProjectId?: string | null;
+  projects: ProjectListItem[];
+}
 
 export const useProjectSelection = ({ defaultProjectId, projects }: UseProjectSelectionParams) => {
   const [selectedProject, setSelectedProject] = useState<SelectedProject>({

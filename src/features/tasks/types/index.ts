@@ -1,4 +1,4 @@
-import { ProjectEntity, ProjectListItem } from '@/features/projects/types';
+import { ProjectEntity } from '@/features/projects/types';
 import { BaseEntity, PaginatedResponse } from '@/shared/types';
 
 export interface TaskEntity extends BaseEntity {
@@ -29,26 +29,3 @@ export interface TaskUpdateInput extends Omit<TaskInput, 'completed'> {
   completed?: boolean;
 }
 export type TasksResponse = PaginatedResponse<TaskEntity>;
-
-export interface UseChronoDateParserParams {
-  content: string;
-  onDateParsed: (date: Date) => void;
-  enabled?: boolean;
-}
-export interface UseTaskCompletionParams {
-  enableUndo?: boolean;
-  onSuccess?: () => void;
-}
-export interface UseTaskFormCompositeParams {
-  defaultValues?: TaskFormInput;
-  projects: ProjectListItem[];
-  onCancel?: () => void;
-  onSubmit?: (formData: TaskFormInput, taskId?: string) => Promise<void>;
-  enableChronoParsing?: boolean;
-}
-export interface UseTaskFormStateParams {
-  defaultValues?: TaskFormInput;
-}
-export interface UseTaskMutationParams {
-  onSuccess?: () => void;
-}

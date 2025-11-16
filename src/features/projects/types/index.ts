@@ -1,5 +1,5 @@
 import { TaskEntity } from '@/features/tasks/types';
-import { BaseEntity, CrudMode, PaginatedResponse } from '@/shared/types';
+import { BaseEntity, PaginatedResponse } from '@/shared/types';
 
 export interface ProjectEntity extends BaseEntity {
   userId: string;
@@ -37,30 +37,3 @@ export interface ColorValue {
 }
 export type ProjectUpdateInput = ProjectInput;
 export type ProjectsListResponse = PaginatedResponse<ProjectListItem>;
-
-export interface UseProjectModalParams {
-  mode?: CrudMode;
-  onSuccess?: () => void;
-}
-export interface UseProjectMutationParams {
-  onSuccess?: () => void;
-}
-export interface UseProjectFilterParams {
-  tasks: TaskEntity[];
-}
-export interface UseProjectSelectionParams {
-  defaultProjectId?: string | null;
-  projects: ProjectListItem[];
-}
-export interface UseProjectFormCompositeParams {
-  defaultValues?: ProjectInput;
-  onSubmit: (data: ProjectFormInput) => Promise<void>;
-  enableAI?: boolean;
-}
-export interface UseProjectFormStateParams {
-  defaultValues?: ProjectInput;
-}
-export interface UseColorPickerParams {
-  defaultColor: ColorValue;
-  onColorChange: (color: ColorValue) => void;
-}

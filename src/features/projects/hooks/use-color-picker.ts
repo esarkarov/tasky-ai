@@ -1,6 +1,10 @@
 import { useDisclosure } from '@/shared/hooks/use-disclosure/use-disclosure';
 import { useCallback, useState } from 'react';
-import type { ColorValue, UseColorPickerParams } from '../types';
+import type { ColorValue } from '../types';
+export interface UseColorPickerParams {
+  defaultColor: ColorValue;
+  onColorChange: (color: ColorValue) => void;
+}
 
 export const useColorPicker = ({ defaultColor, onColorChange }: UseColorPickerParams) => {
   const { isOpen, open: openSelect, close: cancelSelect } = useDisclosure();

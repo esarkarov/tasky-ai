@@ -1,5 +1,8 @@
 import { useCallback, useMemo, useState } from 'react';
-import type { TaskFormInput, UseTaskFormStateParams } from '../../types';
+import type { TaskFormInput } from '../../types';
+export interface UseTaskFormStateParams {
+  defaultValues?: TaskFormInput;
+}
 
 export const useTaskFormState = ({ defaultValues }: UseTaskFormStateParams = {}) => {
   const [content, setContent] = useState(defaultValues?.content || '');

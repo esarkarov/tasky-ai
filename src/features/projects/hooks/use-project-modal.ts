@@ -1,9 +1,14 @@
-import type { ProjectFormInput, UseProjectModalParams } from '@/features/projects/types';
+import type { ProjectFormInput } from '@/features/projects/types';
 import { ROUTES } from '@/shared/constants/routes';
 import { useDisclosure } from '@/shared/hooks/use-disclosure/use-disclosure';
 import { useCallback } from 'react';
 import { useLocation, useNavigate } from 'react-router';
 import { useProjectMutation } from './use-project-mutation';
+import { CrudMode } from '@/shared/types';
+export interface UseProjectModalParams {
+  mode?: CrudMode;
+  onSuccess?: () => void;
+}
 
 export const useProjectModal = ({ mode = 'create', onSuccess }: UseProjectModalParams = {}) => {
   const navigate = useNavigate();

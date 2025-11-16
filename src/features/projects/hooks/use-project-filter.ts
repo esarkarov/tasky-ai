@@ -1,5 +1,8 @@
-import { UseProjectFilterParams } from '@/features/projects/types';
+import { TaskEntity } from '@/features/tasks/types';
 import { useMemo, useState } from 'react';
+export interface UseProjectFilterParams {
+  tasks: TaskEntity[];
+}
 
 export const useProjectFilter = ({ tasks }: UseProjectFilterParams) => {
   const [filterValue, setFilterValue] = useState<string | null>(null);
