@@ -26,9 +26,7 @@ export const EmptyStateMessage = memo(({ variant }: EmptyStateMessageProps) => {
           <figcaption className="sr-only">{title}</figcaption>
         </figure>
       )}
-
       <h2 className="mt-4 mb-2 text-base font-semibold">{title}</h2>
-
       <p className="px-4 text-sm text-muted-foreground">{description}</p>
     </section>
   );

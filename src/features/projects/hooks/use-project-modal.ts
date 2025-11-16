@@ -9,7 +9,7 @@ export const useProjectModal = ({ mode = 'create', onSuccess }: UseProjectModalP
   const navigate = useNavigate();
   const { pathname } = useLocation();
   const { close: cancelModal } = useDisclosure();
-  const isViewingProject = pathname.startsWith('/projects/');
+  const isViewingProject = pathname.startsWith(ROUTES.PROJECTS);
 
   const projectMutation = useProjectMutation({
     onSuccess: () => {
@@ -31,7 +31,7 @@ export const useProjectModal = ({ mode = 'create', onSuccess }: UseProjectModalP
   const handleDelete = useCallback(
     async (id: string, name: string) => {
       if (isViewingProject && pathname.includes(id)) {
-        navigate(ROUTES.INBOX);
+        navigate(ROUTES.PROJECTS);
       }
 
       await projectMutation.deleteProject(id, name);
