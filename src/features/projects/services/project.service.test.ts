@@ -1,6 +1,6 @@
 import { projectRepository } from '@/features/projects/repositories/project.repository';
 import { projectService } from '@/features/projects/services/project.service';
-import { ProjectEntity, ProjectFormInput, ProjectListItem, ProjectsListResponse } from '@/features/projects/types';
+import { Project, ProjectFormInput, ProjectListItem, ProjectsListResponse } from '@/features/projects/types';
 import { DEFAULT_FETCH_LIMIT } from '@/shared/constants/validation';
 import { getUserId } from '@/shared/utils/auth/auth.utils';
 import { generateID } from '@/shared/utils/text/text.utils';
@@ -34,7 +34,7 @@ describe('projectService', () => {
   const MOCK_PROJECT_ID = 'project-123';
   const MOCK_GENERATED_ID = 'generated-id-123';
 
-  const createMockProject = (overrides?: Partial<ProjectEntity>): ProjectEntity => ({
+  const createMockProject = (overrides?: Partial<Project>): Project => ({
     $id: MOCK_PROJECT_ID,
     userId: MOCK_USER_ID,
     name: 'Test Project',
@@ -102,13 +102,13 @@ describe('projectService', () => {
     });
   });
 
-  describe('findAll', () => {
+  describe('search', () => {
     it('should return user projects with search query', async () => {
       const searchQuery = 'test';
       const mockResponse = createMockProjectsResponse();
       mockedProjectRepository.findByUserId.mockResolvedValue(mockResponse);
 
-      const result = await projectService.findAll(searchQuery);
+      const result = await projectService.search(searchQuery);
 
       expect(mockedGetUserId).toHaveBeenCalled();
       expect(mockedProjectRepository.findByUserId).toHaveBeenCalledWith(MOCK_USER_ID, { search: searchQuery });
@@ -119,7 +119,7 @@ describe('projectService', () => {
       const searchQuery = 'test';
       mockedProjectRepository.findByUserId.mockRejectedValue(new Error('Database error'));
 
-      await expect(projectService.findAll(searchQuery)).rejects.toThrow('Failed to load projects');
+      await expect(projectService.search(searchQuery)).rejects.toThrow('Failed to load projects');
     });
   });
 

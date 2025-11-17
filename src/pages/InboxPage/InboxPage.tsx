@@ -1,4 +1,4 @@
-import { ProjectEntity } from '@/features/projects/types';
+import { Project } from '@/features/projects/types';
 import { AddTaskButton } from '@/features/tasks/components/atoms/AddTaskButton/AddTaskButton';
 import { TaskCard } from '@/features/tasks/components/organisms/TaskCard/TaskCard';
 import { TaskForm } from '@/features/tasks/components/organisms/TaskForm/TaskForm';
@@ -70,7 +70,7 @@ export const InboxPage = () => {
                 content={content}
                 completed={completed}
                 dueDate={due_date as Date}
-                project={projectId as ProjectEntity}
+                project={projectId as Project}
               />
             </ItemList>
           ))}

@@ -1,7 +1,7 @@
 import { projectService } from '@/features/projects/services/project.service';
-import type { ProjectEntity, ProjectListItem, ProjectsListResponse } from '@/features/projects/types';
+import type { Project, ProjectListItem, ProjectsListResponse } from '@/features/projects/types';
 import { taskService } from '@/features/tasks/services/task.service';
-import type { TaskEntity, TasksResponse } from '@/features/tasks/types';
+import type { Task, TasksResponse } from '@/features/tasks/types';
 import type { ProjectsWithTasksLoaderData, TasksLoaderData } from '@/shared/types';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { tasksTodayLoader } from './tasks-today.loader';
@@ -27,7 +27,7 @@ const createLoaderArgs = () => ({
   context: {},
 });
 
-const createMockTask = (overrides: Partial<TaskEntity> = {}): TaskEntity => ({
+const createMockTask = (overrides: Partial<Task> = {}): Task => ({
   id: '1',
   $id: 'task-123',
   content: 'Today task',
@@ -42,12 +42,12 @@ const createMockTask = (overrides: Partial<TaskEntity> = {}): TaskEntity => ({
   ...overrides,
 });
 
-const createMockTasks = (documents: TaskEntity[] = [createMockTask()]): TasksResponse => ({
+const createMockTasks = (documents: Task[] = [createMockTask()]): TasksResponse => ({
   total: documents.length,
   documents,
 });
 
-const createMockProject = (overrides: Partial<ProjectListItem> = {}): ProjectEntity => ({
+const createMockProject = (overrides: Partial<ProjectListItem> = {}): Project => ({
   $id: 'project-1',
   userId: 'user-123',
   name: 'Work Project',

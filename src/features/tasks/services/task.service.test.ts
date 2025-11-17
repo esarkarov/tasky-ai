@@ -1,7 +1,7 @@
 import { AIGeneratedTask } from '@/features/ai/types';
 import { taskRepository } from '@/features/tasks/repositories/task.repository';
 import { taskService } from '@/features/tasks/services/task.service';
-import { TaskEntity, TaskFormInput, TasksResponse } from '@/features/tasks/types';
+import { Task, TaskFormInput, TasksResponse } from '@/features/tasks/types';
 import { getUserId } from '@/shared/utils/auth/auth.utils';
 import { generateID } from '@/shared/utils/text/text.utils';
 import { startOfToday, startOfTomorrow } from 'date-fns';
@@ -45,7 +45,7 @@ describe('taskService', () => {
   const MOCK_TODAY_DATE = '2023-01-01T00:00:00.000Z';
   const MOCK_TOMORROW_DATE = '2023-01-02T00:00:00.000Z';
 
-  const createMockTask = (overrides?: Partial<TaskEntity>): TaskEntity => ({
+  const createMockTask = (overrides?: Partial<Task>): Task => ({
     $id: MOCK_TASK_ID,
     id: MOCK_TASK_ID,
     content: 'Test Task',
@@ -60,7 +60,7 @@ describe('taskService', () => {
     ...overrides,
   });
 
-  const createMockTasksResponse = (tasks: TaskEntity[] = [createMockTask()]): TasksResponse => ({
+  const createMockTasksResponse = (tasks: Task[] = [createMockTask()]): TasksResponse => ({
     documents: tasks,
     total: tasks.length,
   });

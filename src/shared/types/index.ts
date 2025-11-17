@@ -1,4 +1,4 @@
-import { ProjectEntity, ProjectsListResponse } from '@/features/projects/types';
+import { Project, ProjectsListResponse } from '@/features/projects/types';
 import { TaskCounts, TasksResponse } from '@/features/tasks/types';
 import { HTTP_METHODS, HTTP_STATUS } from '@/shared/constants/http';
 import { ToasterToast } from '@/shared/hooks/use-toast/use-toast';
@@ -14,7 +14,7 @@ export type TriggerVariant = 'icon' | 'menu-item';
 export type HttpStatusCode = (typeof HTTP_STATUS)[keyof typeof HTTP_STATUS];
 export type HttpMethod = (typeof HTTP_METHODS)[keyof typeof HTTP_METHODS];
 
-export interface BaseEntity extends Models.Document {
+export interface Base extends Models.Document {
   $id: string;
   $createdAt: string;
   $updatedAt: string;
@@ -45,7 +45,7 @@ export interface TasksLoaderData {
 }
 
 export interface ProjectDetailLoaderData {
-  project: ProjectEntity;
+  project: Project;
 }
 
 export interface ProjectsLoaderData {
@@ -53,7 +53,7 @@ export interface ProjectsLoaderData {
 }
 
 export interface ProjectDetailWithRecentLoaderData {
-  project: ProjectEntity;
+  project: Project;
   projects: ProjectsListResponse;
 }
 

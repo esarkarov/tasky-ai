@@ -1,14 +1,14 @@
-import { ProjectEntity } from '@/features/projects/types';
+import { Project } from '@/features/projects/types';
 import { CompleteTaskButton } from '@/features/tasks/components/atoms/CompleteTaskButton/CompleteTaskButton';
 import { TaskActions } from '@/features/tasks/components/molecules/TaskActions/TaskActions';
 import { TaskMeta } from '@/features/tasks/components/molecules/TaskMeta/TaskMeta';
-import { TaskEntity } from '@/features/tasks/types';
+import { Task } from '@/features/tasks/types';
 import { Card, CardContent } from '@/shared/components/ui/card';
 import { cn } from '@/shared/utils/ui/ui.utils';
 
 interface TaskItemProps {
-  project: ProjectEntity;
-  task: TaskEntity;
+  project: Project;
+  task: Task;
   handleEdit: () => void;
 }
 

@@ -1,5 +1,5 @@
 import { useProjectFilter } from '@/features/projects/hooks/use-project-filter';
-import { ProjectEntity } from '@/features/projects/types';
+import { Project } from '@/features/projects/types';
 import { TaskCard } from '@/features/tasks/components/organisms/TaskCard/TaskCard';
 import { Head } from '@/shared/components/atoms/Head/Head';
 import { ItemList } from '@/shared/components/atoms/List/List';
@@ -82,7 +82,7 @@ export const CompletedPage = () => {
                 content={content}
                 completed={completed}
                 dueDate={due_date as Date}
-                project={projectId as ProjectEntity}
+                project={projectId as Project}
               />
             </ItemList>
           ))}

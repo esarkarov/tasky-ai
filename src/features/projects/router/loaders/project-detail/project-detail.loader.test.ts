@@ -1,5 +1,5 @@
 import { projectService } from '@/features/projects/services/project.service';
-import type { ProjectEntity, ProjectsListResponse } from '@/features/projects/types';
+import type { Project, ProjectsListResponse } from '@/features/projects/types';
 import type { ProjectDetailLoaderData, ProjectDetailWithRecentLoaderData } from '@/shared/types';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { projectDetailLoader } from './project-detail.loader';
@@ -19,7 +19,7 @@ const createLoaderArgs = (projectId?: string) => ({
   context: {},
 });
 
-const createMockProject = (overrides: Partial<ProjectEntity> = {}): ProjectEntity => ({
+const createMockProject = (overrides: Partial<Project> = {}): Project => ({
   $id: 'project-123',
   name: 'Test Project',
   description: 'A test project',
@@ -35,7 +35,7 @@ const createMockProject = (overrides: Partial<ProjectEntity> = {}): ProjectEntit
   ...overrides,
 });
 
-const createMockProjects = (projects: ProjectEntity[] = [createMockProject()]): ProjectsListResponse => ({
+const createMockProjects = (projects: Project[] = [createMockProject()]): ProjectsListResponse => ({
   total: projects.length,
   documents: projects,
 });

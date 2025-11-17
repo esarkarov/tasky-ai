@@ -1,4 +1,4 @@
-import { TaskEntity } from '@/features/tasks/types';
+import { Task } from '@/features/tasks/types';
 import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
@@ -49,7 +49,7 @@ vi.mock('@/features/tasks/hooks/use-task-mutation/use-task-mutation', () => ({
 describe('TaskActions', () => {
   const mockHandleEdit = vi.fn();
 
-  const createMockTask = (overrides?: Partial<TaskEntity>): TaskEntity => ({
+  const createMockTask = (overrides?: Partial<Task>): Task => ({
     $id: '1',
     id: 'task-1',
     content: 'Test task content',
@@ -68,7 +68,7 @@ describe('TaskActions', () => {
     vi.clearAllMocks();
   });
 
-  const renderComponent = (task: TaskEntity) => {
+  const renderComponent = (task: Task) => {
     return render(
       <TaskActions
         task={task}

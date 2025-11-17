@@ -1,5 +1,5 @@
 import { aiService } from '@/features/ai/services/ai.service';
-import type { ProjectEntity, ProjectFormInput } from '@/features/projects/types';
+import type { Project, ProjectFormInput } from '@/features/projects/types';
 import { taskService } from '@/features/tasks/services/task.service';
 import { HTTP_STATUS } from '@/shared/constants/http';
 import { ROUTES } from '@/shared/constants/routes';
@@ -51,7 +51,7 @@ const createMockRequest = (body: object) =>
     body: JSON.stringify(body),
   });
 
-const createMockProject = (overrides?: Partial<ProjectEntity>): ProjectEntity => ({
+const createMockProject = (overrides?: Partial<Project>): Project => ({
   $id: 'project-123',
   userId: 'user-123',
   name: 'Test Project',

@@ -1,14 +1,14 @@
-import { TaskEntity } from '@/features/tasks/types';
-import { BaseEntity, PaginatedResponse } from '@/shared/types';
+import { Task } from '@/features/tasks/types';
+import { Base, PaginatedResponse } from '@/shared/types';
 
-export interface ProjectEntity extends BaseEntity {
+export interface Project extends Base {
   userId: string;
   name: string;
   color_name: string;
   color_hex: string;
-  tasks: TaskEntity[] | null;
+  tasks: Task[] | null;
 }
-export interface ProjectListItem extends BaseEntity {
+export interface ProjectListItem extends Base {
   name: string;
   color_name: string;
   color_hex: string;

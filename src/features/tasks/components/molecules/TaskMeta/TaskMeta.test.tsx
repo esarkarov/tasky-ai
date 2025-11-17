@@ -1,5 +1,5 @@
-import { ProjectEntity } from '@/features/projects/types';
-import { TaskEntity } from '@/features/tasks/types';
+import { Project } from '@/features/projects/types';
+import { Task } from '@/features/tasks/types';
 import { ROUTES } from '@/shared/constants/routes';
 import { render, screen } from '@testing-library/react';
 import { MemoryRouter } from 'react-router';
@@ -18,7 +18,7 @@ vi.mock('@/features/tasks/components/atoms/TaskDueDate/TaskDueDate', () => ({
 }));
 
 vi.mock('@/features/projects/components/atoms/ProjectBadge/ProjectBadge', () => ({
-  ProjectBadge: ({ project }: { project: ProjectEntity | null }) =>
+  ProjectBadge: ({ project }: { project: Project | null }) =>
     project && project.$id ? (
       <div
         data-testid="project-badge"
@@ -43,7 +43,7 @@ describe('TaskMeta', () => {
   const MOCK_PROJECT_ID = 'project-1';
   const MOCK_TASK_ID_1 = 'task-1';
 
-  const createMockTask = (overrides?: Partial<TaskEntity>): TaskEntity => ({
+  const createMockTask = (overrides?: Partial<Task>): Task => ({
     id: MOCK_TASK_ID_1,
     $id: MOCK_TASK_ID_1,
     content: 'Test task',
@@ -59,7 +59,7 @@ describe('TaskMeta', () => {
     ...overrides,
   });
 
-  const createMockProject = (overrides?: Partial<ProjectEntity>): ProjectEntity => ({
+  const createMockProject = (overrides?: Partial<Project>): Project => ({
     $id: MOCK_PROJECT_ID,
     userId: 'user-1',
     name: 'Test Project',

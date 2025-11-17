@@ -1,4 +1,4 @@
-import type { TaskEntity, TaskFormInput } from '@/features/tasks/types';
+import type { Task, TaskFormInput } from '@/features/tasks/types';
 import { HTTP_STATUS } from '@/shared/constants/http';
 import { errorResponse, successResponse } from '@/shared/utils/response/response.utils';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
@@ -28,7 +28,7 @@ const createRequest = (body: object) =>
     body: JSON.stringify(body),
   });
 
-const createMockTask = (overrides?: Partial<TaskEntity>): TaskEntity => ({
+const createMockTask = (overrides?: Partial<Task>): Task => ({
   $id: '1',
   id: 'task-1',
   content: 'Test task content',

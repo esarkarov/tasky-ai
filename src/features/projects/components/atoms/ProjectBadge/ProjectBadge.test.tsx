@@ -1,4 +1,4 @@
-import { ProjectEntity } from '@/features/projects/types';
+import { Project } from '@/features/projects/types';
 import { render, screen } from '@testing-library/react';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { ProjectBadge } from './ProjectBadge';
@@ -19,7 +19,7 @@ vi.mock('lucide-react', () => ({
 }));
 
 describe('ProjectBadge', () => {
-  const createMockProject = (overrides?: Partial<ProjectEntity>): ProjectEntity => ({
+  const createMockProject = (overrides?: Partial<Project>): Project => ({
     $id: 'project-1',
     userId: 'user-1',
     name: 'Test Project',
@@ -33,8 +33,8 @@ describe('ProjectBadge', () => {
     $permissions: [],
     ...overrides,
   });
-  const setup = (project?: ProjectEntity | null) => {
-    render(<ProjectBadge project={project as ProjectEntity} />);
+  const setup = (project?: Project | null) => {
+    render(<ProjectBadge project={project as Project} />);
   };
 
   beforeEach(() => {

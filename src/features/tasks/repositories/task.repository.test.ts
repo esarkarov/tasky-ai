@@ -2,7 +2,7 @@ import { env } from '@/core/config/env.config';
 import { databases } from '@/core/lib/appwrite';
 import { taskQueries } from '@/features/tasks/repositories/task.queries';
 import { taskRepository } from '@/features/tasks/repositories/task.repository';
-import { TaskCreateInput, TaskEntity, TasksResponse, TaskUpdateInput } from '@/features/tasks/types';
+import { TaskCreateInput, Task, TasksResponse, TaskUpdateInput } from '@/features/tasks/types';
 import { generateID } from '@/shared/utils/text/text.utils';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 
@@ -47,7 +47,7 @@ describe('taskRepository', () => {
   const MOCK_TOMORROW_DATE = '2023-01-02T00:00:00.000Z';
   const MOCK_QUERIES = ['query1'];
 
-  const createMockTask = (overrides?: Partial<TaskEntity>): TaskEntity => ({
+  const createMockTask = (overrides?: Partial<Task>): Task => ({
     $id: MOCK_TASK_ID,
     id: MOCK_TASK_ID,
     content: 'Test Task',
@@ -62,7 +62,7 @@ describe('taskRepository', () => {
     ...overrides,
   });
 
-  const createMockTasksResponse = (tasks: TaskEntity[] = [createMockTask()], total?: number): TasksResponse => ({
+  const createMockTasksResponse = (tasks: Task[] = [createMockTask()], total?: number): TasksResponse => ({
     documents: tasks,
     total: total ?? tasks.length,
   });
@@ -280,7 +280,7 @@ describe('taskRepository', () => {
 
     it('should update task successfully', async () => {
       const updateData = createMockUpdateData();
-      const updatedTask = createMockTask(updateData as TaskEntity);
+      const updatedTask = createMockTask(updateData as Task);
       mockedDatabases.updateDocument.mockResolvedValue(updatedTask);
 
       const result = await taskRepository.update(MOCK_TASK_ID, updateData);

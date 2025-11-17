@@ -6,7 +6,7 @@ import { projectsLoader } from './projects.loader';
 
 vi.mock('@/features/projects/services/project.service', () => ({
   projectService: {
-    findAll: vi.fn(),
+    search: vi.fn(),
   },
 }));
 
@@ -44,55 +44,55 @@ describe('projectsLoader', () => {
   describe('with search queries', () => {
     it('returns projects when search query is present', async () => {
       const mockProjects = createMockProjects();
-      mockedProjectService.findAll.mockResolvedValue(mockProjects);
+      mockedProjectService.search.mockResolvedValue(mockProjects);
 
       const result = (await projectsLoader(createLoaderArgs('http://localhost?q=test'))) as ProjectsLoaderData;
 
-      expect(mockedProjectService.findAll).toHaveBeenCalledWith('test');
+      expect(mockedProjectService.search).toHaveBeenCalledWith('test');
       expect(result).toEqual({ projects: mockProjects });
     });
 
     it('handles empty search query', async () => {
       const mockProjects = createMockProjects({ total: 2 });
-      mockedProjectService.findAll.mockResolvedValue(mockProjects);
+      mockedProjectService.search.mockResolvedValue(mockProjects);
 
       const result = (await projectsLoader(createLoaderArgs())) as ProjectsLoaderData;
 
-      expect(mockedProjectService.findAll).toHaveBeenCalledWith('');
+      expect(mockedProjectService.search).toHaveBeenCalledWith('');
       expect(result).toEqual({ projects: mockProjects });
     });
 
     it('handles special characters in query', async () => {
       const mockProjects = createMockProjects({ documents: [] });
-      mockedProjectService.findAll.mockResolvedValue(mockProjects);
+      mockedProjectService.search.mockResolvedValue(mockProjects);
 
       const result = (await projectsLoader(createLoaderArgs('http://localhost?q=react+node'))) as ProjectsLoaderData;
 
-      expect(mockedProjectService.findAll).toHaveBeenCalledWith('react node');
+      expect(mockedProjectService.search).toHaveBeenCalledWith('react node');
       expect(result).toEqual({ projects: mockProjects });
     });
 
     it('handles multiple query parameters', async () => {
       const mockProjects = createMockProjects({ documents: [] });
-      mockedProjectService.findAll.mockResolvedValue(mockProjects);
+      mockedProjectService.search.mockResolvedValue(mockProjects);
 
       const result = (await projectsLoader(
         createLoaderArgs('http://localhost?q=test&sort=name&page=1')
       )) as ProjectsLoaderData;
 
-      expect(mockedProjectService.findAll).toHaveBeenCalledWith('test');
+      expect(mockedProjectService.search).toHaveBeenCalledWith('test');
       expect(result).toEqual({ projects: mockProjects });
     });
 
     it('handles URL with hash and query', async () => {
       const mockProjects = createMockProjects({ documents: [] });
-      mockedProjectService.findAll.mockResolvedValue(mockProjects);
+      mockedProjectService.search.mockResolvedValue(mockProjects);
 
       const result = (await projectsLoader(
         createLoaderArgs('http://localhost?q=search#section')
       )) as ProjectsLoaderData;
 
-      expect(mockedProjectService.findAll).toHaveBeenCalledWith('search');
+      expect(mockedProjectService.search).toHaveBeenCalledWith('search');
       expect(result).toEqual({ projects: mockProjects });
     });
   });
@@ -100,11 +100,11 @@ describe('projectsLoader', () => {
   describe('when no projects exist', () => {
     it('returns an empty project list', async () => {
       const mockProjects = createMockProjects({ total: 0, documents: [] });
-      mockedProjectService.findAll.mockResolvedValue(mockProjects);
+      mockedProjectService.search.mockResolvedValue(mockProjects);
 
       const result = (await projectsLoader(createLoaderArgs())) as ProjectsLoaderData;
 
-      expect(mockedProjectService.findAll).toHaveBeenCalledWith('');
+      expect(mockedProjectService.search).toHaveBeenCalledWith('');
       expect(result).toEqual({ projects: mockProjects });
       expect(result.projects.documents).toHaveLength(0);
     });
@@ -112,17 +112,17 @@ describe('projectsLoader', () => {
 
   describe('error handling', () => {
     it('throws when service fails', async () => {
-      mockedProjectService.findAll.mockRejectedValue(new Error('Service error'));
+      mockedProjectService.search.mockRejectedValue(new Error('Service error'));
 
       await expect(projectsLoader(createLoaderArgs())).rejects.toThrow('Service error');
-      expect(mockedProjectService.findAll).toHaveBeenCalledWith('');
+      expect(mockedProjectService.search).toHaveBeenCalledWith('');
     });
   });
 
   describe('data validation', () => {
     it('returns valid ProjectsLoaderData structure', async () => {
       const mockProjects = createMockProjects();
-      mockedProjectService.findAll.mockResolvedValue(mockProjects);
+      mockedProjectService.search.mockResolvedValue(mockProjects);
 
       const result = (await projectsLoader(createLoaderArgs())) as ProjectsLoaderData;
 

@@ -1,8 +1,8 @@
-import { ProjectEntity } from '@/features/projects/types';
+import { Project } from '@/features/projects/types';
 import { Hash, Inbox } from 'lucide-react';
 
 interface ProjectBadgeProps {
-  project: ProjectEntity;
+  project: Project;
 }
 
 export const ProjectBadge = ({ project }: ProjectBadgeProps) => {

@@ -3,7 +3,7 @@ import { databases } from '@/core/lib/appwrite';
 import { projectQueries } from '@/features/projects/repositories/project.queries';
 import {
   ProjectCreateInput,
-  ProjectEntity,
+  Project,
   ProjectListItem,
   ProjectsListResponse,
   ProjectUpdateInput,
@@ -47,7 +47,7 @@ describe('projectRepository', () => {
   const MOCK_USER_ID = 'user-123';
   const MOCK_QUERIES = ['query1', 'query2'];
 
-  const createMockProject = (overrides?: Partial<ProjectEntity>): ProjectEntity => ({
+  const createMockProject = (overrides?: Partial<Project>): Project => ({
     $id: MOCK_PROJECT_ID,
     userId: MOCK_USER_ID,
     name: 'Test Project',

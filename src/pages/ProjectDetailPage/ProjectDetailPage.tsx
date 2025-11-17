@@ -3,7 +3,7 @@ import { AddTaskButton } from '@/features/tasks/components/atoms/AddTaskButton/A
 import { TaskCard } from '@/features/tasks/components/organisms/TaskCard/TaskCard';
 import { TaskForm } from '@/features/tasks/components/organisms/TaskForm/TaskForm';
 import { useTaskMutation } from '@/features/tasks/hooks/use-task-mutation/use-task-mutation';
-import { TaskEntity } from '@/features/tasks/types';
+import { Task } from '@/features/tasks/types';
 import { Head } from '@/shared/components/atoms/Head/Head';
 import { ItemList } from '@/shared/components/atoms/List/List';
 import { LoadMoreButton } from '@/shared/components/atoms/LoadMoreButton/LoadMoreButton';
@@ -33,7 +33,7 @@ export const ProjectDetailPage = () => {
   });
 
   const filteredProjectTasks = useMemo(() => {
-    const incompleteTasks = tasks?.filter((task) => !task.completed) as TaskEntity[];
+    const incompleteTasks = tasks?.filter((task) => !task.completed) as Task[];
 
     const sortedTasks = incompleteTasks?.sort((taskA, taskB) => {
       if (!taskA.due_date && !taskB.due_date) return 0;

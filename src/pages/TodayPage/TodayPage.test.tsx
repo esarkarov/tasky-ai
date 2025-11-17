@@ -1,5 +1,5 @@
-import { ProjectEntity } from '@/features/projects/types';
-import { TaskEntity } from '@/features/tasks/types';
+import { Project } from '@/features/projects/types';
+import { Task } from '@/features/tasks/types';
 import { ProjectsWithTasksLoaderData } from '@/shared/types';
 import { render, screen } from '@testing-library/react';
 import { userEvent } from '@testing-library/user-event';
@@ -111,7 +111,7 @@ vi.mock('@/features/projects/hooks/use-project-filter', () => ({
 
 const mockUseLoadMore = vi.fn();
 vi.mock('@/shared/hooks/use-load-more/use-load-more', () => ({
-  useLoadMore: (tasks: TaskEntity[]) => mockUseLoadMore(tasks),
+  useLoadMore: (tasks: Task[]) => mockUseLoadMore(tasks),
 }));
 
 const mockUseTaskMutation = vi.fn();
@@ -130,7 +130,7 @@ describe('TodayPage', () => {
   const MOCK_TASK_ID_1 = 'task-1';
   const MOCK_TASK_ID_2 = 'task-2';
 
-  const createMockTask = (overrides?: Partial<TaskEntity>): TaskEntity => ({
+  const createMockTask = (overrides?: Partial<Task>): Task => ({
     id: MOCK_TASK_ID_1,
     $id: MOCK_TASK_ID_1,
     content: 'Test task',
@@ -145,7 +145,7 @@ describe('TodayPage', () => {
     ...overrides,
   });
 
-  const createMockProject = (overrides?: Partial<ProjectEntity>): ProjectEntity => ({
+  const createMockProject = (overrides?: Partial<Project>): Project => ({
     $id: MOCK_PROJECT_ID,
     userId: 'user-1',
     name: 'Test Project',
@@ -161,8 +161,8 @@ describe('TodayPage', () => {
   });
 
   const createMockLoaderData = (
-    tasks: TaskEntity[] = [createMockTask()],
-    projects: ProjectEntity[] = [createMockProject()]
+    tasks: Task[] = [createMockTask()],
+    projects: Project[] = [createMockProject()]
   ): ProjectsWithTasksLoaderData => ({
     tasks: {
       documents: tasks,
@@ -174,7 +174,7 @@ describe('TodayPage', () => {
     },
   });
 
-  const setupDefaultMocks = (tasks: TaskEntity[] = [createMockTask()]) => {
+  const setupDefaultMocks = (tasks: Task[] = [createMockTask()]) => {
     mockUseProjectFilter.mockReturnValue({
       filteredTasks: tasks,
       filteredCount: tasks.length,

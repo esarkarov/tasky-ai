@@ -1,14 +1,14 @@
 import { ProjectBadge } from '@/features/projects/components/atoms/ProjectBadge/ProjectBadge';
-import { ProjectEntity } from '@/features/projects/types';
+import { Project } from '@/features/projects/types';
 import { TaskDueDate } from '@/features/tasks/components/atoms/TaskDueDate/TaskDueDate';
-import { TaskEntity } from '@/features/tasks/types';
+import { Task } from '@/features/tasks/types';
 import { CardFooter } from '@/shared/components/ui/card';
 import { ROUTES } from '@/shared/constants/routes';
 import { useLocation } from 'react-router';
 
 interface TaskMetaProps {
-  project: ProjectEntity;
-  task: TaskEntity;
+  project: Project;
+  task: Task;
 }
 
 export const TaskMeta = ({ task, project }: TaskMetaProps) => {

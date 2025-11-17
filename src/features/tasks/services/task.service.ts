@@ -1,6 +1,6 @@
 import { AIGeneratedTask } from '@/features/ai/types';
 import { taskRepository } from '@/features/tasks/repositories/task.repository';
-import { TaskCounts, TaskEntity, TaskFormInput, TasksResponse } from '@/features/tasks/types';
+import { TaskCounts, Task, TaskFormInput, TasksResponse } from '@/features/tasks/types';
 import { getUserId } from '@/shared/utils/auth/auth.utils';
 import { generateID } from '@/shared/utils/text/text.utils';
 import { startOfToday, startOfTomorrow } from 'date-fns';
@@ -84,7 +84,7 @@ export const taskService = {
     return { inboxTasks, todayTasks };
   },
 
-  async createMany(projectId: string, tasks: AIGeneratedTask[]): Promise<TaskEntity[]> {
+  async createMany(projectId: string, tasks: AIGeneratedTask[]): Promise<Task[]> {
     const userId = getUserId();
     try {
       const mapedTasks = tasks.map((task) => ({
@@ -103,7 +103,7 @@ export const taskService = {
       throw new Error('Failed to create project tasks');
     }
   },
-  async create(data: TaskFormInput): Promise<TaskEntity> {
+  async create(data: TaskFormInput): Promise<Task> {
     const userId = getUserId();
     try {
       const payload = {
@@ -122,7 +122,7 @@ export const taskService = {
       throw new Error('Failed to create task');
     }
   },
-  async update(taskId: string, data: Omit<TaskFormInput, 'id'>): Promise<TaskEntity> {
+  async update(taskId: string, data: Omit<TaskFormInput, 'id'>): Promise<Task> {
     try {
       const doc = await taskRepository.update(taskId, data);
 

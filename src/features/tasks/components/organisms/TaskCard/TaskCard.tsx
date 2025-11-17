@@ -1,8 +1,8 @@
-import { ProjectEntity } from '@/features/projects/types';
+import { Project } from '@/features/projects/types';
 import { TaskForm } from '@/features/tasks/components/organisms/TaskForm/TaskForm';
 import { TaskItem } from '@/features/tasks/components/organisms/TaskItem/TaskItem';
 import { useTaskMutation } from '@/features/tasks/hooks/use-task-mutation/use-task-mutation';
-import { TaskEntity } from '@/features/tasks/types';
+import { Task } from '@/features/tasks/types';
 import { useDisclosure } from '@/shared/hooks/use-disclosure/use-disclosure';
 import { memo } from 'react';
 import { useFetcher } from 'react-router';
@@ -12,7 +12,7 @@ interface TaskCardProps {
   content: string;
   completed: boolean;
   dueDate: Date | null;
-  project: ProjectEntity;
+  project: Project;
 }
 
 export const TaskCard = memo(({ id, content, completed, dueDate, project }: TaskCardProps) => {
@@ -22,7 +22,7 @@ export const TaskCard = memo(({ id, content, completed, dueDate, project }: Task
     onSuccess: cancelForm,
   });
 
-  const task: TaskEntity = Object.assign(
+  const task: Task = Object.assign(
     {
       id,
       content,
@@ -30,7 +30,7 @@ export const TaskCard = memo(({ id, content, completed, dueDate, project }: Task
       due_date: dueDate,
       project,
     },
-    fetcher.json as TaskEntity
+    fetcher.json as Task
   );
 
   return (

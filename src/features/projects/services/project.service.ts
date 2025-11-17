@@ -1,11 +1,11 @@
 import { projectRepository } from '@/features/projects/repositories/project.repository';
-import { ProjectEntity, ProjectFormInput, ProjectsListResponse } from '@/features/projects/types';
+import { Project, ProjectFormInput, ProjectsListResponse } from '@/features/projects/types';
 import { DEFAULT_FETCH_LIMIT } from '@/shared/constants/validation';
 import { getUserId } from '@/shared/utils/auth/auth.utils';
 import { generateID } from '@/shared/utils/text/text.utils';
 
 export const projectService = {
-  async findById(projectId: string): Promise<ProjectEntity> {
+  async findById(projectId: string): Promise<Project> {
     try {
       const doc = await projectRepository.findById(projectId);
 
@@ -13,18 +13,6 @@ export const projectService = {
     } catch (error) {
       console.error('Error fetching project:', error);
       throw new Error('Failed to load project');
-    }
-  },
-  async findAll(searchQuery: string): Promise<ProjectsListResponse> {
-    try {
-      const userId = getUserId();
-
-      const docs = await projectRepository.findByUserId(userId, { search: searchQuery });
-
-      return docs;
-    } catch (error) {
-      console.error('Error fetching projects:', error);
-      throw new Error('Failed to load projects');
     }
   },
   async findRecent(limit: number = DEFAULT_FETCH_LIMIT): Promise<ProjectsListResponse> {
@@ -40,7 +28,7 @@ export const projectService = {
     }
   },
 
-  async create(data: ProjectFormInput): Promise<ProjectEntity> {
+  async create(data: ProjectFormInput): Promise<Project> {
     try {
       const payload = {
         name: data.name,
@@ -57,7 +45,7 @@ export const projectService = {
       throw new Error('Failed to create project');
     }
   },
-  async update(projectId: string, data: Omit<ProjectFormInput, 'id'>): Promise<ProjectEntity> {
+  async update(projectId: string, data: Omit<ProjectFormInput, 'id'>): Promise<Project> {
     try {
       const payload = {
         name: data.name,
@@ -79,6 +67,18 @@ export const projectService = {
     } catch (error) {
       console.error('Error deleting project:', error);
       throw new Error('Failed to delete project');
+    }
+  },
+  async search(searchQuery: string): Promise<ProjectsListResponse> {
+    try {
+      const userId = getUserId();
+
+      const docs = await projectRepository.findByUserId(userId, { search: searchQuery });
+
+      return docs;
+    } catch (error) {
+      console.error('Error fetching projects:', error);
+      throw new Error('Failed to load projects');
     }
   },
 };

@@ -1,5 +1,5 @@
-import { ProjectEntity } from '@/features/projects/types';
-import { TaskEntity } from '@/features/tasks/types';
+import { Project } from '@/features/projects/types';
+import { Task } from '@/features/tasks/types';
 import { ProjectDetailLoaderData } from '@/shared/types';
 import { render, screen } from '@testing-library/react';
 import { userEvent } from '@testing-library/user-event';
@@ -107,7 +107,7 @@ vi.mock('@/features/tasks/hooks/use-task-mutation/use-task-mutation', () => ({
 
 const mockUseLoadMore = vi.fn();
 vi.mock('@/shared/hooks/use-load-more/use-load-more', () => ({
-  useLoadMore: (tasks: TaskEntity[]) => mockUseLoadMore(tasks),
+  useLoadMore: (tasks: Task[]) => mockUseLoadMore(tasks),
 }));
 
 const mockedUseLoaderData = vi.mocked(useLoaderData);
@@ -118,7 +118,7 @@ describe('ProjectDetailPage', () => {
   const MOCK_TASK_ID_2 = 'task-2';
   const MOCK_TASK_ID_3 = 'task-3';
 
-  const createMockTask = (overrides?: Partial<TaskEntity>): TaskEntity => ({
+  const createMockTask = (overrides?: Partial<Task>): Task => ({
     id: MOCK_TASK_ID_1,
     $id: MOCK_TASK_ID_1,
     content: 'Test task',
@@ -133,7 +133,7 @@ describe('ProjectDetailPage', () => {
     ...overrides,
   });
 
-  const createMockProject = (overrides?: Partial<ProjectEntity>): ProjectEntity => ({
+  const createMockProject = (overrides?: Partial<Project>): Project => ({
     $id: MOCK_PROJECT_ID,
     userId: 'user-1',
     name: 'Test Project',
@@ -148,11 +148,11 @@ describe('ProjectDetailPage', () => {
     ...overrides,
   });
 
-  const createMockLoaderData = (project: ProjectEntity): ProjectDetailLoaderData => ({
+  const createMockLoaderData = (project: Project): ProjectDetailLoaderData => ({
     project,
   });
 
-  const setupDefaultMocks = (tasks: TaskEntity[] = [createMockTask()]) => {
+  const setupDefaultMocks = (tasks: Task[] = [createMockTask()]) => {
     mockUseTaskMutation.mockReturnValue({
       handleCreate: vi.fn(),
       handleUpdate: vi.fn(),

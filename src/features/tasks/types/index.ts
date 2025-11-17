@@ -1,12 +1,12 @@
-import { ProjectEntity } from '@/features/projects/types';
-import { BaseEntity, PaginatedResponse } from '@/shared/types';
+import { Project } from '@/features/projects/types';
+import { Base, PaginatedResponse } from '@/shared/types';
 
-export interface TaskEntity extends BaseEntity {
+export interface Task extends Base {
   id: string;
   content: string;
   due_date: Date | null;
   completed: boolean;
-  projectId: ProjectEntity | null;
+  projectId: Project | null;
 }
 export interface TaskCounts {
   inboxTasks: number;
@@ -28,4 +28,4 @@ export interface TaskCreateInput extends TaskInput {
 export interface TaskUpdateInput extends Omit<TaskInput, 'completed'> {
   completed?: boolean;
 }
-export type TasksResponse = PaginatedResponse<TaskEntity>;
+export type TasksResponse = PaginatedResponse<Task>;
