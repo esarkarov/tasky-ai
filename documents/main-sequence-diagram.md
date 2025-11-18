@@ -4,7 +4,7 @@
 sequenceDiagram
     title AI Task Generation Sequence
     actor User
-    participant UI as Project Form
+    participant UI as Web UI
     participant API as Project Handler
     participant ProjectSvc as Project Service
     participant AISvc as AI Service
