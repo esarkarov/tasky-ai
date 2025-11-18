@@ -20,24 +20,15 @@ It combines **Clerk authentication**, **Appwrite persistence**, and **Google Gem
 
 ---
 
-## 📋 Table of Contents
-
-- [Features](#features)
-- [Tech Stack](#tech-stack)
-- [Getting Started](#getting-started)
-- [Usage](#usage)
-- [Folder Structure](#folder-structure)
-- [Author](#author)
-
----
-
 ## 🚀 Features
 
-- **Secure authentication & theming** — powered by Clerk with a global router shell, dark theme, and toast notifications.
-- **Multiple productivity workspaces** — Inbox, Today, Upcoming, Completed, and Project detail pages, each delivered through lazy-loaded protected routes.
-- **AI-generated project task scaffolding** — converts natural language prompts into structured tasks using Google Gemini, automatically persisted via Appwrite when AI assistance is enabled.
-- **Appwrite-backed data layer** — provides reusable query builders for counting, filtering, and scheduling tasks.
-- **Responsive, accessible UI** — optimized for different devices, highlighting AI workflows and session-based navigation states.
+- Secure authentication with **Clerk**
+- Project & task management (CRUD)
+- AI task generation using **Gemini**
+- Productivity views: Inbox, Today, Upcoming, Completed
+- Responsive and Accessible UI with **Tailwind + Shadcn UI**
+- Full TypeScript codebase
+- Testing with **Vitest + RTL**
 
 ---
 
@@ -45,10 +36,10 @@ It combines **Clerk authentication**, **Appwrite persistence**, and **Google Gem
 
 | Category                 | Technologies                                                |
 | ------------------------ | ----------------------------------------------------------- |
-| **Framework**            | React + TypeScript                                          |
-| **Authentication**       | Clerk React SDK                                             |
-| **Backend-as-a-Service** | Appwrite SDK                                                |
-| **AI Integration**       | Google Gemini                                               |
+| **Framework**            | React, React Router, TypeScript                             |
+| **Authentication**       | Clerk Auth                                                  |
+| **Backend-as-a-Service** | Appwrite DB                                                 |
+| **AI Integration**       | Gemini API                                                  |
 | **Styling**              | Tailwind CSS, Shadcn UI                                     |
 | **Testing & Quality**    | Vitest, React Testing Library, Playwright, ESLint, Prettier |
 | **CI/CD & Tooling**      | Pnpm, GitHub, GitHub Actions, Vite                          |
@@ -122,17 +113,13 @@ Additional scripts are available for coverage, lint fixing, and auto-formatting.
 
 ---
 
-## 🏗️ Folder Structure
+## 📄 Documentation
 
-```bash
-src/
-├── core/          # Infrastructure
-├── features/      # Business features
-├── pages/         # Route-level pages
-├── shared/        # Shared resources
-```
+Full project architecture and design documentation can be found in the [documents](./documents/) folder.
 
-## 👨‍💻 Author
+---
+
+## 👤 Author
 
 Developed by **Elvin Sarkarov**  
-📎 [GitHub @Elvin Sarkarov](https://github.com/esarkarov)
+[GitHub @Elvin Sarkarov](https://github.com/esarkarov)
