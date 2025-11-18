@@ -58,17 +58,19 @@ Tasky AI is built as a single-page application (SPA) using React with TypeScript
 
 ## Folder Structure
 
+```bash
 src/
-├── core/ # Infrastructure: app config, providers
+├── core/                  # Infrastructure: app config, env, lib etc.
 ├── features/
 │ ├── projects/
-│ │ ├── components/ # UI for projects
-│ │ ├── hooks/ # Project-specific custom hooks
-│ │ ├── repositories/ # Appwrite integration
-│ │ ├── services/ # Business logic
-│ │ ├── router/ # Project routes
-│ │ └── types/ # Type definitions
-│ ├── tasks/ # Same structure for tasks
-│ └── ai/ # Same structure for ai
-├── shared/ # UI elements, utils, constants, custom hooks etc.
-├── pages/ # Route-level screens
+│ │ ├── components/        # UI for projects
+│ │ ├── hooks/             # Project-specific custom hooks
+│ │ ├── repositories/      # Appwrite integration
+│ │ ├── services/          # Business logic
+│ │ ├── router/            # Project routes
+│ │ └── types/             # Type definitions
+│ ├── tasks/               # Same structure for tasks
+│ └── ai/                  # Same structure for ai
+├── shared/                # UI elements, utils, constants, custom hooks etc.
+├── pages/                 # Route-level screens
+```
