@@ -1,8 +1,8 @@
 import { useAITaskGeneration } from '@/features/ai/hooks/use-ai-task-generations';
 import type { ProjectFormInput, ProjectInput } from '@/features/projects/types';
 import { useCallback, useMemo, useState } from 'react';
-import { useColorPicker } from './use-color-picker/use-color-picker';
-import { useProjectFormState } from './use-project-form-state/use-project-form-state';
+import { useColorPicker } from '../use-color-picker/use-color-picker';
+import { useProjectFormState } from '../use-project-form-state/use-project-form-state';
 export interface UseProjectFormCompositeParams {
   defaultValues?: ProjectInput;
   onSubmit: (data: ProjectFormInput) => Promise<void>;

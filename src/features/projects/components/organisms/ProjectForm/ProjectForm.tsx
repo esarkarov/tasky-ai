@@ -3,7 +3,7 @@ import { CancelProjectButton } from '@/features/projects/components/atoms/Cancel
 import { SubmitProjectButton } from '@/features/projects/components/atoms/SubmitProjectButton/SubmitProjectButton';
 import { ProjectNameInput } from '@/features/projects/components/molecules/ProjectNameInput/ProjectNameInput';
 import { PROJECT_COLORS } from '@/features/projects/constants';
-import { useProjectFormComposite } from '@/features/projects/hooks/use-project-form-composite';
+import { useProjectFormComposite } from '@/features/projects/hooks/use-project-form-composite/use-project-form-composite';
 import { ProjectFormInput, ProjectInput } from '@/features/projects/types';
 import { ColorPicker } from '@/shared/components/molecules/ColorPicker/ColorPicker';
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from '@/shared/components/ui/card';
