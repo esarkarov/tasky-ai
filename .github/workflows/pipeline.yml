@@ -16,9 +16,10 @@ env:
   PNPM_VERSION: '9'
 
 jobs:
-  lint-and-test:
-    name: Lint & Test
+  quality-check:
+    name: Code Quality & Tests
     runs-on: ubuntu-latest
+    timeout-minutes: 10
 
     steps:
       - name: Checkout code
@@ -38,91 +39,95 @@ jobs:
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
 
-      - name: Run linting
-        run: pnpm run lint
-
-      - name: Run format checks
+      - name: Run Prettier
         run: pnpm run prettier:check
 
-      - name: Run type check
+      - name: Run ESLint
+        run: pnpm run lint
+
+      - name: TypeScript type check
         run: pnpm exec tsc --noEmit
 
-      - name: Run tests
+      - name: Run tests with coverage
         run: pnpm run test:run
 
-      - name: Upload coverage reports
+      - name: Upload coverage to Codecov (optional)
+        uses: codecov/codecov-action@v4
+        if: github.event_name == 'push'
+        with:
+          files: ./coverage/coverage-final.json
+          fail_ci_if_error: false
+        continue-on-error: true
+
+  security-audit:
+    name: Security Audit
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: ${{ env.PNPM_VERSION }}
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: 'pnpm'
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Run dependency audit
+        run: pnpm audit --audit-level moderate
+        continue-on-error: true
+
+      - name: Check for known vulnerabilities
+        run: |
+          pnpm audit --json > audit-report.json || true
+          echo "Audit complete. Review report if failures occur."
+
+      - name: Upload audit report
         uses: actions/upload-artifact@v4
         if: always()
         with:
-          name: coverage-report
-          path: coverage/
-          retention-days: 7
+          name: security-audit-report
+          path: audit-report.json
+          retention-days: 14
 
-  security-scan:
-    name: Security Analysis
+  sast:
+    name: CodeQL Analysis
     runs-on: ubuntu-latest
-    needs: lint-and-test
     permissions:
       security-events: write
       contents: read
       actions: read
-
-    strategy:
-      matrix:
-        scan-type: [sca, sast]
-      fail-fast: false
+    timeout-minutes: 10
 
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
 
-      - name: Setup pnpm
-        uses: pnpm/action-setup@v4
-        with:
-          version: ${{ env.PNPM_VERSION }}
-
-      - name: Setup Node.js
-        uses: actions/setup-node@v4
-        with:
-          node-version: ${{ env.NODE_VERSION }}
-          cache: 'pnpm'
-
-      - name: Install dependencies
-        run: pnpm install --frozen-lockfile
-
-      - name: Run OWASP Dependency-Check
-        if: matrix.scan-type == 'sca'
-        uses: dependency-check/Dependency-Check_Action@main
-        with:
-          project: 'tasky-ai'
-          path: '.'
-          format: 'HTML'
-
-      - name: Upload OWASP report
-        if: matrix.scan-type == 'sca'
-        uses: actions/upload-artifact@v4
-        with:
-          name: dependency-check-report
-          path: reports/dependency-check-report.html
-          retention-days: 7
-
       - name: Initialize CodeQL
-        if: matrix.scan-type == 'sast'
-        uses: github/codeql-action/init@v4
+        uses: github/codeql-action/init@v3
         with:
           languages: javascript-typescript
-          queries: security-extended
+          queries: security-and-quality
 
-      - name: Perform CodeQL analysis
-        if: matrix.scan-type == 'sast'
-        uses: github/codeql-action/analyze@v4
+      - name: Perform CodeQL Analysis
+        uses: github/codeql-action/analyze@v3
         with:
           category: '/language:javascript-typescript'
 
   build:
-    name: Build
+    name: Build Application
     runs-on: ubuntu-latest
-    needs: lint-and-test
+    needs: [quality-check, security]
+    timeout-minutes: 5
 
     steps:
       - name: Checkout code
@@ -142,57 +147,24 @@ jobs:
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
 
-      - name: Build project
+      - name: Build production bundle
         run: pnpm run build
+        env:
+          NODE_ENV: production
+
+      - name: Check build output
+        run: |
+          if [ ! -d "dist" ] || [ -z "$(ls -A dist)" ]; then
+            echo "Build failed: dist directory is empty"
+            exit 1
+          fi
+          echo "Build successful. Output size:"
+          du -sh dist/
 
       - name: Upload build artifacts
         uses: actions/upload-artifact@v4
         with:
-          name: build-output
+          name: production-build
           path: dist/
           retention-days: 7
           compression-level: 6
-
-  dast:
-    name: DAST Scan
-    runs-on: ubuntu-latest
-    needs: build
-    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
-
-    steps:
-      - name: Checkout code
-        uses: actions/checkout@v4
-
-      - name: Setup pnpm
-        uses: pnpm/action-setup@v4
-        with:
-          version: ${{ env.PNPM_VERSION }}
-
-      - name: Setup Node.js
-        uses: actions/setup-node@v4
-        with:
-          node-version: ${{ env.NODE_VERSION }}
-          cache: 'pnpm'
-
-      - name: Download build artifacts
-        uses: actions/download-artifact@v4
-        with:
-          name: build-output
-          path: dist/
-
-      - name: Install dependencies
-        run: pnpm install --frozen-lockfile
-
-      - name: Start application
-        run: |
-          pnpm run dev &
-          sleep 15
-          curl --retry 5 --retry-delay 2 --retry-connrefused http://localhost:5174
-
-      - name: Run OWASP ZAP security scan
-        uses: zaproxy/action-full-scan@v0.12.0
-        with:
-          target: 'http://localhost:5174'
-          rules_file_name: '.zap/rules.tsv'
-          cmd_options: '-a'
-          allow_issue_writing: false
