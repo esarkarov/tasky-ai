@@ -1,7 +1,6 @@
 import { projectRepository } from '@/features/projects/repositories/project.repository';
-import { projectService } from '@/features/projects/services/project.service';
+import { DEFAULT_FETCH_LIMIT, projectService } from '@/features/projects/services/project.service';
 import { Project, ProjectFormInput, ProjectListItem, ProjectsListResponse } from '@/features/projects/types';
-import { DEFAULT_FETCH_LIMIT } from '@/shared/constants/validation';
 import { getUserId } from '@/shared/utils/auth/auth.utils';
 import { generateID } from '@/shared/utils/text/text.utils';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
@@ -20,9 +19,6 @@ vi.mock('@/shared/utils/auth/auth.utils', () => ({
 }));
 vi.mock('@/shared/utils/text/text.utils', () => ({
   generateID: vi.fn(),
-}));
-vi.mock('@/shared/constants/validation', () => ({
-  DEFAULT_FETCH_LIMIT: 100,
 }));
 
 const mockedProjectRepository = vi.mocked(projectRepository);

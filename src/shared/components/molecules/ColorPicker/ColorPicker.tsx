@@ -1,10 +1,10 @@
+import { PROJECT_COLORS } from '@/features/projects/constants';
 import { SelectableCommandItem } from '@/shared/components/atoms/SelectableCommandItem/SelectableCommandItem';
 import { Button } from '@/shared/components/ui/button';
 import { Command, CommandEmpty, CommandGroup, CommandInput, CommandList } from '@/shared/components/ui/command';
 import { Label } from '@/shared/components/ui/label';
 import { Popover, PopoverContent, PopoverTrigger } from '@/shared/components/ui/popover';
 import { ScrollArea } from '@/shared/components/ui/scroll-area';
-import { PROJECT_COLORS } from '@/shared/constants/colors';
 import { ChevronDown, Circle } from 'lucide-react';
 
 interface ColorPickerProps {

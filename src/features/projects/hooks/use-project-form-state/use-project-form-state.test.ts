@@ -1,8 +1,8 @@
-import { renderHook, act } from '@testing-library/react';
-import { describe, it, expect } from 'vitest';
+import { PROJECT_COLORS } from '@/features/projects/constants';
+import type { ProjectInput } from '@/features/projects/types';
+import { act, renderHook } from '@testing-library/react';
+import { describe, expect, it } from 'vitest';
 import { useProjectFormState } from './use-project-form-state';
-import { PROJECT_COLORS } from '@/shared/constants/colors';
-import type { ProjectInput } from '../../types';
 
 describe('useProjectFormState', () => {
   describe('initial state', () => {

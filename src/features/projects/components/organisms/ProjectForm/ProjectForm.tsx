@@ -2,14 +2,21 @@ import { AITaskGenerator } from '@/features/ai/components/molecules/AITaskGenera
 import { CancelProjectButton } from '@/features/projects/components/atoms/CancelProjectButton/CancelProjectButton';
 import { SubmitProjectButton } from '@/features/projects/components/atoms/SubmitProjectButton/SubmitProjectButton';
 import { ProjectNameInput } from '@/features/projects/components/molecules/ProjectNameInput/ProjectNameInput';
+import { PROJECT_COLORS } from '@/features/projects/constants';
 import { useProjectFormComposite } from '@/features/projects/hooks/use-project-form-composite';
 import { ProjectFormInput, ProjectInput } from '@/features/projects/types';
 import { ColorPicker } from '@/shared/components/molecules/ColorPicker/ColorPicker';
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from '@/shared/components/ui/card';
 import { Separator } from '@/shared/components/ui/separator';
-import { DEFAULT_PROJECT_FORM_DATA } from '@/shared/constants/defaults';
 import { CrudMode } from '@/shared/types';
 import { cn } from '@/shared/utils/ui/ui.utils';
+
+const DEFAULT_PROJECT_FORM_VALUES = {
+  id: null,
+  name: '',
+  color_name: PROJECT_COLORS[0].name,
+  color_hex: PROJECT_COLORS[0].hex,
+};
 
 interface ProjectFormProps {
   mode: CrudMode;
@@ -20,7 +27,7 @@ interface ProjectFormProps {
 }
 
 export const ProjectForm = ({
-  defaultValues = DEFAULT_PROJECT_FORM_DATA,
+  defaultValues = DEFAULT_PROJECT_FORM_VALUES,
   mode,
   handleCancel,
   onSubmit,

@@ -1,6 +1,6 @@
 import { TaskCounts } from '@/features/tasks/types';
 import { ROUTES } from '@/shared/constants/routes';
-import { cn, getBadgeCount, getTaskDueDateColorClass } from '@/shared/utils/ui/ui.utils';
+import { cn, createEmptyState, getBadgeCount, getTaskDueDateColorClass } from '@/shared/utils/ui/ui.utils';
 import clsx from 'clsx';
 import { isBefore, isToday, isTomorrow, startOfToday } from 'date-fns';
 import { twMerge } from 'tailwind-merge';
@@ -171,6 +171,43 @@ describe('ui utils', () => {
       const result = getBadgeCount(ROUTES.INBOX, taskCounts);
 
       expect(result).toBe(0);
+    });
+  });
+
+  describe('createEmptyState', () => {
+    const SRC = '/images/empty.png';
+    const WIDTH = 420;
+    const TITLE = 'No Data';
+    const DESCRIPTION = 'There are no tasks available.';
+
+    it('should return correct empty state structure', () => {
+      const expectedHeight = 260;
+
+      const result = createEmptyState(SRC, WIDTH, TITLE, DESCRIPTION);
+
+      expect(result).toEqual({
+        img: {
+          src: SRC,
+          width: WIDTH,
+          height: expectedHeight,
+        },
+        title: TITLE,
+        description: DESCRIPTION,
+      });
+    });
+
+    it('should correctly assign provided values to image and text fields', () => {
+      const customSrc = '/random/path.svg';
+      const customWidth = 300;
+      const customTitle = 'Empty Projects';
+      const customDescription = 'You have no active projects yet.';
+
+      const result = createEmptyState(customSrc, customWidth, customTitle, customDescription);
+
+      expect(result.img.src).toBe(customSrc);
+      expect(result.img.width).toBe(customWidth);
+      expect(result.title).toBe(customTitle);
+      expect(result.description).toBe(customDescription);
     });
   });
 });

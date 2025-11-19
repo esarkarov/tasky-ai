@@ -1,8 +1,11 @@
 import { TaskCounts } from '@/features/tasks/types';
 import { ROUTES } from '@/shared/constants/routes';
+import { EmptyStateContent } from '@/shared/types';
 import clsx, { ClassValue } from 'clsx';
 import { isBefore, isToday, isTomorrow, startOfToday } from 'date-fns';
 import { twMerge } from 'tailwind-merge';
+
+const DEFAULT_EMPTY_STATE_IMAGE_HEIGHT = 260;
 
 export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs));
@@ -32,3 +35,18 @@ export const getBadgeCount = (href: string, taskCounts: TaskCounts) => {
       return undefined;
   }
 };
+
+export const createEmptyState = (
+  src: string,
+  width: number,
+  title: string,
+  description: string
+): EmptyStateContent => ({
+  img: {
+    src,
+    width,
+    height: DEFAULT_EMPTY_STATE_IMAGE_HEIGHT,
+  },
+  title,
+  description,
+});

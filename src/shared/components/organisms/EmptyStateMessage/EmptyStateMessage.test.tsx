@@ -51,25 +51,29 @@ describe('EmptyStateMessage', () => {
 
       expect(screen.getByRole('status')).toBeInTheDocument();
       expect(screen.getByAltText('today empty image')).toBeInTheDocument();
-      expect(screen.getByRole('heading', { name: 'No tasks for today' })).toBeInTheDocument();
-      expect(screen.getByText('Add your first task to get started')).toBeInTheDocument();
+      expect(screen.getByRole('heading', { name: 'What do you need to get done today?' })).toBeInTheDocument();
+      expect(
+        screen.getByText('By default, tasks added here will be due today. Click + to add a task.')
+      ).toBeInTheDocument();
     });
 
     it('should render without image when not provided', () => {
       render(<EmptyStateMessage variant="upcoming" />);
 
       expect(screen.queryByRole('img')).not.toBeInTheDocument();
-      expect(screen.getByRole('heading', { name: 'No upcoming tasks' })).toBeInTheDocument();
-      expect(screen.getByText('Schedule tasks for the future')).toBeInTheDocument();
+      expect(screen.getByRole('heading', { name: 'Plan ahead with ease!' })).toBeInTheDocument();
+      expect(
+        screen.getByText('Tasks added here will be due in the future. Click + to schedule a task.')
+      ).toBeInTheDocument();
     });
 
     it('should render image with correct attributes', () => {
       render(<EmptyStateMessage variant="project" />);
 
       const img = screen.getByAltText('project empty image');
-      expect(img).toHaveAttribute('src', '/images/project.png');
-      expect(img).toHaveAttribute('width', '180');
-      expect(img).toHaveAttribute('height', '180');
+      expect(img).toHaveAttribute('src', '/empty-state/project-task-empty-state.png');
+      expect(img).toHaveAttribute('width', '228');
+      expect(img).toHaveAttribute('height', '260');
     });
   });
 
@@ -93,7 +97,7 @@ describe('EmptyStateMessage', () => {
 
       const figcaption = container.querySelector('figcaption');
       expect(figcaption).toHaveClass('sr-only');
-      expect(figcaption).toHaveTextContent('Your inbox is empty');
+      expect(figcaption).toHaveTextContent('What is on your mind?');
     });
   });
 
@@ -104,13 +108,13 @@ describe('EmptyStateMessage', () => {
 
     it('should render different variants correctly', () => {
       const { rerender } = render(<EmptyStateMessage variant="today" />);
-      expect(screen.getByRole('heading', { name: 'No tasks for today' })).toBeInTheDocument();
+      expect(screen.getByRole('heading', { name: 'What do you need to get done today?' })).toBeInTheDocument();
 
       rerender(<EmptyStateMessage variant="inbox" />);
-      expect(screen.getByRole('heading', { name: 'Your inbox is empty' })).toBeInTheDocument();
+      expect(screen.getByRole('heading', { name: 'What is on your mind?' })).toBeInTheDocument();
 
       rerender(<EmptyStateMessage variant="completed" />);
-      expect(screen.getByRole('heading', { name: 'No completed tasks' })).toBeInTheDocument();
+      expect(screen.getByRole('heading', { name: 'You have been productive!' })).toBeInTheDocument();
     });
   });
 });

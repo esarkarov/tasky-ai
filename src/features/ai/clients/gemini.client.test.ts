@@ -1,5 +1,5 @@
 import { genAI } from '@/core/lib/google-ai';
-import { DEFAULT_GEMINI_MODEL } from '@/shared/constants/defaults';
+import { DEFAULT_GEMINI_MODEL } from '@/features/ai/clients/gemini.client';
 import { GenerateContentResponse } from '@google/genai';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { geminiClient } from './gemini.client';

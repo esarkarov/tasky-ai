@@ -1,6 +1,6 @@
-import { PROJECT_COLORS } from '@/shared/constants/colors';
+import { PROJECT_COLORS } from '@/features/projects/constants';
+import type { ColorValue, ProjectInput } from '@/features/projects/types';
 import { useCallback, useMemo, useState } from 'react';
-import type { ColorValue, ProjectInput } from '../../types';
 export interface UseProjectFormStateParams {
   defaultValues?: ProjectInput;
 }

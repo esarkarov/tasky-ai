@@ -7,11 +7,16 @@ import { useTaskMutation } from '@/features/tasks/hooks/use-task-mutation/use-ta
 import { TaskFormInput } from '@/features/tasks/types';
 import { Card, CardContent, CardFooter } from '@/shared/components/ui/card';
 import { Separator } from '@/shared/components/ui/separator';
-import { DEFAULT_TASK_FORM_DATA } from '@/shared/constants/defaults';
 import { CrudMode, ProjectsLoaderData } from '@/shared/types';
 import { cn } from '@/shared/utils/ui/ui.utils';
 import type { ClassValue } from 'clsx';
 import { useLoaderData } from 'react-router';
+
+const DEFAULT_TASK_FORM_VALUES = {
+  content: '',
+  due_date: null,
+  projectId: null,
+};
 
 interface TaskFormProps {
   mode: CrudMode;
@@ -22,7 +27,7 @@ interface TaskFormProps {
 }
 
 export const TaskForm = ({
-  defaultValues = DEFAULT_TASK_FORM_DATA,
+  defaultValues = DEFAULT_TASK_FORM_VALUES,
   className,
   mode,
   handleCancel,

@@ -1,7 +1,9 @@
-import { INITIAL_COUNT, PAGE_SIZE } from '@/shared/constants/pagination';
 import { TIMING } from '@/shared/constants/timing';
 import { UseLoadMoreParams } from '@/shared/types';
 import { CSSProperties, useCallback, useState } from 'react';
+
+export const INITIAL_COUNT = 10;
+export const PAGE_SIZE = 5;
 
 export const useLoadMore = <T>(allItems: T[], params: UseLoadMoreParams = {}) => {
   const { initialCount = INITIAL_COUNT, pageSize = PAGE_SIZE } = params;

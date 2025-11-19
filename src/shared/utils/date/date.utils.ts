@@ -1,6 +1,18 @@
-import { WEEKDAYS } from '@/shared/constants/weekdays';
 import { toTitleCase } from '@/shared/utils/text/text.utils';
 import { format, formatRelative, isSameYear } from 'date-fns';
+
+const WEEKDAYS = [
+  'Today',
+  'Tomorrow',
+  'Yesterday',
+  'Saturday',
+  'Sunday',
+  'Monday',
+  'Tuesday',
+  'Wednesday',
+  'Thursday',
+  'Friday',
+];
 
 export function formatCustomDate(date: string | Date) {
   const today = new Date();

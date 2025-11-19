@@ -1,5 +1,5 @@
-import { renderHook, act, waitFor } from '@testing-library/react';
-import { describe, it, expect, vi, beforeEach } from 'vitest';
+import { act, renderHook, waitFor } from '@testing-library/react';
+import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { useTaskCompletion } from './use-task-completion';
 
 const mockSubmit = vi.fn();
@@ -36,7 +36,7 @@ vi.mock('@/shared/constants/timing', () => ({
   },
 }));
 
-vi.mock('@/shared/constants/ui-contents', () => ({
+vi.mock('@/features/tasks/constants', () => ({
   TASK_TOAST_CONTENTS: {
     COMPLETE: {
       success: 'Task completed successfully',

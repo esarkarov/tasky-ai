@@ -24,7 +24,7 @@ vi.mock('lucide-react', () => ({
   ),
 }));
 
-vi.mock('@/shared/constants/colors', () => ({
+vi.mock('@/features/projects/constants', () => ({
   PROJECT_COLORS: [
     { name: 'Red', hex: '#FF0000' },
     { name: 'Blue', hex: '#0000FF' },

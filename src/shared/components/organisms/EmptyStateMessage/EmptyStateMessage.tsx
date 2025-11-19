@@ -1,6 +1,39 @@
-import { EMPTY_STATE_CONTENTS } from '@/shared/constants/ui-contents';
-import { EmptyStateVariant } from '@/shared/types';
+import { EmptyStateContent, EmptyStateVariant } from '@/shared/types';
+import { createEmptyState } from '@/shared/utils/ui/ui.utils';
 import { memo } from 'react';
+
+const EMPTY_STATE_CONTENTS: Record<EmptyStateVariant, EmptyStateContent> = {
+  today: createEmptyState(
+    '/empty-state/today-task-empty-state.png',
+    226,
+    'What do you need to get done today?',
+    'By default, tasks added here will be due today. Click + to add a task.'
+  ),
+  inbox: createEmptyState(
+    '/empty-state/inbox-task-empty-state.png',
+    344,
+    'What is on your mind?',
+    "Capture tasks that don't have a specific category. Click + to add a task."
+  ),
+  upcoming: createEmptyState(
+    '/empty-state/upcoming-task-empty-state.png',
+    208,
+    'Plan ahead with ease!',
+    'Tasks added here will be due in the future. Click + to schedule a task.'
+  ),
+  completed: createEmptyState(
+    '/empty-state/completed-task-empty-state.png',
+    231,
+    'You have been productive!',
+    'All the tasks you have completed will appear here. Keep up the great work!'
+  ),
+  project: createEmptyState(
+    '/empty-state/project-task-empty-state.png',
+    228,
+    "Let's build something amazing!",
+    'Add tasks specific to this project. Click + to start planning.'
+  ),
+};
 
 interface EmptyStateMessageProps {
   variant: EmptyStateVariant;

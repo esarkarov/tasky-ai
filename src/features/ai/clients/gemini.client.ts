@@ -1,6 +1,7 @@
-import { DEFAULT_GEMINI_MODEL } from '@/shared/constants/defaults';
 import { genAI } from '@/core/lib/google-ai';
 import { GenerateContentResponse } from '@google/genai';
+
+export const DEFAULT_GEMINI_MODEL = 'gemini-2.5-flash';
 
 export const geminiClient = {
   generateContent: (contents: string): Promise<GenerateContentResponse> =>

@@ -1,8 +1,9 @@
 import { projectRepository } from '@/features/projects/repositories/project.repository';
 import { Project, ProjectFormInput, ProjectsListResponse } from '@/features/projects/types';
-import { DEFAULT_FETCH_LIMIT } from '@/shared/constants/validation';
 import { getUserId } from '@/shared/utils/auth/auth.utils';
 import { generateID } from '@/shared/utils/text/text.utils';
+
+export const DEFAULT_FETCH_LIMIT = 100;
 
 export const projectService = {
   async findById(projectId: string): Promise<Project> {

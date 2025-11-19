@@ -1,10 +1,30 @@
 import type { ProjectFormInput } from '@/features/projects/types';
 import { HTTP_METHODS } from '@/shared/constants/http';
 import { ROUTES } from '@/shared/constants/routes';
-import { PROJECT_TOAST_CONTENTS } from '@/shared/constants/ui-contents';
 import { useToast } from '@/shared/hooks/use-toast/use-toast';
 import { executeWithToast } from '@/shared/utils/operation/operation.utils';
 import { useFetcher } from 'react-router';
+
+const PROJECT_TOAST_CONTENTS = {
+  CREATE: {
+    loading: 'Creating project...',
+    success: 'Project created!',
+    error: 'Error creating project!',
+    errorDescription: 'An error occurred while creating the project!',
+  },
+  UPDATE: {
+    loading: 'Updating project...',
+    success: 'Project updated!',
+    error: 'Error updating project!',
+    errorDescription: 'An error occurred while updating the project!',
+  },
+  DELETE: {
+    loading: 'Deleting project...',
+    success: 'Project deleted!',
+    error: 'Error deleting project!',
+    errorDescription: 'An error occurred while deleting the project!',
+  },
+};
 export interface UseProjectMutationParams {
   onSuccess?: () => void;
 }
