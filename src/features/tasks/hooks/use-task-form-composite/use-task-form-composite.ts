@@ -1,4 +1,4 @@
-import { useProjectSelection } from '@/features/projects/hooks/use-project-selection';
+import { useProjectSelection } from '@/features/projects/hooks/use-project-selection/use-project-selection';
 import { ProjectListItem } from '@/features/projects/types';
 import { useCallback, useMemo, useState } from 'react';
 import type { TaskFormInput } from '../../types';

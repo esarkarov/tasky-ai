@@ -1,4 +1,4 @@
-import { useProjectFilter } from '@/features/projects/hooks/use-project-filter';
+import { useProjectFilter } from '@/features/projects/hooks/use-project-filter/use-project-filter';
 import { Project } from '@/features/projects/types';
 import { TaskCard } from '@/features/tasks/components/organisms/TaskCard/TaskCard';
 import { Head } from '@/shared/components/atoms/Head/Head';

@@ -14,7 +14,7 @@ vi.mock('@/features/tasks/hooks/use-task-form-state/use-task-form-state', () => 
   useTaskFormState: vi.fn(),
 }));
 
-vi.mock('@/features/projects/hooks/use-project-selection', () => ({
+vi.mock('@/features/projects/hooks/use-project-selection/use-project-selection', () => ({
   useProjectSelection: vi.fn(),
 }));
 
@@ -22,7 +22,7 @@ vi.mock('@/features/tasks/hooks/use-chrone-date-parser/use-chrone-date-parser', 
   useChronoDateParser: vi.fn(),
 }));
 
-import { useProjectSelection } from '@/features/projects/hooks/use-project-selection';
+import { useProjectSelection } from '@/features/projects/hooks/use-project-selection/use-project-selection';
 import { useChronoDateParser } from '../use-chrone-date-parser/use-chrone-date-parser';
 import { useTaskFormState } from '../use-task-form-state/use-task-form-state';
 

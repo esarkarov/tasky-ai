@@ -3,7 +3,7 @@ import { ROUTES } from '@/shared/constants/routes';
 import { useDisclosure } from '@/shared/hooks/use-disclosure/use-disclosure';
 import { useCallback } from 'react';
 import { useLocation, useNavigate } from 'react-router';
-import { useProjectMutation } from './use-project-mutation';
+import { useProjectMutation } from '../use-project-mutation/use-project-mutation';
 import { CrudMode } from '@/shared/types';
 export interface UseProjectModalParams {
   mode?: CrudMode;

@@ -105,7 +105,7 @@ vi.mock('@/features/tasks/components/organisms/TaskForm/TaskForm', () => ({
 }));
 
 const mockUseProjectFilter = vi.fn();
-vi.mock('@/features/projects/hooks/use-project-filter', () => ({
+vi.mock('@/features/projects/hooks/use-project-filter/use-project-filter', () => ({
   useProjectFilter: () => mockUseProjectFilter(),
 }));
 

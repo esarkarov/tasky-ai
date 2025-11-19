@@ -1,7 +1,7 @@
 import { ProjectSearchField } from '@/features/projects/components/molecules/ProjectSearchField/ProjectSearchField';
 import { ProjectCard } from '@/features/projects/components/organisms/ProjectCard/ProjectCard';
 import { ProjectFormDialog } from '@/features/projects/components/organisms/ProjectFormDialog/ProjectFormDialog';
-import { useProjectSearch } from '@/features/projects/hooks/use-project-search';
+import { useProjectSearch } from '@/features/projects/hooks/use-project-search/use-project-search';
 import { Head } from '@/shared/components/atoms/Head/Head';
 import { ItemList } from '@/shared/components/atoms/List/List';
 import { LoadMoreButton } from '@/shared/components/atoms/LoadMoreButton/LoadMoreButton';

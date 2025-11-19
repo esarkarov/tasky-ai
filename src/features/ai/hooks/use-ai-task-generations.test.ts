@@ -3,7 +3,7 @@ import { act, renderHook } from '@testing-library/react';
 import { describe, expect, it } from 'vitest';
 
 describe('useAITaskGeneration', () => {
-  describe('Initialization', () => {
+  describe('initial state', () => {
     it('should initialize with AI disabled by default', () => {
       const { result } = renderHook(() => useAITaskGeneration());
 
@@ -29,7 +29,7 @@ describe('useAITaskGeneration', () => {
     });
   });
 
-  describe('AI Toggle', () => {
+  describe('AI toggle', () => {
     it('should toggle AI from disabled to enabled', () => {
       const { result } = renderHook(() => useAITaskGeneration());
 
@@ -70,7 +70,7 @@ describe('useAITaskGeneration', () => {
     });
   });
 
-  describe('AI Enabled State', () => {
+  describe('AI enabled state', () => {
     it('should enable AI', () => {
       const { result } = renderHook(() => useAITaskGeneration());
 
@@ -92,7 +92,7 @@ describe('useAITaskGeneration', () => {
     });
   });
 
-  describe('AI Prompt Management', () => {
+  describe('AI prompt management', () => {
     it('should update AI prompt', () => {
       const { result } = renderHook(() => useAITaskGeneration());
 
@@ -128,7 +128,7 @@ describe('useAITaskGeneration', () => {
     });
   });
 
-  describe('Validation Logic', () => {
+  describe('validation logic', () => {
     it('should be valid when AI is disabled', () => {
       const { result } = renderHook(() => useAITaskGeneration());
 
@@ -212,7 +212,7 @@ describe('useAITaskGeneration', () => {
     });
   });
 
-  describe('Reset Functionality', () => {
+  describe('reset functionality', () => {
     it('should reset to default state', () => {
       const { result } = renderHook(() => useAITaskGeneration());
 
@@ -247,7 +247,7 @@ describe('useAITaskGeneration', () => {
     });
   });
 
-  describe('Combined State Changes', () => {
+  describe('combined state changes', () => {
     it('should handle enabling AI and adding prompt', () => {
       const { result } = renderHook(() => useAITaskGeneration());
 
@@ -286,7 +286,7 @@ describe('useAITaskGeneration', () => {
     });
   });
 
-  describe('Exposed API', () => {
+  describe('exposed API', () => {
     it('should expose all required properties and methods', () => {
       const { result } = renderHook(() => useAITaskGeneration());
 

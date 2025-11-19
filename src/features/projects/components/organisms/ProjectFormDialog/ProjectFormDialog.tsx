@@ -1,5 +1,5 @@
 import { ProjectForm } from '@/features/projects/components/organisms/ProjectForm/ProjectForm';
-import { useProjectModal } from '@/features/projects/hooks/use-project-modal';
+import { useProjectModal } from '@/features/projects/hooks/use-project-modal/use-project-modal';
 import { ProjectInput } from '@/features/projects/types';
 import { Dialog, DialogContent, DialogTrigger } from '@/shared/components/ui/dialog';
 import { useDisclosure } from '@/shared/hooks/use-disclosure/use-disclosure';

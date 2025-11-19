@@ -1,6 +1,6 @@
 import { useDisclosure } from '@/shared/hooks/use-disclosure/use-disclosure';
 import { useCallback, useState } from 'react';
-import type { ColorValue } from '../types';
+import type { ColorValue } from '../../types';
 export interface UseColorPickerParams {
   defaultColor: ColorValue;
   onColorChange: (color: ColorValue) => void;

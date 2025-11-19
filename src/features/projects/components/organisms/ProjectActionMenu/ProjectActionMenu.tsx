@@ -1,5 +1,5 @@
 import { ProjectFormDialog } from '@/features/projects/components/organisms/ProjectFormDialog/ProjectFormDialog';
-import { useProjectModal } from '@/features/projects/hooks/use-project-modal';
+import { useProjectModal } from '@/features/projects/hooks/use-project-modal/use-project-modal';
 import { ProjectInput } from '@/features/projects/types';
 import { ConfirmationDialog } from '@/shared/components/molecules/ConfirmationDialog/ConfirmationDialog';
 import { Button } from '@/shared/components/ui/button';
