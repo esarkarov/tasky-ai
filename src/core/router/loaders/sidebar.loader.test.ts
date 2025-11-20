@@ -48,6 +48,7 @@ const createLoaderArgs = () => ({
   request: new Request('http://localhost'),
   params: {},
   context: {},
+  unstable_pattern: '',
 });
 
 beforeEach(() => {

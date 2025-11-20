@@ -16,6 +16,7 @@ const createLoaderArgs = (url: string = 'http://localhost') => ({
   request: new Request(url),
   params: {},
   context: {},
+  unstable_pattern: '',
 });
 
 const createMockProjects = (overrides?: Partial<ProjectsListResponse>): ProjectsListResponse => ({

@@ -21,6 +21,13 @@ const mockErrorResponse = vi.mocked(errorResponse);
 
 const createRequest = (method: string) => new Request('http://localhost', { method });
 
+const createActionArgs = (request: Request) => ({
+  request,
+  params: {},
+  context: {},
+  unstable_pattern: '',
+});
+
 beforeEach(() => {
   vi.clearAllMocks();
 });
@@ -32,7 +39,7 @@ describe('taskAction', () => {
       const mockResponse = new Response('created', { status: 201 });
       mockHandlers.handleCreate.mockResolvedValue(mockResponse);
 
-      const result = await taskAction({ request, params: {}, context: {} });
+      const result = await taskAction(createActionArgs(request));
 
       expect(mockHandlers.handleCreate).toHaveBeenCalledWith(request);
       expect(result).toBe(mockResponse);
@@ -43,7 +50,7 @@ describe('taskAction', () => {
       const mockResponse = new Response('updated', { status: 200 });
       mockHandlers.handleUpdate.mockResolvedValue(mockResponse);
 
-      const result = await taskAction({ request, params: {}, context: {} });
+      const result = await taskAction(createActionArgs(request));
 
       expect(mockHandlers.handleUpdate).toHaveBeenCalledWith(request);
       expect(result).toBe(mockResponse);
@@ -54,7 +61,7 @@ describe('taskAction', () => {
       const mockResponse = new Response(null, { status: 204 });
       mockHandlers.handleDelete.mockResolvedValue(mockResponse);
 
-      const result = await taskAction({ request, params: {}, context: {} });
+      const result = await taskAction(createActionArgs(request));
 
       expect(mockHandlers.handleDelete).toHaveBeenCalledWith(request);
       expect(result).toBe(mockResponse);
@@ -65,7 +72,7 @@ describe('taskAction', () => {
       const errorRes = new Response('not allowed', { status: 405 });
       mockErrorResponse.mockReturnValue(errorRes);
 
-      const result = await taskAction({ request, params: {}, context: {} });
+      const result = await taskAction(createActionArgs(request));
 
       expect(mockErrorResponse).toHaveBeenCalledWith('Method not allowed', HTTP_STATUS.METHOD_NOT_ALLOWED);
       expect(result).toBe(errorRes);
@@ -80,7 +87,7 @@ describe('taskAction', () => {
       const errorRes = new Response('error', { status: 500 });
       mockErrorResponse.mockReturnValue(errorRes);
 
-      const result = await taskAction({ request, params: {}, context: {} });
+      const result = await taskAction(createActionArgs(request));
 
       expect(mockErrorResponse).toHaveBeenCalledWith('Service failed', HTTP_STATUS.INTERNAL_SERVER_ERROR);
       expect(result).toBe(errorRes);
@@ -92,7 +99,7 @@ describe('taskAction', () => {
       const errorRes = new Response('error', { status: 500 });
       mockErrorResponse.mockReturnValue(errorRes);
 
-      const result = await taskAction({ request, params: {}, context: {} });
+      const result = await taskAction(createActionArgs(request));
 
       expect(mockErrorResponse).toHaveBeenCalledWith('Failed to process request', HTTP_STATUS.INTERNAL_SERVER_ERROR);
       expect(result).toBe(errorRes);

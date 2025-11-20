@@ -14,9 +14,10 @@ vi.mock('@/features/projects/services/project.service', () => ({
 const mockProjectService = vi.mocked(projectService);
 
 const createLoaderArgs = (projectId?: string) => ({
-  params: { projectId },
   request: new Request('http://localhost'),
+  params: { projectId },
   context: {},
+  unstable_pattern: '',
 });
 
 const createMockProject = (overrides: Partial<Project> = {}): Project => ({
