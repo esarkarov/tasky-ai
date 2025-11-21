@@ -1,7 +1,7 @@
 import { InputValueCount } from '@/shared/components/atoms/InputValueCount/InputValueCount';
 import { Label } from '@/shared/components/ui/label';
 import { Textarea } from '@/shared/components/ui/textarea';
-import { MAX_PROMPT_LENGTH } from '@/shared/constants/validation';
+import { MAX_PROMPT_LENGTH } from '@/shared/constants';
 
 interface AIPromptInputProps {
   value: string;

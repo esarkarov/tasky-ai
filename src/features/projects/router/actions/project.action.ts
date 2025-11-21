@@ -1,5 +1,5 @@
 import { projectActionHandlers } from '@/features/projects/services/projectAction.handlers';
-import { HTTP_METHODS, HTTP_STATUS } from '@/shared/constants/http';
+import { HTTP_METHODS, HTTP_STATUS } from '@/shared/constants';
 import { errorResponse } from '@/shared/utils/response/response.utils';
 import type { ActionFunction } from 'react-router';
 

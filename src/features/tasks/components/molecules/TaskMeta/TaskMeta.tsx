@@ -3,7 +3,7 @@ import { Project } from '@/features/projects/types';
 import { TaskDueDate } from '@/features/tasks/components/atoms/TaskDueDate/TaskDueDate';
 import { Task } from '@/features/tasks/types';
 import { CardFooter } from '@/shared/components/ui/card';
-import { ROUTES } from '@/shared/constants/routes';
+import { ROUTES } from '@/shared/constants';
 import { useLocation } from 'react-router';
 
 interface TaskMetaProps {

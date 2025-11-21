@@ -1,7 +1,7 @@
 import { InputValueCount } from '@/shared/components/atoms/InputValueCount/InputValueCount';
 import { Input } from '@/shared/components/ui/input';
 import { Label } from '@/shared/components/ui/label';
-import { MAX_NAME_LENGTH } from '@/shared/constants/validation';
+import { MAX_NAME_LENGTH } from '@/shared/constants';
 
 interface ProjectNameInputProps {
   value: string;

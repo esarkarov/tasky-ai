@@ -24,7 +24,7 @@ vi.mock('lucide-react', () => ({
   ),
 }));
 
-vi.mock('@/shared/constants/routes', () => ({
+vi.mock('@/shared/constants', () => ({
   ROUTES: { PROJECTS: '/projects' },
 }));
 

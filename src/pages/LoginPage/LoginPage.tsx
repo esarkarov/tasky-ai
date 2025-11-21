@@ -1,5 +1,5 @@
 import { Head } from '@/shared/components/atoms/Head/Head';
-import { ROUTES } from '@/shared/constants/routes';
+import { ROUTES } from '@/shared/constants';
 import { SignIn } from '@clerk/clerk-react';
 
 export const LoginPage = () => {

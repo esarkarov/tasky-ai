@@ -1,5 +1,5 @@
 import { AppTopBar } from '@/shared/components/organisms/AppTopBar/AppTopBar';
-import { TIMING } from '@/shared/constants/timing';
+import { TIMING } from '@/shared/constants';
 import { render, screen, waitFor } from '@testing-library/react';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 

@@ -1,4 +1,4 @@
-import { TIMING } from '@/shared/constants/timing';
+import { TIMING } from '@/shared/constants';
 import { UseLoadMoreParams } from '@/shared/types';
 import { CSSProperties, useCallback, useState } from 'react';
 

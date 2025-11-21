@@ -1,6 +1,0 @@
-export const TIMING = {
-  DELAY_DURATION: 500,
-  TOAST_DURATION: 2500,
-  LOAD_DELAY: 300,
-  SCROLL_THRESHOLD: 70,
-} as const;

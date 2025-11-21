@@ -1,5 +1,5 @@
 import { TaskCounts } from '@/features/tasks/types';
-import { ROUTES } from '@/shared/constants/routes';
+import { ROUTES } from '@/shared/constants';
 import { cn, createEmptyState, getBadgeCount, getTaskDueDateColorClass } from '@/shared/utils/ui/ui.utils';
 import clsx from 'clsx';
 import { isBefore, isToday, isTomorrow, startOfToday } from 'date-fns';
@@ -16,7 +16,7 @@ vi.mock('date-fns', () => ({
   isTomorrow: vi.fn(),
   startOfToday: vi.fn(),
 }));
-vi.mock('@/shared/constants/routes', () => ({
+vi.mock('@/shared/constants', () => ({
   ROUTES: {
     INBOX: '/inbox',
     TODAY: '/today',

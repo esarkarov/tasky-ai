@@ -2,7 +2,7 @@ import { env } from '@/core/config/env.config';
 import { router } from '@/core/router';
 import { Loader } from '@/shared/components/atoms/Loader/Loader';
 import { Toaster } from '@/shared/components/ui/toaster';
-import { ROUTES } from '@/shared/constants/routes';
+import { ROUTES } from '@/shared/constants';
 import { ClerkProvider } from '@clerk/clerk-react';
 import { dark } from '@clerk/themes';
 import { Suspense } from 'react';

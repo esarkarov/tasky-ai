@@ -1,4 +1,4 @@
-import { TIMING } from '@/shared/constants/timing';
+import { TIMING } from '@/shared/constants';
 import { buildSearchUrl } from '@/shared/utils/operation/operation.utils';
 import { act, renderHook } from '@testing-library/react';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
@@ -14,9 +14,12 @@ vi.mock('@/shared/utils/operation/operation.utils', () => ({
   buildSearchUrl: vi.fn((route: string, searchValue: string) => `${route}?search=${encodeURIComponent(searchValue)}`),
 }));
 
-vi.mock('@/shared/constants/routes', () => ({
+vi.mock('@/shared/constants', () => ({
   ROUTES: {
     PROJECTS: '/projects',
+  },
+  TIMING: {
+    DELAY_DURATION: 300,
   },
 }));
 

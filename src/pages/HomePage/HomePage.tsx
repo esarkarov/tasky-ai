@@ -1,7 +1,7 @@
 'use client';
 import { Head } from '@/shared/components/atoms/Head/Head';
 import { Button } from '@/shared/components/ui/button';
-import { ROUTES } from '@/shared/constants/routes';
+import { ROUTES } from '@/shared/constants';
 import { useAuth } from '@clerk/clerk-react';
 import { Link } from 'react-router';
 

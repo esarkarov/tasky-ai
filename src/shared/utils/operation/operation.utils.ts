@@ -1,5 +1,4 @@
-import { TIMING } from '@/shared/constants/timing';
-import { MAX_PROJECT_NAME_TRUNCATE_LENGTH, MAX_TASK_CONTENT_TRUNCATE_LENGTH } from '@/shared/constants/validation';
+import { MAX_PROJECT_NAME_TRUNCATE_LENGTH, MAX_TASK_CONTENT_TRUNCATE_LENGTH, TIMING } from '@/shared/constants';
 import { Toast } from '@/shared/hooks/use-toast/use-toast';
 import { HttpMethod, ToastHandler, ToastMessages } from '@/shared/types';
 import { truncateString } from '@/shared/utils/text/text.utils';

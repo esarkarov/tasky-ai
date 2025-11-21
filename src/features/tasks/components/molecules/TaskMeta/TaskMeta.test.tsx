@@ -1,6 +1,6 @@
 import { Project } from '@/features/projects/types';
 import { Task } from '@/features/tasks/types';
-import { ROUTES } from '@/shared/constants/routes';
+import { ROUTES } from '@/shared/constants';
 import { render, screen } from '@testing-library/react';
 import { MemoryRouter } from 'react-router';
 import { beforeEach, describe, expect, it, vi } from 'vitest';

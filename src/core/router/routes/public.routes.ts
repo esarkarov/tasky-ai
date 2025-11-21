@@ -1,5 +1,5 @@
 import { HomePage, LoginPage, RegisterPage } from '@/core/router/lazy';
-import { ROUTES } from '@/shared/constants/routes';
+import { ROUTES } from '@/shared/constants';
 import { RouteObject } from 'react-router';
 
 export const publicRoutes: RouteObject[] = [

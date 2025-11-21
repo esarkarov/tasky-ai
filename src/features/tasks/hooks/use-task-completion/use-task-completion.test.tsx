@@ -18,21 +18,15 @@ vi.mock('@/shared/hooks/use-toast/use-toast', () => ({
   }),
 }));
 
-vi.mock('@/shared/constants/routes', () => ({
-  ROUTES: {
-    APP: '/app',
-  },
-}));
-
-vi.mock('@/shared/constants/http', () => ({
+vi.mock('@/shared/constants', () => ({
   HTTP_METHODS: {
     PUT: 'PUT',
   },
-}));
-
-vi.mock('@/shared/constants/timing', () => ({
   TIMING: {
     TOAST_DURATION: 3000,
+  },
+  ROUTES: {
+    APP: '/app',
   },
 }));
 

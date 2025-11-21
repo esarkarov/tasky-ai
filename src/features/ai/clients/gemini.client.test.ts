@@ -4,10 +4,6 @@ import { GenerateContentResponse } from '@google/genai';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { geminiClient } from './gemini.client';
 
-vi.mock('@/shared/constants/defaults', () => ({
-  DEFAULT_GEMINI_MODEL: 'gemini-pro',
-}));
-
 vi.mock('@/core/lib/google-ai', () => ({
   genAI: {
     models: {

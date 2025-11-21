@@ -1,5 +1,5 @@
 import { env } from '@/core/config/env.config';
-import { ROUTES } from '@/shared/constants/routes';
+import { ROUTES } from '@/shared/constants';
 import { redirect } from 'react-router';
 
 export function getUserId() {

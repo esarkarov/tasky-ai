@@ -1,7 +1,7 @@
-import { ROUTES } from '@/shared/constants/routes';
+import { SidebarMenuButton } from '@/shared/components/ui/sidebar';
+import { ROUTES } from '@/shared/constants';
 import { MoreHorizontal } from 'lucide-react';
 import { Link, useLocation } from 'react-router';
-import { SidebarMenuButton } from '@/shared/components/ui/sidebar';
 
 export interface AllProjectsButtonProps {
   onClick: () => void;

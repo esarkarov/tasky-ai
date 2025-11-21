@@ -1,6 +1,5 @@
 import { Loader } from '@/shared/components/atoms/Loader/Loader';
-import { ROUTES } from '@/shared/constants/routes';
-import { TIMING } from '@/shared/constants/timing';
+import { ROUTES, TIMING } from '@/shared/constants';
 import { useToast } from '@/shared/hooks/use-toast/use-toast';
 import { useAuth } from '@clerk/clerk-react';
 import { useEffect } from 'react';

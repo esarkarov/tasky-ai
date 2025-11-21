@@ -1,5 +1,4 @@
-import { TIMING } from '@/shared/constants/timing';
-import { MAX_PROJECT_NAME_TRUNCATE_LENGTH, MAX_TASK_CONTENT_TRUNCATE_LENGTH } from '@/shared/constants/validation';
+import { MAX_PROJECT_NAME_TRUNCATE_LENGTH, MAX_TASK_CONTENT_TRUNCATE_LENGTH, TIMING } from '@/shared/constants';
 import { OperationResult } from '@/shared/types';
 import {
   buildProjectSuccessDescription,
@@ -10,13 +9,10 @@ import {
 import { truncateString } from '@/shared/utils/text/text.utils';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 
-vi.mock('@/shared/constants/timing', () => ({
+vi.mock('@/shared/constants', () => ({
   TIMING: {
     TOAST_DURATION: 5000,
   },
-}));
-
-vi.mock('@/shared/constants/validation', () => ({
   MAX_PROJECT_NAME_TRUNCATE_LENGTH: 30,
   MAX_TASK_CONTENT_TRUNCATE_LENGTH: 50,
 }));

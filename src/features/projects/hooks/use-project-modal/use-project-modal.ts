@@ -1,10 +1,10 @@
 import type { ProjectFormInput } from '@/features/projects/types';
-import { ROUTES } from '@/shared/constants/routes';
+import { ROUTES } from '@/shared/constants';
 import { useDisclosure } from '@/shared/hooks/use-disclosure/use-disclosure';
+import { CrudMode } from '@/shared/types';
 import { useCallback } from 'react';
 import { useLocation, useNavigate } from 'react-router';
 import { useProjectMutation } from '../use-project-mutation/use-project-mutation';
-import { CrudMode } from '@/shared/types';
 export interface UseProjectModalParams {
   mode?: CrudMode;
   onSuccess?: () => void;

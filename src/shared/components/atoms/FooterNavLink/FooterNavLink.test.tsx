@@ -14,22 +14,18 @@ vi.mock('@/shared/components/ui/separator', () => ({
   ),
 }));
 
-vi.mock('@/shared/constants/app-links', () => ({
-  SOCIAL_LINKS: [
-    { href: 'https://twitter.com', label: 'Twitter' },
-    { href: 'https://github.com', label: 'GitHub' },
-    { href: 'https://linkedin.com', label: 'LinkedIn' },
-  ],
-}));
-
 describe('FooterNavLink', () => {
-  const defaultLink = { href: 'https://twitter.com', label: 'Twitter' };
-  const setup = async (index = 0, link = { href: 'https://twitter.com', label: 'Twitter' }) => {
+  const mockLink = {
+    href: 'https://twitter.com',
+    label: 'Twitter',
+  };
+
+  const setup = (link = mockLink, isLast = false) => {
     const user = userEvent.setup();
     render(
       <FooterNavLink
         link={link}
-        index={index}
+        isLast={isLast}
       />
     );
     const navLink = screen.getByRole('link', { name: link.label });
@@ -42,16 +38,24 @@ describe('FooterNavLink', () => {
   });
 
   describe('rendering', () => {
-    it('renders link with correct text and href', async () => {
-      const { navLink } = await setup(0, defaultLink);
+    it('renders link with correct text and href', () => {
+      const { navLink } = setup();
 
       expect(navLink).toBeInTheDocument();
       expect(navLink).toHaveTextContent('Twitter');
       expect(navLink).toHaveAttribute('href', 'https://twitter.com');
     });
 
-    it('opens link in a new tab with safe rel attributes', async () => {
-      const { navLink } = await setup();
+    it('renders link with custom data', () => {
+      const customLink = { href: 'https://github.com', label: 'GitHub' };
+      const { navLink } = setup(customLink);
+
+      expect(navLink).toHaveTextContent('GitHub');
+      expect(navLink).toHaveAttribute('href', 'https://github.com');
+    });
+
+    it('opens link in a new tab with safe rel attributes', () => {
+      const { navLink } = setup();
 
       expect(navLink).toHaveAttribute('target', '_blank');
       expect(navLink).toHaveAttribute('rel', 'noopener noreferrer');
@@ -59,29 +63,29 @@ describe('FooterNavLink', () => {
   });
 
   describe('separator rendering', () => {
-    it('renders separator when not the last item', async () => {
-      const { separator } = await setup(0);
+    it('renders separator when isLast is false', () => {
+      const { separator } = setup(mockLink, false);
 
       expect(separator).toBeInTheDocument();
     });
 
-    it('does not render separator for the last item', async () => {
-      const { separator } = await setup(2);
+    it('does not render separator when isLast is true', () => {
+      const { separator } = setup(mockLink, true);
 
       expect(separator).not.toBeInTheDocument();
     });
 
-    it('sets vertical orientation and correct classes on separator', async () => {
-      const { separator } = await setup(1);
+    it('hides separator from screen readers', () => {
+      const { separator } = setup(mockLink, false);
 
-      expect(separator).toHaveAttribute('data-orientation', 'vertical');
-      expect(separator).toHaveClass('h-3', 'mx-3');
+      expect(separator).toHaveAttribute('aria-hidden', 'true');
+      expect(separator).toHaveAttribute('role', 'presentation');
     });
   });
 
   describe('user interactions', () => {
-    it('is clickable and navigates to correct href', async () => {
-      const { user, navLink } = await setup();
+    it('is clickable and has correct href', async () => {
+      const { user, navLink } = setup();
 
       await user.click(navLink);
 
@@ -89,49 +93,94 @@ describe('FooterNavLink', () => {
     });
 
     it('is keyboard accessible via Tab', async () => {
-      const { user, navLink } = await setup();
+      const { user, navLink } = setup();
 
       await user.tab();
 
       expect(navLink).toHaveFocus();
     });
+
+    it('can be activated with Enter key', async () => {
+      const { user, navLink } = setup();
+
+      navLink.focus();
+      await user.keyboard('{Enter}');
+
+      expect(navLink).toHaveAttribute('href', 'https://twitter.com');
+    });
   });
 
   describe('accessibility', () => {
-    it('adds aria-label for assistive technologies', async () => {
-      const { navLink } = await setup();
+    it('has correct aria-label', () => {
+      const { navLink } = setup();
 
       expect(navLink).toHaveAttribute('aria-label', 'Twitter');
     });
 
-    it('hides separator from screen readers', async () => {
-      const { separator } = await setup(0);
+    it('provides semantic link role', () => {
+      setup();
 
-      expect(separator).toHaveAttribute('aria-hidden', 'true');
-      expect(separator).toHaveAttribute('role', 'presentation');
+      const link = screen.getByRole('link', { name: 'Twitter' });
+      expect(link).toBeInTheDocument();
+    });
+
+    it('announces link properly to screen readers', () => {
+      const { navLink } = setup();
+
+      expect(navLink).toHaveAccessibleName('Twitter');
     });
   });
 
-  describe('multiple links behavior', () => {
-    it('renders first link with separator', async () => {
-      const { separator, navLink } = await setup(0, { href: 'https://twitter.com', label: 'Twitter' });
+  describe('multiple links simulation', () => {
+    it('renders first link (not last) with separator', () => {
+      const { navLink, separator } = setup({ href: 'https://twitter.com', label: 'Twitter' }, false);
 
       expect(navLink).toBeInTheDocument();
       expect(separator).toBeInTheDocument();
     });
 
-    it('renders middle link with separator', async () => {
-      const { separator, navLink } = await setup(1, { href: 'https://github.com', label: 'GitHub' });
+    it('renders middle link (not last) with separator', () => {
+      const { navLink, separator } = setup({ href: 'https://github.com', label: 'GitHub' }, false);
 
       expect(navLink).toHaveTextContent('GitHub');
       expect(separator).toBeInTheDocument();
     });
 
-    it('renders last link without separator', async () => {
-      const { navLink, separator } = await setup(2, { href: 'https://linkedin.com', label: 'LinkedIn' });
+    it('renders last link without separator', () => {
+      const { navLink, separator } = setup({ href: 'https://linkedin.com', label: 'LinkedIn' }, true);
 
       expect(navLink).toHaveTextContent('LinkedIn');
       expect(separator).not.toBeInTheDocument();
+    });
+  });
+
+  describe('edge cases', () => {
+    it('handles link with special characters in label', () => {
+      const specialLink = {
+        href: 'https://example.com',
+        label: 'Test & Demo',
+      };
+      const { navLink } = setup(specialLink);
+
+      expect(navLink).toHaveTextContent('Test & Demo');
+    });
+
+    it('handles very long URLs', () => {
+      const longLink = {
+        href: 'https://example.com/very/long/path/to/resource?param1=value1&param2=value2',
+        label: 'Long URL',
+      };
+      const { navLink } = setup(longLink);
+
+      expect(navLink).toHaveAttribute('href', longLink.href);
+    });
+
+    it('wraps content in list item', () => {
+      const { navLink } = setup();
+      const listItem = navLink.closest('li');
+
+      expect(listItem).toBeInTheDocument();
+      expect(listItem).toHaveClass('flex', 'items-center');
     });
   });
 });

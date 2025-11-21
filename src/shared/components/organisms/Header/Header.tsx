@@ -1,7 +1,7 @@
 import { Logo } from '@/shared/components/atoms/Logo/Logo';
-import { ROUTES } from '@/shared/constants/routes';
-import { Link } from 'react-router';
 import { AuthActions } from '@/shared/components/molecules/AuthActions/AuthActions';
+import { ROUTES } from '@/shared/constants';
+import { Link } from 'react-router';
 
 export const Header = () => {
   return (

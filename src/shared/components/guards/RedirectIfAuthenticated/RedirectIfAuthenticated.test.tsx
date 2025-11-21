@@ -27,7 +27,7 @@ vi.mock('@clerk/clerk-react', () => ({
   useAuth: () => mockUseAuth(),
 }));
 
-vi.mock('@/shared/constants/routes', () => ({
+vi.mock('@/shared/constants', () => ({
   ROUTES: { TODAY: '/today' },
 }));
 

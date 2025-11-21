@@ -1,8 +1,8 @@
-import { describe, it, expect, vi, beforeEach } from 'vitest';
-import { projectAction } from './project.action';
-import { HTTP_METHODS, HTTP_STATUS } from '@/shared/constants/http';
-import { errorResponse } from '@/shared/utils/response/response.utils';
 import { projectActionHandlers } from '@/features/projects/services/projectAction.handlers';
+import { HTTP_METHODS, HTTP_STATUS } from '@/shared/constants';
+import { errorResponse } from '@/shared/utils/response/response.utils';
+import { beforeEach, describe, expect, it, vi } from 'vitest';
+import { projectAction } from './project.action';
 
 vi.mock('@/features/projects/services/projectAction.handlers', () => ({
   projectActionHandlers: {

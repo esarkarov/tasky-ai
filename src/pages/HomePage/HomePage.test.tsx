@@ -24,7 +24,7 @@ vi.mock('@/shared/components/ui/button', () => ({
   ),
 }));
 
-vi.mock('@/shared/constants/routes', () => ({
+vi.mock('@/shared/constants', () => ({
   ROUTES: {
     TODAY: '/today',
     REGISTER: '/register',

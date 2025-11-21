@@ -1,10 +1,10 @@
-import { MAX_PROMPT_LENGTH } from '@/shared/constants/validation';
+import { MAX_PROMPT_LENGTH } from '@/shared/constants';
 import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { AIPromptInput } from './AIPromptInput';
 
-vi.mock('@/shared/constants/validation', () => ({
+vi.mock('@/shared/constants', () => ({
   MAX_PROMPT_LENGTH: 500,
 }));
 

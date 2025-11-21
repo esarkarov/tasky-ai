@@ -1,6 +1,5 @@
 import type { ProjectFormInput } from '@/features/projects/types';
-import { HTTP_METHODS } from '@/shared/constants/http';
-import { ROUTES } from '@/shared/constants/routes';
+import { HTTP_METHODS, ROUTES } from '@/shared/constants';
 import { NavigationState } from '@/shared/types';
 import { act, renderHook } from '@testing-library/react';
 import { beforeEach, describe, expect, it, vi } from 'vitest';

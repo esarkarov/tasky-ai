@@ -4,7 +4,7 @@ import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { ProjectNameInput } from './ProjectNameInput';
 import { useState } from 'react';
 
-vi.mock('@/shared/constants/validation', () => ({
+vi.mock('@/shared/constants', () => ({
   MAX_NAME_LENGTH: 50,
 }));
 

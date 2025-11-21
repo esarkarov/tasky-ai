@@ -1,6 +1,6 @@
 import { Project, ProjectsListResponse } from '@/features/projects/types';
 import { TaskCounts, TasksResponse } from '@/features/tasks/types';
-import { HTTP_METHODS, HTTP_STATUS } from '@/shared/constants/http';
+import { HTTP_METHODS, HTTP_STATUS } from '@/shared/constants';
 import { ToasterToast } from '@/shared/hooks/use-toast/use-toast';
 import { Models } from 'appwrite';
 

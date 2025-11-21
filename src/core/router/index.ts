@@ -6,7 +6,7 @@ import { ErrorPage } from '@/pages/ErrorPage/ErrorPage';
 import { Loader } from '@/shared/components/atoms/Loader/Loader';
 import { RedirectIfAuthenticated } from '@/shared/components/guards/RedirectIfAuthenticated/RedirectIfAuthenticated';
 import { RequireAuth } from '@/shared/components/guards/RequireAuth/RequireAuth';
-import { ROUTES } from '@/shared/constants/routes';
+import { ROUTES } from '@/shared/constants';
 import { createElement } from 'react';
 import { createBrowserRouter } from 'react-router';
 

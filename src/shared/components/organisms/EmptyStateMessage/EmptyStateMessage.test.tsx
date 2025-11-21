@@ -1,48 +1,6 @@
 import { EmptyStateMessage } from '@/shared/components/organisms/EmptyStateMessage/EmptyStateMessage';
 import { render, screen } from '@testing-library/react';
-import { describe, expect, it, vi } from 'vitest';
-
-vi.mock('@/shared/constants/ui-contents', () => ({
-  EMPTY_STATE_CONTENTS: {
-    today: {
-      img: {
-        src: '/images/today.png',
-        width: 200,
-        height: 200,
-      },
-      title: 'No tasks for today',
-      description: 'Add your first task to get started',
-    },
-    inbox: {
-      img: {
-        src: '/images/inbox.png',
-        width: 200,
-        height: 200,
-      },
-      title: 'Your inbox is empty',
-      description: 'Add tasks to organize your work',
-    },
-    project: {
-      img: {
-        src: '/images/project.png',
-        width: 180,
-        height: 180,
-      },
-      title: 'No tasks in this project',
-      description: 'Create your first task',
-    },
-    upcoming: {
-      img: null,
-      title: 'No upcoming tasks',
-      description: 'Schedule tasks for the future',
-    },
-    completed: {
-      img: null,
-      title: 'No completed tasks',
-      description: 'Complete tasks to see them here',
-    },
-  },
-}));
+import { describe, expect, it } from 'vitest';
 
 describe('EmptyStateMessage', () => {
   describe('rendering', () => {

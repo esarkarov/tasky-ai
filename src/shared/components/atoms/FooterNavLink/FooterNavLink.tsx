@@ -1,14 +1,15 @@
 import { Separator } from '@/shared/components/ui/separator';
-import { SOCIAL_LINKS } from '@/shared/constants/app-links';
 
+interface NavLink {
+  href: string;
+  label: string;
+}
 interface FooterNavLinkProps {
-  link: (typeof SOCIAL_LINKS)[number];
-  index: number;
+  link: NavLink;
+  isLast: boolean;
 }
 
-export const FooterNavLink = ({ link, index }: FooterNavLinkProps) => {
-  const isLast = index === SOCIAL_LINKS.length - 1;
-
+export const FooterNavLink = ({ link, isLast }: FooterNavLinkProps) => {
   return (
     <li className="flex items-center">
       <a
@@ -19,7 +20,6 @@ export const FooterNavLink = ({ link, index }: FooterNavLinkProps) => {
         aria-label={link.label}>
         {link.label}
       </a>
-
       {!isLast && (
         <Separator
           orientation="vertical"

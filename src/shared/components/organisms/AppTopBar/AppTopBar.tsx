@@ -1,6 +1,6 @@
 import { AppBarTitle } from '@/shared/components/atoms/AppBarTitle/AppBarTitle';
 import { ToggleSidebarButton } from '@/shared/components/atoms/ToggleSidebarButton/ToggleSidebarButton';
-import { TIMING } from '@/shared/constants/timing';
+import { TIMING } from '@/shared/constants';
 import { cn } from '@/shared/utils/ui/ui.utils';
 import { useEffect, useState } from 'react';
 

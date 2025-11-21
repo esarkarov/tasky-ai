@@ -1,4 +1,4 @@
-import { INPUT_WARN_THRESHOLD } from '@/shared/constants/validation';
+import { INPUT_WARN_THRESHOLD } from '@/shared/constants';
 import { cn } from '@/shared/utils/ui/ui.utils';
 
 export interface InputValueCountProps {

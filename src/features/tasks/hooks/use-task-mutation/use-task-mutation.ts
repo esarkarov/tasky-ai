@@ -1,7 +1,6 @@
 import { TASK_TOAST_CONTENTS } from '@/features/tasks/constants';
 import { TaskFormInput } from '@/features/tasks/types';
-import { HTTP_METHODS } from '@/shared/constants/http';
-import { ROUTES } from '@/shared/constants/routes';
+import { HTTP_METHODS, ROUTES } from '@/shared/constants';
 import { useToast } from '@/shared/hooks/use-toast/use-toast';
 import { buildTaskSuccessDescription, executeWithToast } from '@/shared/utils/operation/operation.utils';
 import { useCallback } from 'react';

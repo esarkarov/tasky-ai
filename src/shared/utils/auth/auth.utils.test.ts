@@ -1,5 +1,5 @@
 import { env } from '@/core/config/env.config';
-import { ROUTES } from '@/shared/constants/routes';
+import { ROUTES } from '@/shared/constants';
 import { getUserId } from '@/shared/utils/auth/auth.utils';
 import { redirect } from 'react-router';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
@@ -10,7 +10,7 @@ vi.mock('@/core/config/env.config', () => ({
   },
 }));
 
-vi.mock('@/shared/constants/routes', () => ({
+vi.mock('@/shared/constants', () => ({
   ROUTES: {
     LOGIN: '/login',
   },

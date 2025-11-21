@@ -1,5 +1,15 @@
 import { FooterNavLink } from '@/shared/components/atoms/FooterNavLink/FooterNavLink';
-import { SOCIAL_LINKS } from '@/shared/constants/app-links';
+
+const SOCIAL_LINKS = [
+  {
+    href: 'https://linkedin.com/in/elvinsarkarov',
+    label: 'LinkedIn',
+  },
+  {
+    href: 'https://github.com/esarkarov',
+    label: 'GitHub',
+  },
+];
 
 export const FooterNav = () => {
   return (
@@ -7,9 +17,9 @@ export const FooterNav = () => {
       <ul className="flex flex-wrap items-center">
         {SOCIAL_LINKS.map((link, index) => (
           <FooterNavLink
-            key={link.href}
+            key={link.label}
             link={link}
-            index={index}
+            isLast={index === SOCIAL_LINKS.length - 1}
           />
         ))}
       </ul>

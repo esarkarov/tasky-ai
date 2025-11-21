@@ -20,7 +20,7 @@ vi.mock('@/shared/components/ui/tooltip', () => ({
   ),
 }));
 
-vi.mock('@/shared/constants/timing', () => ({
+vi.mock('@/shared/constants', () => ({
   TIMING: { DELAY_DURATION: 500 },
 }));
 

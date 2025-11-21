@@ -1,5 +1,5 @@
 import type { TaskFormInput } from '@/features/tasks/types';
-import { HTTP_STATUS } from '@/shared/constants/http';
+import { HTTP_STATUS } from '@/shared/constants';
 import { errorResponse, successResponse } from '@/shared/utils/response/response.utils';
 import { taskService } from './task.service';
 

@@ -1,7 +1,7 @@
 import { AppSidebar } from '@/shared/components/organisms/AppSidebar/AppSidebar';
 import { SidebarProvider } from '@/shared/components/ui/sidebar';
 import { TooltipProvider } from '@/shared/components/ui/tooltip';
-import { TIMING } from '@/shared/constants/timing';
+import { TIMING } from '@/shared/constants';
 import { cn } from '@/shared/utils/ui/ui.utils';
 import { memo } from 'react';
 import { Outlet, useNavigation } from 'react-router';

@@ -1,6 +1,6 @@
 import { InputValueCount } from '@/shared/components/atoms/InputValueCount/InputValueCount';
 import { Textarea } from '@/shared/components/ui/textarea';
-import { MAX_CONTENT_LENGTH } from '@/shared/constants/validation';
+import { MAX_CONTENT_LENGTH } from '@/shared/constants';
 
 interface TaskContentInputProps {
   value: string;

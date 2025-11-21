@@ -1,6 +1,0 @@
-export const MAX_CONTENT_LENGTH = 250;
-export const MAX_NAME_LENGTH = 50;
-export const MAX_PROMPT_LENGTH = 150;
-export const MAX_PROJECT_NAME_TRUNCATE_LENGTH = 32;
-export const MAX_TASK_CONTENT_TRUNCATE_LENGTH = 50;
-export const INPUT_WARN_THRESHOLD = 10;

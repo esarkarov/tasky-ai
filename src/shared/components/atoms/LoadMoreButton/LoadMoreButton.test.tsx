@@ -3,14 +3,16 @@ import userEvent from '@testing-library/user-event';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { LoadMoreButton, LoadMoreButtonProps } from './LoadMoreButton';
 
-vi.mock('lucide-react', () => ({
-  Loader2: (props: Record<string, unknown>) => (
-    <svg
-      data-testid="loader-icon"
-      {...props}
-    />
-  ),
-}));
+vi.mock('lucide-react', () => {
+  return {
+    Loader2: (props: Record<string, unknown>) => (
+      <svg
+        data-testid="loader-icon"
+        {...props}
+      />
+    ),
+  };
+});
 
 describe('LoadMoreButton', () => {
   const setup = (props?: Partial<LoadMoreButtonProps>) => {

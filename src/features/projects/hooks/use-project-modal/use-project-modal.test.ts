@@ -1,8 +1,8 @@
-import { renderHook, act } from '@testing-library/react';
-import { describe, it, expect, vi, beforeEach } from 'vitest';
-import { useProjectModal } from './use-project-modal';
-import { ROUTES } from '@/shared/constants/routes';
 import type { ProjectFormInput } from '@/features/projects/types';
+import { ROUTES } from '@/shared/constants';
+import { act, renderHook } from '@testing-library/react';
+import { beforeEach, describe, expect, it, vi } from 'vitest';
+import { useProjectModal } from './use-project-modal';
 
 const mockNavigate = vi.fn();
 const mockCancelModal = vi.fn();

@@ -1,12 +1,18 @@
 import { TaskCounts } from '@/features/tasks/types';
 import { SidebarMenuBadge, SidebarMenuButton, SidebarMenuItem } from '@/shared/components/ui/sidebar';
-import { TASK_SIDEBAR_LINKS } from '@/shared/constants/app-links';
 import { getBadgeCount } from '@/shared/utils/ui/ui.utils';
+import { LucideIcon } from 'lucide-react';
 import { memo } from 'react';
 import { Link } from 'react-router';
 
+interface NavLink {
+  href: string;
+  label: string;
+  icon: LucideIcon;
+}
+
 interface TaskSidebarNavLinkProps {
-  link: (typeof TASK_SIDEBAR_LINKS)[number];
+  link: NavLink;
   isActive: boolean;
   taskCounts: TaskCounts;
   onClick: () => void;

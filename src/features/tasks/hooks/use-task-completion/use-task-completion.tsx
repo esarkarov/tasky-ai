@@ -1,8 +1,6 @@
 import { TASK_TOAST_CONTENTS } from '@/features/tasks/constants';
 import { ToastAction } from '@/shared/components/ui/toast';
-import { HTTP_METHODS } from '@/shared/constants/http';
-import { ROUTES } from '@/shared/constants/routes';
-import { TIMING } from '@/shared/constants/timing';
+import { HTTP_METHODS, ROUTES, TIMING } from '@/shared/constants';
 import { useToast } from '@/shared/hooks/use-toast/use-toast';
 import { useCallback } from 'react';
 import { useFetcher } from 'react-router';

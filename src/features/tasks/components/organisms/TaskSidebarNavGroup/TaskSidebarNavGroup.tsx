@@ -9,8 +9,30 @@ import {
   SidebarMenuButton,
   SidebarMenuItem,
 } from '@/shared/components/ui/sidebar';
-import { TASK_SIDEBAR_LINKS } from '@/shared/constants/app-links';
-import { CirclePlus } from 'lucide-react';
+import { Calendar1, CalendarDays, CircleCheck, CirclePlus, Inbox } from 'lucide-react';
+
+const TASK_SIDEBAR_LINKS = [
+  {
+    href: '/app/inbox',
+    label: 'Inbox',
+    icon: Inbox,
+  },
+  {
+    href: '/app/today',
+    label: 'Today',
+    icon: Calendar1,
+  },
+  {
+    href: '/app/upcoming',
+    label: 'Upcoming',
+    icon: CalendarDays,
+  },
+  {
+    href: '/app/completed',
+    label: 'Completed',
+    icon: CircleCheck,
+  },
+];
 
 interface TaskSidebarNavGroupProps {
   currentPath: string;

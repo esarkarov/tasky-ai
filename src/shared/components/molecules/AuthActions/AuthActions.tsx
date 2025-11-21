@@ -1,6 +1,6 @@
 import { UserChip } from '@/shared/components/atoms/UserChip/UserChip';
 import { Button } from '@/shared/components/ui/button';
-import { ROUTES } from '@/shared/constants/routes';
+import { ROUTES } from '@/shared/constants';
 import { useAuth } from '@clerk/clerk-react';
 import { Link, useLocation } from 'react-router';
 

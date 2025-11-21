@@ -22,7 +22,7 @@ vi.mock('@/shared/components/atoms/UserChip/UserChip', () => ({
   UserChip: () => <div data-testid="user-chip">User Chip</div>,
 }));
 
-vi.mock('@/shared/constants/routes', () => ({
+vi.mock('@/shared/constants', () => ({
   ROUTES: {
     LOGIN: '/login',
     REGISTER: '/register',

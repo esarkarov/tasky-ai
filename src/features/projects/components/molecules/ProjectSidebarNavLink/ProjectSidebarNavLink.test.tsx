@@ -4,7 +4,7 @@ import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { ProjectSidebarNavLink } from './ProjectSidebarNavLink';
 import { MemoryRouter } from 'react-router';
 
-vi.mock('@/shared/constants/routes', () => ({
+vi.mock('@/shared/constants', () => ({
   ROUTES: {
     PROJECT: (id: string) => `/project/${id}`,
   },

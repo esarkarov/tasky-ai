@@ -20,7 +20,7 @@ export const FilterSelect = ({ value, projects, handleValueChange }: FilterSelec
       <SelectTrigger className="w-[200px]">
         <SelectValue placeholder="All Projects" />
       </SelectTrigger>
-      <SelectContent className="w-[250px]">
+      <SelectContent className="w-[200px]">
         <SelectItem value="all">
           <div className="flex items-center gap-2">
             <ClipboardCheck

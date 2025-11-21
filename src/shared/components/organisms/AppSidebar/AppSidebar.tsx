@@ -3,7 +3,7 @@ import { TaskSidebarNavGroup } from '@/features/tasks/components/organisms/TaskS
 import { Logo } from '@/shared/components/atoms/Logo/Logo';
 import { UserChip } from '@/shared/components/atoms/UserChip/UserChip';
 import { Sidebar, SidebarContent, SidebarFooter, SidebarHeader, useSidebar } from '@/shared/components/ui/sidebar';
-import { ROUTES } from '@/shared/constants/routes';
+import { ROUTES } from '@/shared/constants';
 import { SidebarLoaderData } from '@/shared/types';
 import { Link, useLoaderData, useLocation } from 'react-router';
 

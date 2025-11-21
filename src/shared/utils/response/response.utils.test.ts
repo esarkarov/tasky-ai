@@ -1,4 +1,4 @@
-import { HTTP_STATUS } from '@/shared/constants/http';
+import { HTTP_STATUS } from '@/shared/constants';
 import { HttpStatusCode } from '@/shared/types';
 import { errorResponse, jsonResponse, successResponse } from '@/shared/utils/response/response.utils';
 import { beforeEach, describe, expect, it, vi } from 'vitest';

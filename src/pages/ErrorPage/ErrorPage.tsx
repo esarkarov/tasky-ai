@@ -1,6 +1,6 @@
 import { Head } from '@/shared/components/atoms/Head/Head';
 import { Button } from '@/shared/components/ui/button';
-import { ROUTES } from '@/shared/constants/routes';
+import { ROUTES } from '@/shared/constants';
 import { isRouteErrorResponse, Link, useRouteError } from 'react-router';
 
 export const ErrorPage = () => {

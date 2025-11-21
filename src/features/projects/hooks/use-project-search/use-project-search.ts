@@ -1,5 +1,4 @@
-import { ROUTES } from '@/shared/constants/routes';
-import { TIMING } from '@/shared/constants/timing';
+import { ROUTES, TIMING } from '@/shared/constants';
 import type { SearchStatus } from '@/shared/types';
 import { buildSearchUrl } from '@/shared/utils/operation/operation.utils';
 import { useCallback, useEffect, useRef, useState } from 'react';

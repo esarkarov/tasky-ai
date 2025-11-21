@@ -1,8 +1,7 @@
 import { aiService } from '@/features/ai/services/ai.service';
 import type { Project, ProjectFormInput } from '@/features/projects/types';
 import { taskService } from '@/features/tasks/services/task.service';
-import { HTTP_STATUS } from '@/shared/constants/http';
-import { ROUTES } from '@/shared/constants/routes';
+import { HTTP_STATUS, ROUTES } from '@/shared/constants';
 import { errorResponse, successResponse } from '@/shared/utils/response/response.utils';
 import { redirect } from 'react-router';
 import { beforeEach, describe, expect, it, vi } from 'vitest';

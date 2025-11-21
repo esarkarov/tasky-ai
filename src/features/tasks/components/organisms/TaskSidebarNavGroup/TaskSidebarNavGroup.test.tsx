@@ -4,12 +4,42 @@ import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { TaskSidebarNavGroup } from './TaskSidebarNavGroup';
 import type { TaskCounts } from '@/features/tasks/types';
 
-vi.mock('@/shared/constants/app-links', () => ({
-  TASK_SIDEBAR_LINKS: [
-    { href: '/inbox', label: 'Inbox', icon: () => null },
-    { href: '/today', label: 'Today', icon: () => null },
-    { href: '/upcoming', label: 'Upcoming', icon: () => null },
-  ],
+vi.mock('lucide-react', () => ({
+  CirclePlus: (props: Record<string, unknown>) => (
+    <span
+      aria-hidden="true"
+      data-testid="icon-wrapper">
+      <svg
+        data-testid="circle-plus-icon"
+        {...props}>
+        +
+      </svg>
+    </span>
+  ),
+  Inbox: (props: Record<string, unknown>) => (
+    <svg
+      data-testid="inbox-icon"
+      {...props}
+    />
+  ),
+  Calendar1: (props: Record<string, unknown>) => (
+    <svg
+      data-testid="calendar1-icon"
+      {...props}
+    />
+  ),
+  CalendarDays: (props: Record<string, unknown>) => (
+    <svg
+      data-testid="calendar-days-icon"
+      {...props}
+    />
+  ),
+  CircleCheck: (props: Record<string, unknown>) => (
+    <svg
+      data-testid="circle-check-icon"
+      {...props}
+    />
+  ),
 }));
 
 vi.mock('@/features/tasks/components/molecules/TaskSidebarNavLink/TaskSidebarNavLink', () => ({
@@ -31,7 +61,7 @@ vi.mock('@/features/tasks/components/molecules/TaskSidebarNavLink/TaskSidebarNav
         onClick={onClick}>
         {link.label}
       </a>
-      <span>Tasks: {link.href === '/inbox' ? taskCounts.inboxTasks : taskCounts.todayTasks}</span>
+      <span>Tasks: {link.href.includes('inbox') ? taskCounts.inboxTasks : taskCounts.todayTasks}</span>
     </div>
   ),
 }));
@@ -86,16 +116,6 @@ vi.mock('@/shared/components/ui/sidebar', () => ({
   ),
 }));
 
-vi.mock('lucide-react', () => ({
-  CirclePlus: () => (
-    <span
-      aria-hidden="true"
-      data-testid="icon-wrapper">
-      <svg data-testid="circle-plus-icon">+</svg>
-    </span>
-  ),
-}));
-
 describe('TaskSidebarNavGroup', () => {
   const mockHandleMobileNavigation = vi.fn();
   const mockTaskCounts: TaskCounts = {
@@ -111,7 +131,7 @@ describe('TaskSidebarNavGroup', () => {
     it('should render sidebar group with navigation role', () => {
       render(
         <TaskSidebarNavGroup
-          currentPath="/inbox"
+          currentPath="/app/inbox"
           taskCounts={mockTaskCounts}
           handleMobileNavigation={mockHandleMobileNavigation}
         />
@@ -125,7 +145,7 @@ describe('TaskSidebarNavGroup', () => {
     it('should render add task button', () => {
       render(
         <TaskSidebarNavGroup
-          currentPath="/inbox"
+          currentPath="/app/inbox"
           taskCounts={mockTaskCounts}
           handleMobileNavigation={mockHandleMobileNavigation}
         />
@@ -140,7 +160,7 @@ describe('TaskSidebarNavGroup', () => {
     it('should render add task button inside TaskFormDialog', () => {
       render(
         <TaskSidebarNavGroup
-          currentPath="/inbox"
+          currentPath="/app/inbox"
           taskCounts={mockTaskCounts}
           handleMobileNavigation={mockHandleMobileNavigation}
         />
@@ -153,7 +173,7 @@ describe('TaskSidebarNavGroup', () => {
     it('should render CirclePlus icon', () => {
       render(
         <TaskSidebarNavGroup
-          currentPath="/inbox"
+          currentPath="/app/inbox"
           taskCounts={mockTaskCounts}
           handleMobileNavigation={mockHandleMobileNavigation}
         />
@@ -165,7 +185,7 @@ describe('TaskSidebarNavGroup', () => {
     it('should render all navigation links', () => {
       render(
         <TaskSidebarNavGroup
-          currentPath="/inbox"
+          currentPath="/app/inbox"
           taskCounts={mockTaskCounts}
           handleMobileNavigation={mockHandleMobileNavigation}
         />
@@ -174,6 +194,7 @@ describe('TaskSidebarNavGroup', () => {
       expect(screen.getByTestId('nav-link-inbox')).toBeInTheDocument();
       expect(screen.getByTestId('nav-link-today')).toBeInTheDocument();
       expect(screen.getByTestId('nav-link-upcoming')).toBeInTheDocument();
+      expect(screen.getByTestId('nav-link-completed')).toBeInTheDocument();
     });
   });
 
@@ -181,7 +202,7 @@ describe('TaskSidebarNavGroup', () => {
     it('should mark current path as active', () => {
       render(
         <TaskSidebarNavGroup
-          currentPath="/inbox"
+          currentPath="/app/inbox"
           taskCounts={mockTaskCounts}
           handleMobileNavigation={mockHandleMobileNavigation}
         />
@@ -194,7 +215,7 @@ describe('TaskSidebarNavGroup', () => {
     it('should not mark other paths as active', () => {
       render(
         <TaskSidebarNavGroup
-          currentPath="/inbox"
+          currentPath="/app/inbox"
           taskCounts={mockTaskCounts}
           handleMobileNavigation={mockHandleMobileNavigation}
         />
@@ -212,7 +233,7 @@ describe('TaskSidebarNavGroup', () => {
     it('should pass task counts to navigation links', () => {
       render(
         <TaskSidebarNavGroup
-          currentPath="/inbox"
+          currentPath="/app/inbox"
           taskCounts={{ inboxTasks: 10, todayTasks: 7 }}
           handleMobileNavigation={mockHandleMobileNavigation}
         />
@@ -225,7 +246,7 @@ describe('TaskSidebarNavGroup', () => {
     it('should handle zero task counts', () => {
       render(
         <TaskSidebarNavGroup
-          currentPath="/inbox"
+          currentPath="/app/inbox"
           taskCounts={{ inboxTasks: 0, todayTasks: 0 }}
           handleMobileNavigation={mockHandleMobileNavigation}
         />
@@ -241,7 +262,7 @@ describe('TaskSidebarNavGroup', () => {
       const user = userEvent.setup();
       render(
         <TaskSidebarNavGroup
-          currentPath="/inbox"
+          currentPath="/app/inbox"
           taskCounts={mockTaskCounts}
           handleMobileNavigation={mockHandleMobileNavigation}
         />
@@ -257,7 +278,7 @@ describe('TaskSidebarNavGroup', () => {
       const user = userEvent.setup();
       render(
         <TaskSidebarNavGroup
-          currentPath="/inbox"
+          currentPath="/app/inbox"
           taskCounts={mockTaskCounts}
           handleMobileNavigation={mockHandleMobileNavigation}
         />
@@ -277,7 +298,7 @@ describe('TaskSidebarNavGroup', () => {
     it('should wrap navigation links in NavList components', () => {
       render(
         <TaskSidebarNavGroup
-          currentPath="/inbox"
+          currentPath="/app/inbox"
           taskCounts={mockTaskCounts}
           handleMobileNavigation={mockHandleMobileNavigation}
         />
@@ -286,12 +307,13 @@ describe('TaskSidebarNavGroup', () => {
       expect(screen.getByTestId('nav-list-0')).toBeInTheDocument();
       expect(screen.getByTestId('nav-list-1')).toBeInTheDocument();
       expect(screen.getByTestId('nav-list-2')).toBeInTheDocument();
+      expect(screen.getByTestId('nav-list-3')).toBeInTheDocument();
     });
 
     it('should have correct hierarchy of sidebar components', () => {
       render(
         <TaskSidebarNavGroup
-          currentPath="/inbox"
+          currentPath="/app/inbox"
           taskCounts={mockTaskCounts}
           handleMobileNavigation={mockHandleMobileNavigation}
         />
@@ -307,7 +329,7 @@ describe('TaskSidebarNavGroup', () => {
     it('should have navigation landmark with label', () => {
       render(
         <TaskSidebarNavGroup
-          currentPath="/inbox"
+          currentPath="/app/inbox"
           taskCounts={mockTaskCounts}
           handleMobileNavigation={mockHandleMobileNavigation}
         />
@@ -320,7 +342,7 @@ describe('TaskSidebarNavGroup', () => {
     it('should have accessible add task button', () => {
       render(
         <TaskSidebarNavGroup
-          currentPath="/inbox"
+          currentPath="/app/inbox"
           taskCounts={mockTaskCounts}
           handleMobileNavigation={mockHandleMobileNavigation}
         />
@@ -333,7 +355,7 @@ describe('TaskSidebarNavGroup', () => {
     it('should hide icon from screen readers', () => {
       render(
         <TaskSidebarNavGroup
-          currentPath="/inbox"
+          currentPath="/app/inbox"
           taskCounts={mockTaskCounts}
           handleMobileNavigation={mockHandleMobileNavigation}
         />

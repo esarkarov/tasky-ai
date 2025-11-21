@@ -1,8 +1,8 @@
+import { TIMING } from '@/shared/constants';
 import { render, screen, waitFor } from '@testing-library/react';
-import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { MemoryRouter } from 'react-router';
+import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { RequireAuth } from './RequireAuth';
-import { TIMING } from '@/shared/constants/timing';
 
 vi.mock('@/shared/components/atoms/Loader/Loader', () => ({
   Loader: () => <div data-testid="loader">Loading...</div>,
@@ -29,12 +29,9 @@ vi.mock('@clerk/clerk-react', () => ({
   useAuth: () => mockUseAuth(),
 }));
 
-vi.mock('@/shared/constants/routes', () => ({
-  ROUTES: { LOGIN: '/login' },
-}));
-
-vi.mock('@/shared/constants/timing', () => ({
+vi.mock('@/shared/constants', () => ({
   TIMING: { TOAST_DURATION: 3000 },
+  ROUTES: { LOGIN: '/login' },
 }));
 
 const renderComponent = () =>

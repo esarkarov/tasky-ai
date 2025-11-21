@@ -1,5 +1,5 @@
 import { SidebarMenuButton } from '@/shared/components/ui/sidebar';
-import { ROUTES } from '@/shared/constants/routes';
+import { ROUTES } from '@/shared/constants';
 import { Hash } from 'lucide-react';
 import { Link, useLocation } from 'react-router';
 

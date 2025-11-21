@@ -43,7 +43,7 @@ vi.mock('@/shared/components/ui/textarea', () => ({
   ),
 }));
 
-vi.mock('@/shared/constants/validation', () => ({
+vi.mock('@/shared/constants', () => ({
   MAX_CONTENT_LENGTH: 500,
 }));
 

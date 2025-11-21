@@ -12,7 +12,7 @@ const mockTaskCounts = {
   today: 3,
 };
 
-vi.mock('@/shared/constants/routes', () => ({
+vi.mock('@/shared/constants', () => ({
   ROUTES: {
     INBOX: '/inbox',
   },
