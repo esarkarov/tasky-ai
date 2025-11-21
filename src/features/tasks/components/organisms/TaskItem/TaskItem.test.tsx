@@ -1,8 +1,9 @@
-import { render, screen } from '@testing-library/react';
-import { describe, it, expect, vi, beforeEach } from 'vitest';
-import { TaskItem } from './TaskItem';
-import { Task } from '@/features/tasks/types';
+import { createMockProject, createMockTask } from '@/core/tests/factories';
 import { Project } from '@/features/projects/types';
+import { Task } from '@/features/tasks/types';
+import { render, screen } from '@testing-library/react';
+import { beforeEach, describe, expect, it, vi } from 'vitest';
+import { TaskItem } from './TaskItem';
 
 vi.mock('@/features/tasks/components/atoms/CompleteTaskButton/CompleteTaskButton', () => ({
   CompleteTaskButton: ({ taskId, completed }: { taskId: string; completed: boolean }) => (
@@ -35,35 +36,6 @@ vi.mock('@/features/tasks/components/molecules/TaskMeta/TaskMeta', () => ({
 
 describe('TaskItem', () => {
   const mockHandleEdit = vi.fn();
-  const createMockTask = (overrides?: Partial<Task>): Task => ({
-    $id: 'task-1',
-    id: 'task-1',
-    content: 'Test task content',
-    completed: false,
-    due_date: null,
-    project: null,
-    projectId: null,
-    $createdAt: '2024-01-01',
-    $updatedAt: '2024-01-01',
-    $collectionId: 'tasks',
-    $databaseId: 'db',
-    $permissions: [],
-    ...overrides,
-  });
-  const createMockProject = (overrides?: Partial<Project>): Project => ({
-    $id: 'project-1',
-    name: 'Test Project',
-    color_name: 'blue',
-    color_hex: '#0000FF',
-    tasks: [],
-    userId: 'user-1',
-    $createdAt: '2024-01-01',
-    $updatedAt: '2024-01-01',
-    $collectionId: 'projects',
-    $databaseId: 'db',
-    $permissions: [],
-    ...overrides,
-  });
 
   beforeEach(() => {
     vi.clearAllMocks();

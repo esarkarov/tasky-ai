@@ -1,22 +1,9 @@
-import type { ProjectListItem } from '@/features/projects/types';
+import { createMockProject } from '@/core/tests/factories';
 import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { MemoryRouter } from 'react-router';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { ProjectCard } from './ProjectCard';
-
-const createMockProject = (overrides?: Partial<ProjectListItem>): ProjectListItem => ({
-  $id: 'project-123',
-  name: 'Test Project',
-  color_name: 'blue',
-  color_hex: '#0000FF',
-  $createdAt: new Date().toISOString(),
-  $updatedAt: new Date().toISOString(),
-  $collectionId: 'projects',
-  $databaseId: 'db',
-  $permissions: [],
-  ...overrides,
-});
 
 vi.mock('@/features/projects/components/organisms/ProjectActionMenu/ProjectActionMenu', () => ({
   ProjectActionMenu: ({

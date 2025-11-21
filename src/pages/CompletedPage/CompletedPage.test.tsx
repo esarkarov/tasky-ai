@@ -1,6 +1,5 @@
-import { Project } from '@/features/projects/types';
+import { createMockProjectsWithTasksLoaderData, createMockTask } from '@/core/tests/factories';
 import { Task } from '@/features/tasks/types';
-import { ProjectsWithTasksLoaderData } from '@/shared/types';
 import { render, screen } from '@testing-library/react';
 import { userEvent } from '@testing-library/user-event';
 import { useLoaderData } from 'react-router';
@@ -93,50 +92,6 @@ describe('CompletedPage', () => {
   const MOCK_TASK_ID_1 = 'task-1';
   const MOCK_TASK_ID_2 = 'task-2';
 
-  const createMockTask = (overrides?: Partial<Task>): Task => ({
-    id: MOCK_TASK_ID_1,
-    $id: MOCK_TASK_ID_1,
-    content: 'Test task',
-    completed: true,
-    due_date: new Date('2024-12-31'),
-    projectId: null,
-    $createdAt: '2024-01-01',
-    $updatedAt: '2024-01-01',
-    $collectionId: 'tasks',
-    $databaseId: 'db',
-    $permissions: [],
-    ...overrides,
-  });
-
-  const createMockProject = (overrides?: Partial<Project>): Project => ({
-    $id: MOCK_PROJECT_ID,
-    userId: 'user-1',
-    name: 'Test Project',
-    color_name: 'blue',
-    color_hex: '#0000FF',
-    tasks: [],
-    $createdAt: '2024-01-01',
-    $updatedAt: '2024-01-01',
-    $collectionId: 'projects',
-    $databaseId: 'db',
-    $permissions: [],
-    ...overrides,
-  });
-
-  const createMockLoaderData = (
-    tasks: Task[] = [createMockTask()],
-    projects: Project[] = [createMockProject()]
-  ): ProjectsWithTasksLoaderData => ({
-    tasks: {
-      documents: tasks,
-      total: tasks.length,
-    },
-    projects: {
-      documents: projects,
-      total: projects.length,
-    },
-  });
-
   const setupDefaultMocks = (tasks: Task[] = [createMockTask()]) => {
     mockUseProjectFilter.mockReturnValue({
       filteredTasks: tasks,
@@ -161,7 +116,7 @@ describe('CompletedPage', () => {
 
   describe('basic rendering', () => {
     it('should render page title and structure', () => {
-      const mockData = createMockLoaderData();
+      const mockData = createMockProjectsWithTasksLoaderData();
       mockedUseLoaderData.mockReturnValue(mockData);
       setupDefaultMocks();
 
@@ -172,7 +127,7 @@ describe('CompletedPage', () => {
     });
 
     it('should set document title', () => {
-      const mockData = createMockLoaderData();
+      const mockData = createMockProjectsWithTasksLoaderData();
       mockedUseLoaderData.mockReturnValue(mockData);
       setupDefaultMocks();
 
@@ -183,7 +138,7 @@ describe('CompletedPage', () => {
 
     it('should render top app bar with correct props', () => {
       const tasks = [createMockTask({ $id: MOCK_TASK_ID_1 }), createMockTask({ $id: MOCK_TASK_ID_2 })];
-      const mockData = createMockLoaderData(tasks);
+      const mockData = createMockProjectsWithTasksLoaderData(tasks);
       mockedUseLoaderData.mockReturnValue(mockData);
       setupDefaultMocks(tasks);
 
@@ -201,7 +156,7 @@ describe('CompletedPage', () => {
         createMockTask({ $id: MOCK_TASK_ID_1, content: 'Task 1' }),
         createMockTask({ $id: MOCK_TASK_ID_2, content: 'Task 2' }),
       ];
-      const mockData = createMockLoaderData(tasks);
+      const mockData = createMockProjectsWithTasksLoaderData(tasks);
       mockedUseLoaderData.mockReturnValue(mockData);
       setupDefaultMocks(tasks);
 
@@ -212,7 +167,7 @@ describe('CompletedPage', () => {
     });
 
     it('should show total counter when tasks exist', () => {
-      const mockData = createMockLoaderData([createMockTask()]);
+      const mockData = createMockProjectsWithTasksLoaderData([createMockTask()]);
       mockedUseLoaderData.mockReturnValue(mockData);
       setupDefaultMocks([createMockTask()]);
 
@@ -222,7 +177,7 @@ describe('CompletedPage', () => {
     });
 
     it('should not show total counter when no tasks', () => {
-      const mockData = createMockLoaderData([]);
+      const mockData = createMockProjectsWithTasksLoaderData([]);
       mockedUseLoaderData.mockReturnValue(mockData);
       setupDefaultMocks([]);
 
@@ -234,7 +189,7 @@ describe('CompletedPage', () => {
 
   describe('filtering', () => {
     it('should render filter select', () => {
-      const mockData = createMockLoaderData();
+      const mockData = createMockProjectsWithTasksLoaderData();
       mockedUseLoaderData.mockReturnValue(mockData);
       setupDefaultMocks();
 
@@ -245,7 +200,7 @@ describe('CompletedPage', () => {
 
     it('should pass tasks to useProjectFilter hook', () => {
       const tasks = [createMockTask(), createMockTask({ $id: MOCK_TASK_ID_2 })];
-      const mockData = createMockLoaderData(tasks);
+      const mockData = createMockProjectsWithTasksLoaderData(tasks);
       mockedUseLoaderData.mockReturnValue(mockData);
       setupDefaultMocks(tasks);
 
@@ -257,7 +212,7 @@ describe('CompletedPage', () => {
     it('should pass filtered tasks to load more hook', () => {
       const allTasks = [createMockTask(), createMockTask({ $id: MOCK_TASK_ID_2 })];
       const filteredTasks = [createMockTask()];
-      const mockData = createMockLoaderData(allTasks);
+      const mockData = createMockProjectsWithTasksLoaderData(allTasks);
       mockedUseLoaderData.mockReturnValue(mockData);
 
       mockUseProjectFilter.mockReturnValue({
@@ -283,7 +238,7 @@ describe('CompletedPage', () => {
 
     it('should handle filter value changes', async () => {
       const user = userEvent.setup();
-      const mockData = createMockLoaderData();
+      const mockData = createMockProjectsWithTasksLoaderData();
       const mockSetValue = vi.fn();
       mockedUseLoaderData.mockReturnValue(mockData);
 
@@ -314,7 +269,7 @@ describe('CompletedPage', () => {
 
   describe('empty state', () => {
     it('should show empty state when no filtered tasks', () => {
-      const mockData = createMockLoaderData([createMockTask()]);
+      const mockData = createMockProjectsWithTasksLoaderData([createMockTask()]);
       mockedUseLoaderData.mockReturnValue(mockData);
 
       mockUseProjectFilter.mockReturnValue({
@@ -340,7 +295,7 @@ describe('CompletedPage', () => {
     });
 
     it('should not show empty state when tasks exist', () => {
-      const mockData = createMockLoaderData();
+      const mockData = createMockProjectsWithTasksLoaderData();
       mockedUseLoaderData.mockReturnValue(mockData);
       setupDefaultMocks();
 
@@ -352,7 +307,7 @@ describe('CompletedPage', () => {
 
   describe('load more functionality', () => {
     it('should show load more button when hasMore is true', () => {
-      const mockData = createMockLoaderData();
+      const mockData = createMockProjectsWithTasksLoaderData();
       mockedUseLoaderData.mockReturnValue(mockData);
 
       mockUseProjectFilter.mockReturnValue({
@@ -377,7 +332,7 @@ describe('CompletedPage', () => {
     });
 
     it('should not show load more button when hasMore is false', () => {
-      const mockData = createMockLoaderData();
+      const mockData = createMockProjectsWithTasksLoaderData();
       mockedUseLoaderData.mockReturnValue(mockData);
       setupDefaultMocks();
 
@@ -388,7 +343,7 @@ describe('CompletedPage', () => {
 
     it('should call handleLoadMore when button is clicked', async () => {
       const user = userEvent.setup();
-      const mockData = createMockLoaderData();
+      const mockData = createMockProjectsWithTasksLoaderData();
       const mockHandleLoadMore = vi.fn();
       mockedUseLoaderData.mockReturnValue(mockData);
 
@@ -417,7 +372,7 @@ describe('CompletedPage', () => {
     });
 
     it('should disable load more button when loading', () => {
-      const mockData = createMockLoaderData();
+      const mockData = createMockProjectsWithTasksLoaderData();
       mockedUseLoaderData.mockReturnValue(mockData);
 
       mockUseProjectFilter.mockReturnValue({
@@ -446,7 +401,7 @@ describe('CompletedPage', () => {
 
   describe('accessibility', () => {
     it('should have proper ARIA labels', () => {
-      const mockData = createMockLoaderData();
+      const mockData = createMockProjectsWithTasksLoaderData();
       mockedUseLoaderData.mockReturnValue(mockData);
       setupDefaultMocks();
 

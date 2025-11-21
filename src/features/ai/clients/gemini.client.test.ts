@@ -1,6 +1,6 @@
 import { genAI } from '@/core/lib/google-ai';
+import { createMockAIContentResponse } from '@/core/tests/factories';
 import { DEFAULT_GEMINI_MODEL } from '@/features/ai/clients/gemini.client';
-import { GenerateContentResponse } from '@google/genai';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { geminiClient } from './gemini.client';
 
@@ -17,15 +17,6 @@ const mockedGenerateContent = vi.mocked(mockedGenAI.models.generateContent);
 
 describe('gemini client', () => {
   const MOCK_CONTENTS = 'Test prompt content';
-
-  const createMockResponse = (overrides?: Partial<GenerateContentResponse>): GenerateContentResponse => ({
-    text: '{"result": "test response"}',
-    data: '',
-    functionCalls: [],
-    executableCode: '',
-    codeExecutionResult: '',
-    ...overrides,
-  });
 
   const expectGenerateContentCalledWith = (contents: string) => {
     expect(mockedGenerateContent).toHaveBeenCalledWith({
@@ -44,7 +35,7 @@ describe('gemini client', () => {
 
   describe('generateContent', () => {
     it('should generate content successfully with correct parameters', async () => {
-      const mockResponse = createMockResponse();
+      const mockResponse = createMockAIContentResponse();
       mockedGenerateContent.mockResolvedValue(mockResponse);
 
       const result = await geminiClient.generateContent(MOCK_CONTENTS);
@@ -55,7 +46,7 @@ describe('gemini client', () => {
 
     it('should handle empty contents string', async () => {
       const emptyContents = '';
-      const mockResponse = createMockResponse();
+      const mockResponse = createMockAIContentResponse();
       mockedGenerateContent.mockResolvedValue(mockResponse);
 
       await geminiClient.generateContent(emptyContents);

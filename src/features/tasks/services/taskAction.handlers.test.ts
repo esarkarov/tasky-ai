@@ -1,4 +1,5 @@
-import type { Task, TaskFormInput } from '@/features/tasks/types';
+import { createMockTask } from '@/core/tests/factories';
+import type { TaskFormInput } from '@/features/tasks/types';
 import { HTTP_STATUS } from '@/shared/constants';
 import { errorResponse, successResponse } from '@/shared/utils/response/response.utils';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
@@ -27,21 +28,6 @@ const createRequest = (body: object) =>
     method: 'POST',
     body: JSON.stringify(body),
   });
-
-const createMockTask = (overrides?: Partial<Task>): Task => ({
-  $id: '1',
-  id: 'task-1',
-  content: 'Test task content',
-  completed: false,
-  due_date: null,
-  projectId: null,
-  $createdAt: new Date().toISOString(),
-  $updatedAt: new Date().toISOString(),
-  $collectionId: 'tasks',
-  $databaseId: 'tasks-db-123',
-  $permissions: [],
-  ...overrides,
-});
 
 beforeEach(() => {
   vi.clearAllMocks();

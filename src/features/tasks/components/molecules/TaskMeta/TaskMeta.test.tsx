@@ -1,5 +1,5 @@
+import { createMockProject, createMockTask } from '@/core/tests/factories';
 import { Project } from '@/features/projects/types';
-import { Task } from '@/features/tasks/types';
 import { ROUTES } from '@/shared/constants';
 import { render, screen } from '@testing-library/react';
 import { MemoryRouter } from 'react-router';
@@ -40,40 +40,6 @@ vi.mock('@/shared/components/ui/card', () => ({
 }));
 
 describe('TaskMeta', () => {
-  const MOCK_PROJECT_ID = 'project-1';
-  const MOCK_TASK_ID_1 = 'task-1';
-
-  const createMockTask = (overrides?: Partial<Task>): Task => ({
-    id: MOCK_TASK_ID_1,
-    $id: MOCK_TASK_ID_1,
-    content: 'Test task',
-    completed: false,
-    due_date: new Date('2024-12-31'),
-    projectId: null,
-    project: null,
-    $createdAt: '2024-01-01',
-    $updatedAt: '2024-01-01',
-    $collectionId: 'tasks',
-    $databaseId: 'db',
-    $permissions: [],
-    ...overrides,
-  });
-
-  const createMockProject = (overrides?: Partial<Project>): Project => ({
-    $id: MOCK_PROJECT_ID,
-    userId: 'user-1',
-    name: 'Test Project',
-    color_name: 'blue',
-    color_hex: '#0000FF',
-    tasks: [],
-    $createdAt: '2024-01-01',
-    $updatedAt: '2024-01-01',
-    $collectionId: 'projects',
-    $databaseId: 'db',
-    $permissions: [],
-    ...overrides,
-  });
-
   const renderComponent = (ui: React.ReactElement, route = '/') => {
     return render(<MemoryRouter initialEntries={[route]}>{ui}</MemoryRouter>);
   };

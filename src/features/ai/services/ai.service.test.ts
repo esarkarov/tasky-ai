@@ -1,3 +1,4 @@
+import { createMockAIContentResponse } from '@/core/tests/factories';
 import { geminiClient } from '@/features/ai/clients/gemini.client';
 import { aiService } from '@/features/ai/services/ai.service';
 import { AIGeneratedTask } from '@/features/ai/types';
@@ -33,14 +34,6 @@ describe('aiService', () => {
     },
   ];
 
-  const createMockResponse = (text: string) => ({
-    text,
-    data: '',
-    functionCalls: [],
-    executableCode: '',
-    codeExecutionResult: '',
-  });
-
   beforeEach(() => {
     vi.clearAllMocks();
   });
@@ -64,7 +57,7 @@ describe('aiService', () => {
     describe('when prompt is valid', () => {
       it('should generate tasks successfully', async () => {
         const mockTasks = createMockTasks();
-        const mockResponse = createMockResponse(JSON.stringify(mockTasks));
+        const mockResponse = createMockAIContentResponse(JSON.stringify(mockTasks));
         mockedbuildTaskGenerationPrompt.mockReturnValue(MOCK_GENERATED_CONTENTS);
         mockedGeminiClient.generateContent.mockResolvedValue(mockResponse);
 
@@ -86,7 +79,7 @@ describe('aiService', () => {
       it.each(mockInvalidResponses)(
         'should return empty array when response text is $description',
         async ({ responseText }) => {
-          const mockResponse = createMockResponse(responseText);
+          const mockResponse = createMockAIContentResponse(responseText);
           mockedbuildTaskGenerationPrompt.mockReturnValue(MOCK_GENERATED_CONTENTS);
           mockedGeminiClient.generateContent.mockResolvedValue(mockResponse);
 

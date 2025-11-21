@@ -1,3 +1,4 @@
+import { createMockProject, createMockTask } from '@/core/tests/factories';
 import { Project } from '@/features/projects/types';
 import { Task } from '@/features/tasks/types';
 import { ProjectDetailLoaderData } from '@/shared/types';
@@ -113,40 +114,9 @@ vi.mock('@/shared/hooks/use-load-more/use-load-more', () => ({
 const mockedUseLoaderData = vi.mocked(useLoaderData);
 
 describe('ProjectDetailPage', () => {
-  const MOCK_PROJECT_ID = 'project-1';
   const MOCK_TASK_ID_1 = 'task-1';
   const MOCK_TASK_ID_2 = 'task-2';
   const MOCK_TASK_ID_3 = 'task-3';
-
-  const createMockTask = (overrides?: Partial<Task>): Task => ({
-    id: MOCK_TASK_ID_1,
-    $id: MOCK_TASK_ID_1,
-    content: 'Test task',
-    completed: false,
-    due_date: new Date('2024-12-31'),
-    projectId: null,
-    $createdAt: '2024-01-01',
-    $updatedAt: '2024-01-01',
-    $collectionId: 'tasks',
-    $databaseId: 'db',
-    $permissions: [],
-    ...overrides,
-  });
-
-  const createMockProject = (overrides?: Partial<Project>): Project => ({
-    $id: MOCK_PROJECT_ID,
-    userId: 'user-1',
-    name: 'Test Project',
-    color_name: 'blue',
-    color_hex: '#0000FF',
-    tasks: [],
-    $createdAt: '2024-01-01',
-    $updatedAt: '2024-01-01',
-    $collectionId: 'projects',
-    $databaseId: 'db',
-    $permissions: [],
-    ...overrides,
-  });
 
   const createMockLoaderData = (project: Project): ProjectDetailLoaderData => ({
     project,

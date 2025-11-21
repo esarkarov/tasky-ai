@@ -1,9 +1,10 @@
-import { render, screen } from '@testing-library/react';
-import { describe, it, expect, vi, beforeEach } from 'vitest';
-import { ProjectsPage } from './ProjectsPage';
-import userEvent from '@testing-library/user-event';
-import type { ProjectsLoaderData } from '@/shared/types';
+import { createMockProject } from '@/core/tests/factories';
 import type { ProjectListItem } from '@/features/projects/types';
+import type { ProjectsLoaderData } from '@/shared/types';
+import { render, screen } from '@testing-library/react';
+import userEvent from '@testing-library/user-event';
+import { beforeEach, describe, expect, it, vi } from 'vitest';
+import { ProjectsPage } from './ProjectsPage';
 
 const mockHandleSearchChange = vi.fn();
 const mockHandleLoadMore = vi.fn();
@@ -24,19 +25,6 @@ let mockLoadMoreState = {
   getItemClassName: mockGetItemClassName,
   getItemStyle: mockGetItemStyle,
 };
-
-const createMockProject = (overrides?: Partial<ProjectListItem>): ProjectListItem => ({
-  $id: 'project-1',
-  name: 'Test Project',
-  color_name: 'blue',
-  color_hex: '#0000FF',
-  $createdAt: new Date().toISOString(),
-  $updatedAt: new Date().toISOString(),
-  $collectionId: 'projects',
-  $databaseId: 'db',
-  $permissions: [],
-  ...overrides,
-});
 
 const mockLoaderData: ProjectsLoaderData = {
   projects: {

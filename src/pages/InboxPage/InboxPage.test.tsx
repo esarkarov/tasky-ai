@@ -1,5 +1,5 @@
+import { createMockTask, createMockTasksLoaderData } from '@/core/tests/factories';
 import { Task } from '@/features/tasks/types';
-import { TasksLoaderData } from '@/shared/types';
 import { render, screen } from '@testing-library/react';
 import { userEvent } from '@testing-library/user-event';
 import { useLoaderData } from 'react-router';
@@ -109,28 +109,6 @@ describe('InboxPage', () => {
   const MOCK_TASK_ID_2 = 'task-2';
   const MOCK_TASK_ID_3 = 'task-3';
 
-  const createMockTask = (overrides?: Partial<Task>): Task => ({
-    id: MOCK_TASK_ID_1,
-    $id: MOCK_TASK_ID_1,
-    content: 'Test task',
-    completed: false,
-    due_date: new Date('2024-12-31'),
-    projectId: null,
-    $createdAt: '2024-01-01',
-    $updatedAt: '2024-01-01',
-    $collectionId: 'tasks',
-    $databaseId: 'db',
-    $permissions: [],
-    ...overrides,
-  });
-
-  const createMockLoaderData = (tasks: Task[] = [createMockTask()]): TasksLoaderData => ({
-    tasks: {
-      documents: tasks,
-      total: tasks.length,
-    },
-  });
-
   const setupDefaultMocks = (tasks: Task[] = [createMockTask()]) => {
     mockUseTaskMutation.mockReturnValue({
       handleCreate: vi.fn(),
@@ -154,7 +132,7 @@ describe('InboxPage', () => {
 
   describe('basic rendering', () => {
     it('should render page title and structure', () => {
-      const mockData = createMockLoaderData();
+      const mockData = createMockTasksLoaderData();
       mockedUseLoaderData.mockReturnValue(mockData);
       setupDefaultMocks();
 
@@ -165,7 +143,7 @@ describe('InboxPage', () => {
     });
 
     it('should set document title', () => {
-      const mockData = createMockLoaderData();
+      const mockData = createMockTasksLoaderData();
       mockedUseLoaderData.mockReturnValue(mockData);
       setupDefaultMocks();
 
@@ -176,7 +154,7 @@ describe('InboxPage', () => {
 
     it('should render top app bar with correct props', () => {
       const tasks = [createMockTask({ $id: MOCK_TASK_ID_1 }), createMockTask({ $id: MOCK_TASK_ID_2 })];
-      const mockData = createMockLoaderData(tasks);
+      const mockData = createMockTasksLoaderData(tasks);
       mockedUseLoaderData.mockReturnValue(mockData);
       setupDefaultMocks(tasks);
 
@@ -195,7 +173,7 @@ describe('InboxPage', () => {
         createMockTask({ $id: MOCK_TASK_ID_2, content: 'Task 2' }),
         createMockTask({ $id: MOCK_TASK_ID_3, content: 'Task 3' }),
       ];
-      const mockData = createMockLoaderData(tasks);
+      const mockData = createMockTasksLoaderData(tasks);
       mockedUseLoaderData.mockReturnValue(mockData);
       setupDefaultMocks(tasks);
 
@@ -208,7 +186,7 @@ describe('InboxPage', () => {
 
     it('should show total counter when tasks exist', () => {
       const tasks = [createMockTask()];
-      const mockData = createMockLoaderData(tasks);
+      const mockData = createMockTasksLoaderData(tasks);
       mockedUseLoaderData.mockReturnValue(mockData);
       setupDefaultMocks(tasks);
 
@@ -218,7 +196,7 @@ describe('InboxPage', () => {
     });
 
     it('should not show total counter when no tasks', () => {
-      const mockData = createMockLoaderData([]);
+      const mockData = createMockTasksLoaderData([]);
       mockedUseLoaderData.mockReturnValue(mockData);
       setupDefaultMocks([]);
 
@@ -229,7 +207,7 @@ describe('InboxPage', () => {
 
     it('should pass taskDocs to useLoadMore hook', () => {
       const tasks = [createMockTask({ $id: MOCK_TASK_ID_1 }), createMockTask({ $id: MOCK_TASK_ID_2 })];
-      const mockData = createMockLoaderData(tasks);
+      const mockData = createMockTasksLoaderData(tasks);
       mockedUseLoaderData.mockReturnValue(mockData);
       setupDefaultMocks(tasks);
 
@@ -241,7 +219,7 @@ describe('InboxPage', () => {
 
   describe('add task functionality', () => {
     it('should show add task button when form is not open', () => {
-      const mockData = createMockLoaderData([]);
+      const mockData = createMockTasksLoaderData([]);
       mockedUseLoaderData.mockReturnValue(mockData);
       setupDefaultMocks([]);
 
@@ -252,7 +230,7 @@ describe('InboxPage', () => {
 
     it('should show task form when add task button is clicked', async () => {
       const user = userEvent.setup();
-      const mockData = createMockLoaderData([]);
+      const mockData = createMockTasksLoaderData([]);
       mockedUseLoaderData.mockReturnValue(mockData);
       setupDefaultMocks([]);
 
@@ -266,7 +244,7 @@ describe('InboxPage', () => {
 
     it('should hide add task button when form is open', async () => {
       const user = userEvent.setup();
-      const mockData = createMockLoaderData([]);
+      const mockData = createMockTasksLoaderData([]);
       mockedUseLoaderData.mockReturnValue(mockData);
       setupDefaultMocks([]);
 
@@ -280,7 +258,7 @@ describe('InboxPage', () => {
 
     it('should hide form when cancel button is clicked', async () => {
       const user = userEvent.setup();
-      const mockData = createMockLoaderData([]);
+      const mockData = createMockTasksLoaderData([]);
       mockedUseLoaderData.mockReturnValue(mockData);
       setupDefaultMocks([]);
 
@@ -296,7 +274,7 @@ describe('InboxPage', () => {
     it('should call handleCreateTask when form is submitted', async () => {
       const user = userEvent.setup();
       const mockHandleCreate = vi.fn();
-      const mockData = createMockLoaderData([]);
+      const mockData = createMockTasksLoaderData([]);
       mockedUseLoaderData.mockReturnValue(mockData);
 
       mockUseTaskMutation.mockReturnValue({
@@ -325,7 +303,7 @@ describe('InboxPage', () => {
 
   describe('empty state', () => {
     it('should show empty state when no tasks and form is not open', () => {
-      const mockData = createMockLoaderData([]);
+      const mockData = createMockTasksLoaderData([]);
       mockedUseLoaderData.mockReturnValue(mockData);
       setupDefaultMocks([]);
 
@@ -337,7 +315,7 @@ describe('InboxPage', () => {
 
     it('should not show empty state when tasks exist', () => {
       const tasks = [createMockTask()];
-      const mockData = createMockLoaderData(tasks);
+      const mockData = createMockTasksLoaderData(tasks);
       mockedUseLoaderData.mockReturnValue(mockData);
       setupDefaultMocks(tasks);
 
@@ -348,7 +326,7 @@ describe('InboxPage', () => {
 
     it('should not show empty state when form is open', async () => {
       const user = userEvent.setup();
-      const mockData = createMockLoaderData([]);
+      const mockData = createMockTasksLoaderData([]);
       mockedUseLoaderData.mockReturnValue(mockData);
       setupDefaultMocks([]);
 
@@ -363,7 +341,7 @@ describe('InboxPage', () => {
   describe('load more functionality', () => {
     it('should show load more button when hasMore is true', () => {
       const tasks = [createMockTask()];
-      const mockData = createMockLoaderData(tasks);
+      const mockData = createMockTasksLoaderData(tasks);
       mockedUseLoaderData.mockReturnValue(mockData);
 
       mockUseTaskMutation.mockReturnValue({
@@ -388,7 +366,7 @@ describe('InboxPage', () => {
 
     it('should not show load more button when hasMore is false', () => {
       const tasks = [createMockTask()];
-      const mockData = createMockLoaderData(tasks);
+      const mockData = createMockTasksLoaderData(tasks);
       mockedUseLoaderData.mockReturnValue(mockData);
       setupDefaultMocks(tasks);
 
@@ -401,7 +379,7 @@ describe('InboxPage', () => {
       const user = userEvent.setup();
       const tasks = [createMockTask()];
       const mockHandleLoadMore = vi.fn();
-      const mockData = createMockLoaderData(tasks);
+      const mockData = createMockTasksLoaderData(tasks);
       mockedUseLoaderData.mockReturnValue(mockData);
 
       mockUseTaskMutation.mockReturnValue({
@@ -429,7 +407,7 @@ describe('InboxPage', () => {
 
     it('should disable load more button when loading', () => {
       const tasks = [createMockTask()];
-      const mockData = createMockLoaderData(tasks);
+      const mockData = createMockTasksLoaderData(tasks);
       mockedUseLoaderData.mockReturnValue(mockData);
 
       mockUseTaskMutation.mockReturnValue({
@@ -457,7 +435,7 @@ describe('InboxPage', () => {
 
   describe('accessibility', () => {
     it('should have proper ARIA labels', () => {
-      const mockData = createMockLoaderData([]);
+      const mockData = createMockTasksLoaderData([]);
       mockedUseLoaderData.mockReturnValue(mockData);
       setupDefaultMocks([]);
 

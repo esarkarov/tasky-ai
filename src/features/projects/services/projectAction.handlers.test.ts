@@ -1,5 +1,6 @@
+import { createMockProject } from '@/core/tests/factories';
 import { aiService } from '@/features/ai/services/ai.service';
-import type { Project, ProjectFormInput } from '@/features/projects/types';
+import type { ProjectFormInput } from '@/features/projects/types';
 import { taskService } from '@/features/tasks/services/task.service';
 import { HTTP_STATUS, ROUTES } from '@/shared/constants';
 import { errorResponse, successResponse } from '@/shared/utils/response/response.utils';
@@ -50,21 +51,6 @@ const createMockRequest = (body: object) =>
     body: JSON.stringify(body),
   });
 
-const createMockProject = (overrides?: Partial<Project>): Project => ({
-  $id: 'project-123',
-  userId: 'user-123',
-  name: 'Test Project',
-  color_name: 'blue',
-  color_hex: '#0000FF',
-  tasks: [],
-  $createdAt: '',
-  $updatedAt: '',
-  $permissions: [],
-  $databaseId: '',
-  $collectionId: '',
-  ...overrides,
-});
-
 beforeEach(() => {
   vi.clearAllMocks();
 });
@@ -91,7 +77,7 @@ describe('projectActionHandlers', () => {
       await projectActionHandlers.handleCreate(request);
 
       expect(mockProjectService.create).toHaveBeenCalledWith(validData);
-      expect(mockRedirect).toHaveBeenCalledWith(ROUTES.PROJECT('project-123'));
+      expect(mockRedirect).toHaveBeenCalledWith(ROUTES.PROJECT('project-1'));
     });
 
     it('generates AI tasks when ai_task_gen is true and prompt provided', async () => {
@@ -111,8 +97,8 @@ describe('projectActionHandlers', () => {
       await projectActionHandlers.handleCreate(request);
 
       expect(mockAiService.generateProjectTasks).toHaveBeenCalledWith('Generate tasks');
-      expect(mockTaskService.createMany).toHaveBeenCalledWith('project-123', aiTasks);
-      expect(mockRedirect).toHaveBeenCalledWith(ROUTES.PROJECT('project-123'));
+      expect(mockTaskService.createMany).toHaveBeenCalledWith('project-1', aiTasks);
+      expect(mockRedirect).toHaveBeenCalledWith(ROUTES.PROJECT('project-1'));
     });
 
     it('does not create tasks when AI returns empty list', async () => {
@@ -131,7 +117,7 @@ describe('projectActionHandlers', () => {
       await projectActionHandlers.handleCreate(request);
 
       expect(mockTaskService.createMany).not.toHaveBeenCalled();
-      expect(mockRedirect).toHaveBeenCalledWith(ROUTES.PROJECT('project-123'));
+      expect(mockRedirect).toHaveBeenCalledWith(ROUTES.PROJECT('project-1'));
     });
 
     it('handles AI task generation errors gracefully', async () => {
@@ -149,7 +135,7 @@ describe('projectActionHandlers', () => {
       await projectActionHandlers.handleCreate(request);
 
       expect(mockTaskService.createMany).not.toHaveBeenCalled();
-      expect(mockRedirect).toHaveBeenCalledWith(ROUTES.PROJECT('project-123'));
+      expect(mockRedirect).toHaveBeenCalledWith(ROUTES.PROJECT('project-1'));
     });
   });
 

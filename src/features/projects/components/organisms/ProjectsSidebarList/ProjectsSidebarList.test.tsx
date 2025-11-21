@@ -1,22 +1,10 @@
-import { render, screen } from '@testing-library/react';
-import userEvent from '@testing-library/user-event';
-import { describe, it, expect, vi, beforeEach } from 'vitest';
-import { ProjectsSidebarList } from './ProjectsSidebarList';
+import { createMockProject } from '@/core/tests/factories';
 import type { ProjectListItem } from '@/features/projects/types';
 import type { ProjectsLoaderData } from '@/shared/types';
-
-const createMockProject = (overrides?: Partial<ProjectListItem>): ProjectListItem => ({
-  $id: 'project-1',
-  name: 'Test Project',
-  color_name: 'blue',
-  color_hex: '#0000FF',
-  $createdAt: '2024-01-01',
-  $updatedAt: '2024-01-01',
-  $collectionId: 'projects',
-  $databaseId: 'db',
-  $permissions: [],
-  ...overrides,
-});
+import { render, screen } from '@testing-library/react';
+import userEvent from '@testing-library/user-event';
+import { beforeEach, describe, expect, it, vi } from 'vitest';
+import { ProjectsSidebarList } from './ProjectsSidebarList';
 
 const mockUseLoaderData = vi.fn();
 vi.mock('react-router', () => ({

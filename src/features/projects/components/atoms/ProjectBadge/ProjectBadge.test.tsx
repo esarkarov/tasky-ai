@@ -1,3 +1,4 @@
+import { createMockProject } from '@/core/tests/factories';
 import { Project } from '@/features/projects/types';
 import { render, screen } from '@testing-library/react';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
@@ -19,20 +20,6 @@ vi.mock('lucide-react', () => ({
 }));
 
 describe('ProjectBadge', () => {
-  const createMockProject = (overrides?: Partial<Project>): Project => ({
-    $id: 'project-1',
-    userId: 'user-1',
-    name: 'Test Project',
-    color_name: 'blue',
-    color_hex: '#0000FF',
-    tasks: [],
-    $createdAt: '2024-01-01',
-    $updatedAt: '2024-01-01',
-    $collectionId: 'projects',
-    $databaseId: 'db',
-    $permissions: [],
-    ...overrides,
-  });
   const setup = (project?: Project | null) => {
     render(<ProjectBadge project={project as Project} />);
   };

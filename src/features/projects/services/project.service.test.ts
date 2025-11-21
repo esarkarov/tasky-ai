@@ -1,6 +1,7 @@
+import { createMockProject, createMockProjects } from '@/core/tests/factories';
 import { projectRepository } from '@/features/projects/repositories/project.repository';
 import { DEFAULT_FETCH_LIMIT, projectService } from '@/features/projects/services/project.service';
-import { Project, ProjectFormInput, ProjectListItem, ProjectsListResponse } from '@/features/projects/types';
+import { ProjectFormInput } from '@/features/projects/types';
 import { getUserId } from '@/shared/utils/auth/auth.utils';
 import { generateID } from '@/shared/utils/text/text.utils';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
@@ -26,44 +27,9 @@ const mockedGetUserId = vi.mocked(getUserId);
 const mockedGenerateID = vi.mocked(generateID);
 
 describe('projectService', () => {
-  const MOCK_USER_ID = 'user-123';
-  const MOCK_PROJECT_ID = 'project-123';
+  const MOCK_USER_ID = 'user-1';
+  const MOCK_PROJECT_ID = 'project-1';
   const MOCK_GENERATED_ID = 'generated-id-123';
-
-  const createMockProject = (overrides?: Partial<Project>): Project => ({
-    $id: MOCK_PROJECT_ID,
-    userId: MOCK_USER_ID,
-    name: 'Test Project',
-    color_name: 'blue',
-    color_hex: '#0000FF',
-    tasks: [],
-    $createdAt: '',
-    $updatedAt: '',
-    $permissions: [],
-    $databaseId: '',
-    $collectionId: '',
-    ...overrides,
-  });
-
-  const createMockProjectListItem = (overrides?: Partial<ProjectListItem>): ProjectListItem => ({
-    $id: MOCK_PROJECT_ID,
-    name: 'Test Project',
-    color_name: 'blue',
-    color_hex: '#0000FF',
-    $createdAt: '2023-01-01',
-    $updatedAt: '',
-    $permissions: [],
-    $databaseId: '',
-    $collectionId: '',
-    ...overrides,
-  });
-
-  const createMockProjectsResponse = (
-    items: ProjectListItem[] = [createMockProjectListItem()]
-  ): ProjectsListResponse => ({
-    documents: items,
-    total: items.length,
-  });
 
   const createMockFormData = (overrides?: Partial<ProjectFormInput>): ProjectFormInput => ({
     name: 'New Project',
@@ -101,7 +67,7 @@ describe('projectService', () => {
   describe('search', () => {
     it('should return user projects with search query', async () => {
       const searchQuery = 'test';
-      const mockResponse = createMockProjectsResponse();
+      const mockResponse = createMockProjects();
       mockedProjectRepository.findByUserId.mockResolvedValue(mockResponse);
 
       const result = await projectService.search(searchQuery);
@@ -121,7 +87,7 @@ describe('projectService', () => {
 
   describe('findRecent', () => {
     it('should return recent projects with default limit', async () => {
-      const mockResponse = createMockProjectsResponse();
+      const mockResponse = createMockProjects();
       mockedProjectRepository.findByUserId.mockResolvedValue(mockResponse);
 
       const result = await projectService.findRecent();
@@ -133,7 +99,7 @@ describe('projectService', () => {
 
     it('should return recent projects with custom limit', async () => {
       const customLimit = 5;
-      const mockResponse = createMockProjectsResponse();
+      const mockResponse = createMockProjects();
       mockedProjectRepository.findByUserId.mockResolvedValue(mockResponse);
 
       const result = await projectService.findRecent(customLimit);

@@ -1,38 +1,8 @@
-import { renderHook, act } from '@testing-library/react';
-import { describe, it, expect } from 'vitest';
-import { useProjectFilter } from './use-project-filter';
+import { createMockProject, createMockTask } from '@/core/tests/factories';
 import type { Task } from '@/features/tasks/types';
-import type { Project } from '@/features/projects/types';
-
-const createMockTask = (overrides?: Partial<Task>): Task => ({
-  $id: '1',
-  id: 'task-1',
-  content: 'Test task content',
-  completed: false,
-  due_date: null,
-  projectId: null,
-  $createdAt: new Date().toISOString(),
-  $updatedAt: new Date().toISOString(),
-  $collectionId: 'tasks',
-  $databaseId: 'tasks-db-123',
-  $permissions: [],
-  ...overrides,
-});
-
-const createMockProject = (overrides?: Partial<Project>): Project => ({
-  $id: 'project-1',
-  userId: 'user-1',
-  name: 'Test Project',
-  color_name: 'blue',
-  color_hex: '#0000FF',
-  tasks: [],
-  $createdAt: new Date().toISOString(),
-  $updatedAt: new Date().toISOString(),
-  $collectionId: 'projects',
-  $databaseId: 'db',
-  $permissions: [],
-  ...overrides,
-});
+import { act, renderHook } from '@testing-library/react';
+import { describe, expect, it } from 'vitest';
+import { useProjectFilter } from './use-project-filter';
 
 describe('useProjectFilter', () => {
   const mockTasks: Task[] = [

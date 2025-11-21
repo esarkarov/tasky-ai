@@ -1,13 +1,8 @@
 import { env } from '@/core/config/env.config';
 import { databases } from '@/core/lib/appwrite';
+import { createMockProject, createMockProjects } from '@/core/tests/factories';
 import { projectQueries } from '@/features/projects/repositories/project.queries';
-import {
-  ProjectCreateInput,
-  Project,
-  ProjectListItem,
-  ProjectsListResponse,
-  ProjectUpdateInput,
-} from '@/features/projects/types';
+import { ProjectCreateInput, ProjectUpdateInput } from '@/features/projects/types';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { projectRepository } from './project.repository';
 
@@ -43,44 +38,9 @@ const mockedProjectQueries = vi.mocked(projectQueries);
 describe('projectRepository', () => {
   const MOCK_DATABASE_ID = 'test-database';
   const MOCK_COLLECTION_ID = 'test-projects';
-  const MOCK_PROJECT_ID = 'project-123';
-  const MOCK_USER_ID = 'user-123';
+  const MOCK_PROJECT_ID = 'project-1';
+  const MOCK_USER_ID = 'user-1';
   const MOCK_QUERIES = ['query1', 'query2'];
-
-  const createMockProject = (overrides?: Partial<Project>): Project => ({
-    $id: MOCK_PROJECT_ID,
-    userId: MOCK_USER_ID,
-    name: 'Test Project',
-    color_name: 'blue',
-    color_hex: '#0000FF',
-    tasks: [],
-    $createdAt: '',
-    $updatedAt: '',
-    $permissions: [],
-    $databaseId: '',
-    $collectionId: '',
-    ...overrides,
-  });
-
-  const createMockProjectListItem = (overrides?: Partial<ProjectListItem>): ProjectListItem => ({
-    $id: MOCK_PROJECT_ID,
-    name: 'Test Project',
-    color_name: 'blue',
-    color_hex: '#0000FF',
-    $createdAt: '2023-01-01',
-    $updatedAt: '',
-    $permissions: [],
-    $databaseId: '',
-    $collectionId: '',
-    ...overrides,
-  });
-
-  const createMockProjectsResponse = (
-    items: ProjectListItem[] = [createMockProjectListItem()]
-  ): ProjectsListResponse => ({
-    documents: items,
-    total: items.length,
-  });
 
   beforeEach(() => {
     vi.clearAllMocks();
@@ -114,7 +74,7 @@ describe('projectRepository', () => {
     ];
 
     it.each(mockFilterOptions)('should return user projects $description', async ({ options }) => {
-      const mockResponse = createMockProjectsResponse();
+      const mockResponse = createMockProjects();
       mockedProjectQueries.forUserProjectsList.mockReturnValue(MOCK_QUERIES);
       mockedDatabases.listDocuments.mockResolvedValue(mockResponse);
 

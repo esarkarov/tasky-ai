@@ -1,7 +1,8 @@
+import { createMockTask, createMockTasks } from '@/core/tests/factories';
 import { AIGeneratedTask } from '@/features/ai/types';
 import { taskRepository } from '@/features/tasks/repositories/task.repository';
 import { taskService } from '@/features/tasks/services/task.service';
-import { Task, TaskFormInput, TasksResponse } from '@/features/tasks/types';
+import { TaskFormInput } from '@/features/tasks/types';
 import { getUserId } from '@/shared/utils/auth/auth.utils';
 import { generateID } from '@/shared/utils/text/text.utils';
 import { startOfToday, startOfTomorrow } from 'date-fns';
@@ -40,30 +41,10 @@ const mockedStartOfTomorrow = vi.mocked(startOfTomorrow);
 
 describe('taskService', () => {
   const MOCK_USER_ID = 'user-123';
-  const MOCK_TASK_ID = 'task-123';
+  const MOCK_TASK_ID = 'task-1';
   const MOCK_PROJECT_ID = 'project-123';
   const MOCK_TODAY_DATE = '2023-01-01T00:00:00.000Z';
   const MOCK_TOMORROW_DATE = '2023-01-02T00:00:00.000Z';
-
-  const createMockTask = (overrides?: Partial<Task>): Task => ({
-    $id: MOCK_TASK_ID,
-    id: MOCK_TASK_ID,
-    content: 'Test Task',
-    due_date: new Date(),
-    completed: false,
-    projectId: null,
-    $createdAt: '',
-    $updatedAt: '',
-    $permissions: [],
-    $databaseId: '',
-    $collectionId: '',
-    ...overrides,
-  });
-
-  const createMockTasksResponse = (tasks: Task[] = [createMockTask()]): TasksResponse => ({
-    documents: tasks,
-    total: tasks.length,
-  });
 
   beforeEach(() => {
     vi.clearAllMocks();
@@ -83,8 +64,8 @@ describe('taskService', () => {
     ) => {
       describe(method, () => {
         it('should return tasks successfully', async () => {
-          const mockResponse = createMockTasksResponse();
-          mockedTaskRepository[repositoryMethod].mockResolvedValue(mockResponse);
+          const mockTasks = createMockTasks();
+          mockedTaskRepository[repositoryMethod].mockResolvedValue(mockTasks);
 
           const result = await taskService[method]();
 
@@ -92,7 +73,7 @@ describe('taskService', () => {
           if (usesToday) expect(mockedStartOfToday).toHaveBeenCalled();
           if (usesTomorrow) expect(mockedStartOfTomorrow).toHaveBeenCalled();
           expect(mockedTaskRepository[repositoryMethod]).toHaveBeenCalledWith(...repositoryArgs);
-          expect(result).toEqual(mockResponse);
+          expect(result).toEqual(mockTasks);
         });
 
         it('should throw error when repository fails', async () => {

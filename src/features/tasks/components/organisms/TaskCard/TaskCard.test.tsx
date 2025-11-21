@@ -1,8 +1,8 @@
+import { createMockProject } from '@/core/tests/factories';
 import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
-import { describe, it, expect, vi, beforeEach } from 'vitest';
+import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { TaskCard } from './TaskCard';
-import { Project } from '@/features/projects/types';
 
 const mockHandleUpdate = vi.fn();
 const mockCancelForm = vi.fn();
@@ -66,20 +66,6 @@ vi.mock('@/features/tasks/components/organisms/TaskForm/TaskForm', () => ({
 }));
 
 describe('TaskCard', () => {
-  const createMockProject = (overrides?: Partial<Project>): Project => ({
-    $id: 'project-1',
-    userId: 'user-1',
-    name: 'Test Project',
-    color_name: 'blue',
-    color_hex: '#0000FF',
-    tasks: [],
-    $createdAt: '2024-01-01',
-    $updatedAt: '2024-01-01',
-    $collectionId: 'projects',
-    $databaseId: 'db',
-    $permissions: [],
-    ...overrides,
-  });
   const defaultProps = {
     id: 'task-1',
     content: 'Test task',

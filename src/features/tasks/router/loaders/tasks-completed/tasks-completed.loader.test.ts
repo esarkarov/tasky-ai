@@ -1,7 +1,12 @@
+import {
+  createMockLoaderArgs,
+  createMockProject,
+  createMockProjects,
+  createMockTask,
+  createMockTasks,
+} from '@/core/tests/factories';
 import { projectService } from '@/features/projects/services/project.service';
-import type { Project, ProjectListItem, ProjectsListResponse } from '@/features/projects/types';
 import { taskService } from '@/features/tasks/services/task.service';
-import type { Task, TasksResponse } from '@/features/tasks/types';
 import type { ProjectsWithTasksLoaderData, TasksLoaderData } from '@/shared/types';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { tasksCompletedLoader } from './tasks-completed.loader';
@@ -21,56 +26,6 @@ vi.mock('@/features/projects/services/project.service', () => ({
 const mockTaskService = vi.mocked(taskService);
 const mockProjectService = vi.mocked(projectService);
 
-const createLoaderArgs = () => ({
-  request: new Request('http://localhost'),
-  params: {},
-  context: {},
-  unstable_pattern: '',
-});
-
-const createMockTask = (overrides: Partial<Task> = {}): Task => ({
-  id: '1',
-  $id: 'task-123',
-  content: 'Completed task',
-  completed: true,
-  due_date: null,
-  projectId: null,
-  $createdAt: '2023-01-01T00:00:00.000Z',
-  $updatedAt: '2023-01-01T00:00:00.000Z',
-  $collectionId: 'tasks',
-  $databaseId: 'default',
-  $permissions: [],
-  ...overrides,
-});
-
-const createMockTasks = (
-  documents: TasksResponse['documents'] = [createMockTask()],
-  total = documents.length
-): TasksResponse => ({
-  total,
-  documents,
-});
-
-const createMockProject = (overrides: Partial<ProjectListItem> = {}): Project => ({
-  $id: 'project-1',
-  userId: 'user-123',
-  name: 'Test Project',
-  color_name: 'orange',
-  color_hex: '#FFA500',
-  $createdAt: '2023-01-01T00:00:00.000Z',
-  $updatedAt: '2023-01-01T00:00:00.000Z',
-  $collectionId: 'projects',
-  $databaseId: 'default',
-  $permissions: [],
-  tasks: [],
-  ...overrides,
-});
-
-const createMockProjects = (docs: ProjectListItem[] = [createMockProject()]): ProjectsListResponse => ({
-  total: docs.length,
-  documents: docs,
-});
-
 beforeEach(() => {
   vi.clearAllMocks();
 });
@@ -87,7 +42,7 @@ describe('tasksCompletedLoader', () => {
       mockTaskService.findCompletedTasks.mockResolvedValue(tasks);
       mockProjectService.findRecent.mockResolvedValue(projects);
 
-      const result = (await tasksCompletedLoader(createLoaderArgs())) as ProjectsWithTasksLoaderData;
+      const result = (await tasksCompletedLoader(createMockLoaderArgs())) as ProjectsWithTasksLoaderData;
 
       expect(mockTaskService.findCompletedTasks).toHaveBeenCalledOnce();
       expect(mockProjectService.findRecent).toHaveBeenCalledOnce();
@@ -103,7 +58,7 @@ describe('tasksCompletedLoader', () => {
       mockTaskService.findCompletedTasks.mockResolvedValue(tasks);
       mockProjectService.findRecent.mockResolvedValue(projects);
 
-      const result = (await tasksCompletedLoader(createLoaderArgs())) as TasksLoaderData;
+      const result = (await tasksCompletedLoader(createMockLoaderArgs())) as TasksLoaderData;
 
       expect(result.tasks.documents[0].projectId?.$id).toBe('project-1');
     });
@@ -115,7 +70,7 @@ describe('tasksCompletedLoader', () => {
       mockTaskService.findCompletedTasks.mockResolvedValue(tasks);
       mockProjectService.findRecent.mockResolvedValue(projects);
 
-      const result = (await tasksCompletedLoader(createLoaderArgs())) as TasksLoaderData;
+      const result = (await tasksCompletedLoader(createMockLoaderArgs())) as TasksLoaderData;
 
       expect(result.tasks.documents[0].due_date).toBeInstanceOf(Date);
     });
@@ -123,13 +78,13 @@ describe('tasksCompletedLoader', () => {
 
   describe('empty state', () => {
     it('returns an empty task list if no tasks exist', async () => {
-      const tasks = createMockTasks([], 0);
+      const tasks = createMockTasks([]);
       const projects = createMockProjects();
 
       mockTaskService.findCompletedTasks.mockResolvedValue(tasks);
       mockProjectService.findRecent.mockResolvedValue(projects);
 
-      const result = (await tasksCompletedLoader(createLoaderArgs())) as TasksLoaderData;
+      const result = (await tasksCompletedLoader(createMockLoaderArgs())) as TasksLoaderData;
 
       expect(result.tasks.total).toBe(0);
       expect(result.tasks.documents).toHaveLength(0);
@@ -140,7 +95,7 @@ describe('tasksCompletedLoader', () => {
     it('throws if task service fails', async () => {
       mockTaskService.findCompletedTasks.mockRejectedValue(new Error('Task error'));
 
-      await expect(tasksCompletedLoader(createLoaderArgs())).rejects.toThrow('Task error');
+      await expect(tasksCompletedLoader(createMockLoaderArgs())).rejects.toThrow('Task error');
     });
 
     it('throws if project service fails', async () => {
@@ -148,7 +103,7 @@ describe('tasksCompletedLoader', () => {
       mockTaskService.findCompletedTasks.mockResolvedValue(tasks);
       mockProjectService.findRecent.mockRejectedValue(new Error('Project error'));
 
-      await expect(tasksCompletedLoader(createLoaderArgs())).rejects.toThrow('Project error');
+      await expect(tasksCompletedLoader(createMockLoaderArgs())).rejects.toThrow('Project error');
     });
   });
 
@@ -160,7 +115,7 @@ describe('tasksCompletedLoader', () => {
       mockTaskService.findCompletedTasks.mockResolvedValue(tasks);
       mockProjectService.findRecent.mockResolvedValue(projects);
 
-      const result = (await tasksCompletedLoader(createLoaderArgs())) as TasksLoaderData;
+      const result = (await tasksCompletedLoader(createMockLoaderArgs())) as TasksLoaderData;
 
       expect(result).toHaveProperty('tasks');
       expect(result.tasks).toHaveProperty('total', 1);
@@ -174,7 +129,7 @@ describe('tasksCompletedLoader', () => {
       mockTaskService.findCompletedTasks.mockResolvedValue(tasks);
       mockProjectService.findRecent.mockResolvedValue(projects);
 
-      const result = (await tasksCompletedLoader(createLoaderArgs())) as TasksLoaderData;
+      const result = (await tasksCompletedLoader(createMockLoaderArgs())) as TasksLoaderData;
 
       const allCompleted = result.tasks.documents.every((task) => task.completed);
       expect(allCompleted).toBe(true);

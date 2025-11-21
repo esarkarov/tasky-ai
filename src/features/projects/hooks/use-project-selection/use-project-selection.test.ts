@@ -1,20 +1,8 @@
-import { renderHook, act, waitFor } from '@testing-library/react';
-import { describe, it, expect } from 'vitest';
-import { useProjectSelection } from './use-project-selection';
+import { createMockProject } from '@/core/tests/factories';
 import type { ProjectListItem } from '@/features/projects/types';
-
-const createMockProject = (overrides?: Partial<ProjectListItem>): ProjectListItem => ({
-  $id: 'project-1',
-  name: 'Test Project',
-  color_name: 'blue',
-  color_hex: '#0000FF',
-  $createdAt: '2024-01-01',
-  $updatedAt: '2024-01-01',
-  $collectionId: 'projects',
-  $databaseId: 'db',
-  $permissions: [],
-  ...overrides,
-});
+import { act, renderHook, waitFor } from '@testing-library/react';
+import { describe, expect, it } from 'vitest';
+import { useProjectSelection } from './use-project-selection';
 
 describe('useProjectSelection', () => {
   const mockProjects: ProjectListItem[] = [

@@ -1,3 +1,4 @@
+import { createMockTask } from '@/core/tests/factories';
 import { Task } from '@/features/tasks/types';
 import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
@@ -48,21 +49,6 @@ vi.mock('@/features/tasks/hooks/use-task-mutation/use-task-mutation', () => ({
 
 describe('TaskActions', () => {
   const mockHandleEdit = vi.fn();
-
-  const createMockTask = (overrides?: Partial<Task>): Task => ({
-    $id: '1',
-    id: 'task-1',
-    content: 'Test task content',
-    completed: false,
-    due_date: null,
-    projectId: null,
-    $createdAt: new Date().toISOString(),
-    $updatedAt: new Date().toISOString(),
-    $collectionId: 'tasks',
-    $databaseId: 'tasks-db-123',
-    $permissions: [],
-    ...overrides,
-  });
 
   beforeEach(() => {
     vi.clearAllMocks();
