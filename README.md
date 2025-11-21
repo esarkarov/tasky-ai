@@ -15,8 +15,7 @@
 
 # 📋 Tasky AI
 
-**Tasky AI** is an AI-assisted task management platform built with **React**, **TypeScript**, and **Vite**.  
-It combines **Clerk authentication**, **Appwrite persistence**, and **Google Gemini–powered task generation** to help individuals and teams plan and manage work efficiently across multiple productivity views — Inbox, Today, Upcoming, Completed, and Project-focused sections.
+**Tasky AI** is an AI-assisted task management platform built with **React**, **TypeScript**, and **Vite**. It combines **Clerk auth**, **Appwrite database**, and **Google Gemini–powered task generation** to help individuals and teams plan and manage work efficiently across multiple productivity views — Inbox, Today, Upcoming, Completed, and Project-focused sections.
 
 ---
 
@@ -29,20 +28,6 @@ It combines **Clerk authentication**, **Appwrite persistence**, and **Google Gem
 - Responsive and Accessible UI with **Tailwind + Shadcn UI**
 - Full TypeScript codebase
 - Testing with **Vitest + RTL**
-
----
-
-## 🧰 Tech Stack
-
-| Category                 | Technologies                                                |
-| ------------------------ | ----------------------------------------------------------- |
-| **Framework**            | React, React Router, TypeScript                             |
-| **Authentication**       | Clerk Auth                                                  |
-| **Backend-as-a-Service** | Appwrite DB                                                 |
-| **AI Integration**       | Gemini API                                                  |
-| **Styling**              | Tailwind CSS, Shadcn UI                                     |
-| **Testing & Quality**    | Vitest, React Testing Library, Playwright, ESLint, Prettier |
-| **CI/CD & Tooling**      | Pnpm, GitHub, GitHub Actions, Vite                          |
 
 ---
 
