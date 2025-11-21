@@ -17,7 +17,7 @@ export const ProjectCard = memo(({ project }: ProjectCardProps) => {
       aria-label={`Project: ${project.name}`}>
       <Hash
         size={16}
-        color={project.color_hex}
+        style={{ color: project.color_hex }}
         className="shrink-0"
         aria-hidden="true"
       />

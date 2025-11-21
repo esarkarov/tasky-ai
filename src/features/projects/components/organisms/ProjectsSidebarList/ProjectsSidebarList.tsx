@@ -10,6 +10,8 @@ interface ProjectsSidebarListProps {
   handleMobileNavigation: () => void;
 }
 
+const PROJECTS_DISPLAY_LIMIT = 9;
+
 export const ProjectsSidebarList = ({ handleMobileNavigation }: ProjectsSidebarListProps) => {
   const {
     projects: { documents: projectDocs, total },
@@ -19,7 +21,7 @@ export const ProjectsSidebarList = ({ handleMobileNavigation }: ProjectsSidebarL
     <CollapsibleContent id="projects-list">
       <SidebarGroupContent>
         <SidebarMenu>
-          {projectDocs.slice(0, 9).map((project, index) => (
+          {projectDocs.slice(0, PROJECTS_DISPLAY_LIMIT).map((project, index) => (
             <NavList
               key={project.$id}
               index={index}>
@@ -29,7 +31,7 @@ export const ProjectsSidebarList = ({ handleMobileNavigation }: ProjectsSidebarL
               />
             </NavList>
           ))}
-          {projectDocs !== null && total > 9 && (
+          {projectDocs !== null && total > PROJECTS_DISPLAY_LIMIT && (
             <SidebarMenuItem>
               <AllProjectsButton onClick={handleMobileNavigation} />
             </SidebarMenuItem>
