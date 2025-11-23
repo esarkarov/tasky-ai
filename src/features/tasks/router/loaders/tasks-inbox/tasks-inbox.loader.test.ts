@@ -1,4 +1,4 @@
-import { createMockLoaderArgs, createMockProjects, createMockTask, createMockTasks } from '@/core/tests/factories';
+import { createMockProjects, createMockTask, createMockTasks } from '@/core/tests/factories';
 import { projectService } from '@/features/projects/services/project.service';
 import { taskService } from '@/features/tasks/services/task.service';
 import type { ProjectsWithTasksLoaderData, TasksLoaderData } from '@/shared/types';
@@ -36,7 +36,7 @@ describe('tasksInboxLoader', () => {
       mockTaskService.findInboxTasks.mockResolvedValue(tasks);
       mockProjectService.findRecent.mockResolvedValue(projects);
 
-      const result = (await tasksInboxLoader(createMockLoaderArgs())) as ProjectsWithTasksLoaderData;
+      const result = (await tasksInboxLoader()) as ProjectsWithTasksLoaderData;
 
       expect(result.tasks).toEqual(tasks);
       expect(result.projects).toEqual(projects);
@@ -51,7 +51,7 @@ describe('tasksInboxLoader', () => {
       mockTaskService.findInboxTasks.mockResolvedValue(tasks);
       mockProjectService.findRecent.mockResolvedValue(projects);
 
-      const result = (await tasksInboxLoader(createMockLoaderArgs())) as TasksLoaderData;
+      const result = (await tasksInboxLoader()) as TasksLoaderData;
 
       expect(result.tasks.documents[0].due_date).toBeInstanceOf(Date);
     });
@@ -66,7 +66,7 @@ describe('tasksInboxLoader', () => {
       mockTaskService.findInboxTasks.mockResolvedValue(tasks);
       mockProjectService.findRecent.mockResolvedValue(projects);
 
-      const result = (await tasksInboxLoader(createMockLoaderArgs())) as TasksLoaderData;
+      const result = (await tasksInboxLoader()) as TasksLoaderData;
 
       const allAreInbox = result.tasks.documents.every((task) => task.projectId === null);
       expect(allAreInbox).toBe(true);
@@ -81,7 +81,7 @@ describe('tasksInboxLoader', () => {
       mockTaskService.findInboxTasks.mockResolvedValue(tasks);
       mockProjectService.findRecent.mockResolvedValue(projects);
 
-      const result = (await tasksInboxLoader(createMockLoaderArgs())) as ProjectsWithTasksLoaderData;
+      const result = (await tasksInboxLoader()) as ProjectsWithTasksLoaderData;
 
       expect(result.tasks.total).toBe(0);
       expect(result.projects.total).toBe(0);
@@ -93,14 +93,14 @@ describe('tasksInboxLoader', () => {
       mockTaskService.findInboxTasks.mockRejectedValue(new Error('Task service error'));
       mockProjectService.findRecent.mockResolvedValue(createMockProjects());
 
-      await expect(tasksInboxLoader(createMockLoaderArgs())).rejects.toThrow('Task service error');
+      await expect(tasksInboxLoader()).rejects.toThrow('Task service error');
     });
 
     it('throws if project service fails', async () => {
       mockTaskService.findInboxTasks.mockResolvedValue(createMockTasks());
       mockProjectService.findRecent.mockRejectedValue(new Error('Project service error'));
 
-      await expect(tasksInboxLoader(createMockLoaderArgs())).rejects.toThrow('Project service error');
+      await expect(tasksInboxLoader()).rejects.toThrow('Project service error');
     });
   });
 
@@ -112,7 +112,7 @@ describe('tasksInboxLoader', () => {
       mockTaskService.findInboxTasks.mockResolvedValue(tasks);
       mockProjectService.findRecent.mockResolvedValue(projects);
 
-      const result = (await tasksInboxLoader(createMockLoaderArgs())) as ProjectsWithTasksLoaderData;
+      const result = (await tasksInboxLoader()) as ProjectsWithTasksLoaderData;
 
       expect(result).toHaveProperty('tasks');
       expect(result).toHaveProperty('projects');

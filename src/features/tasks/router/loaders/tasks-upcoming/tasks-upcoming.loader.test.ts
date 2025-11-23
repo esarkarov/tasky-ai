@@ -1,10 +1,4 @@
-import {
-  createMockLoaderArgs,
-  createMockProject,
-  createMockProjects,
-  createMockTask,
-  createMockTasks,
-} from '@/core/tests/factories';
+import { createMockProject, createMockProjects, createMockTask, createMockTasks } from '@/core/tests/factories';
 import { projectService } from '@/features/projects/services/project.service';
 import { taskService } from '@/features/tasks/services/task.service';
 import type { ProjectsWithTasksLoaderData, TasksLoaderData } from '@/shared/types';
@@ -39,7 +33,7 @@ describe('tasksUpcomingLoader', () => {
       mockTaskService.findUpcomingTasks.mockResolvedValue(tasks);
       mockProjectService.findRecent.mockResolvedValue(projects);
 
-      const result = (await tasksUpcomingLoader(createMockLoaderArgs())) as ProjectsWithTasksLoaderData;
+      const result = (await tasksUpcomingLoader()) as ProjectsWithTasksLoaderData;
 
       expect(result.tasks).toEqual(tasks);
       expect(result.projects).toEqual(projects);
@@ -54,7 +48,7 @@ describe('tasksUpcomingLoader', () => {
       mockTaskService.findUpcomingTasks.mockResolvedValue(emptyTasks);
       mockProjectService.findRecent.mockResolvedValue(emptyProjects);
 
-      const result = (await tasksUpcomingLoader(createMockLoaderArgs())) as ProjectsWithTasksLoaderData;
+      const result = (await tasksUpcomingLoader()) as ProjectsWithTasksLoaderData;
 
       expect(result.tasks.total).toBe(0);
       expect(result.projects.total).toBe(0);
@@ -68,7 +62,7 @@ describe('tasksUpcomingLoader', () => {
       mockTaskService.findUpcomingTasks.mockResolvedValue(tasks);
       mockProjectService.findRecent.mockResolvedValue(projects);
 
-      const result = (await tasksUpcomingLoader(createMockLoaderArgs())) as TasksLoaderData;
+      const result = (await tasksUpcomingLoader()) as TasksLoaderData;
 
       expect(result.tasks.documents[0].due_date).toEqual(dueDate);
     });
@@ -81,7 +75,7 @@ describe('tasksUpcomingLoader', () => {
       mockTaskService.findUpcomingTasks.mockResolvedValue(tasks);
       mockProjectService.findRecent.mockResolvedValue(projects);
 
-      const result = (await tasksUpcomingLoader(createMockLoaderArgs())) as TasksLoaderData;
+      const result = (await tasksUpcomingLoader()) as TasksLoaderData;
 
       expect(result.tasks.documents[0].projectId?.$id).toBe(project.$id);
     });
@@ -95,7 +89,7 @@ describe('tasksUpcomingLoader', () => {
       mockTaskService.findUpcomingTasks.mockResolvedValue(tasks);
       mockProjectService.findRecent.mockResolvedValue(projects);
 
-      const result = (await tasksUpcomingLoader(createMockLoaderArgs())) as TasksLoaderData;
+      const result = (await tasksUpcomingLoader()) as TasksLoaderData;
 
       expect(result.tasks.total).toBe(0);
       expect(result.tasks.documents).toHaveLength(0);
@@ -107,14 +101,14 @@ describe('tasksUpcomingLoader', () => {
       mockTaskService.findUpcomingTasks.mockRejectedValue(new Error('Task error'));
       mockProjectService.findRecent.mockResolvedValue(createMockProjects());
 
-      await expect(tasksUpcomingLoader(createMockLoaderArgs())).rejects.toThrow('Task error');
+      await expect(tasksUpcomingLoader()).rejects.toThrow('Task error');
     });
 
     it('throws if findRecent fails', async () => {
       mockTaskService.findUpcomingTasks.mockResolvedValue(createMockTasks());
       mockProjectService.findRecent.mockRejectedValue(new Error('Project error'));
 
-      await expect(tasksUpcomingLoader(createMockLoaderArgs())).rejects.toThrow('Project error');
+      await expect(tasksUpcomingLoader()).rejects.toThrow('Project error');
     });
   });
 
@@ -126,7 +120,7 @@ describe('tasksUpcomingLoader', () => {
       mockTaskService.findUpcomingTasks.mockResolvedValue(tasks);
       mockProjectService.findRecent.mockResolvedValue(projects);
 
-      const result = (await tasksUpcomingLoader(createMockLoaderArgs())) as ProjectsWithTasksLoaderData;
+      const result = (await tasksUpcomingLoader()) as ProjectsWithTasksLoaderData;
 
       expect(result).toHaveProperty('tasks');
       expect(result).toHaveProperty('projects');

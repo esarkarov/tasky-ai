@@ -1,10 +1,4 @@
-import {
-  createMockLoaderArgs,
-  createMockProject,
-  createMockProjects,
-  createMockTask,
-  createMockTasks,
-} from '@/core/tests/factories';
+import { createMockProject, createMockProjects, createMockTask, createMockTasks } from '@/core/tests/factories';
 import { projectService } from '@/features/projects/services/project.service';
 import { taskService } from '@/features/tasks/services/task.service';
 import type { ProjectsWithTasksLoaderData, TasksLoaderData } from '@/shared/types';
@@ -42,7 +36,7 @@ describe('tasksTodayLoader', () => {
       mockTaskService.findTodayTasks.mockResolvedValue(tasks);
       mockProjectService.findRecent.mockResolvedValue(projects);
 
-      const result = (await tasksTodayLoader(createMockLoaderArgs())) as ProjectsWithTasksLoaderData;
+      const result = (await tasksTodayLoader()) as ProjectsWithTasksLoaderData;
 
       expect(mockTaskService.findTodayTasks).toHaveBeenCalledOnce();
       expect(mockProjectService.findRecent).toHaveBeenCalledOnce();
@@ -58,7 +52,7 @@ describe('tasksTodayLoader', () => {
       mockTaskService.findTodayTasks.mockResolvedValue(tasks);
       mockProjectService.findRecent.mockResolvedValue(projects);
 
-      const result = (await tasksTodayLoader(createMockLoaderArgs())) as TasksLoaderData;
+      const result = (await tasksTodayLoader()) as TasksLoaderData;
 
       expect(result.tasks.documents[0].due_date).toEqual(today);
     });
@@ -71,7 +65,7 @@ describe('tasksTodayLoader', () => {
       mockTaskService.findTodayTasks.mockResolvedValue(tasks);
       mockProjectService.findRecent.mockResolvedValue(projects);
 
-      const result = (await tasksTodayLoader(createMockLoaderArgs())) as TasksLoaderData;
+      const result = (await tasksTodayLoader()) as TasksLoaderData;
 
       expect(result.tasks.documents[0].projectId?.$id).toBe(project.$id);
     });
@@ -85,7 +79,7 @@ describe('tasksTodayLoader', () => {
       mockTaskService.findTodayTasks.mockResolvedValue(tasks);
       mockProjectService.findRecent.mockResolvedValue(projects);
 
-      const result = (await tasksTodayLoader(createMockLoaderArgs())) as TasksLoaderData;
+      const result = (await tasksTodayLoader()) as TasksLoaderData;
 
       expect(result.tasks.total).toBe(0);
       expect(result.tasks.documents).toHaveLength(0);
@@ -96,7 +90,7 @@ describe('tasksTodayLoader', () => {
     it('throws if task service fails', async () => {
       mockTaskService.findTodayTasks.mockRejectedValue(new Error('Task error'));
 
-      await expect(tasksTodayLoader(createMockLoaderArgs())).rejects.toThrow('Task error');
+      await expect(tasksTodayLoader()).rejects.toThrow('Task error');
     });
 
     it('throws if project service fails', async () => {
@@ -104,7 +98,7 @@ describe('tasksTodayLoader', () => {
       mockTaskService.findTodayTasks.mockResolvedValue(tasks);
       mockProjectService.findRecent.mockRejectedValue(new Error('Project error'));
 
-      await expect(tasksTodayLoader(createMockLoaderArgs())).rejects.toThrow('Project error');
+      await expect(tasksTodayLoader()).rejects.toThrow('Project error');
     });
   });
 
@@ -116,7 +110,7 @@ describe('tasksTodayLoader', () => {
       mockTaskService.findTodayTasks.mockResolvedValue(tasks);
       mockProjectService.findRecent.mockResolvedValue(projects);
 
-      const result = (await tasksTodayLoader(createMockLoaderArgs())) as TasksLoaderData;
+      const result = (await tasksTodayLoader()) as TasksLoaderData;
 
       expect(result).toHaveProperty('tasks');
       expect(result.tasks.total).toBe(1);
