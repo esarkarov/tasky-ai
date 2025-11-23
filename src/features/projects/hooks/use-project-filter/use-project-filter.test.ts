@@ -1,4 +1,4 @@
-import { createMockProject, createMockTask } from '@/core/tests/factories';
+import { createMockProject, createMockTask } from '@/core/test-setup/factories';
 import type { Task } from '@/features/tasks/types';
 import { act, renderHook } from '@testing-library/react';
 import { describe, expect, it } from 'vitest';

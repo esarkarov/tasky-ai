@@ -1,4 +1,4 @@
-import { createMockProject } from '@/core/tests/factories';
+import { createMockProject } from '@/core/test-setup/factories';
 import { Project } from '@/features/projects/types';
 import { render, screen } from '@testing-library/react';
 import { beforeEach, describe, expect, it, vi } from 'vitest';

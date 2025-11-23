@@ -1,4 +1,4 @@
-import { createMockProjects, createMockTask, createMockTasks } from '@/core/tests/factories';
+import { createMockProjects, createMockTask, createMockTasks } from '@/core/test-setup/factories';
 import { projectService } from '@/features/projects/services/project.service';
 import { taskService } from '@/features/tasks/services/task.service';
 import type { ProjectsWithTasksLoaderData, TasksLoaderData } from '@/shared/types';

@@ -1,5 +1,5 @@
 import { genAI } from '@/core/lib/google-ai';
-import { createMockAIContentResponse } from '@/core/tests/factories';
+import { createMockAIContentResponse } from '@/core/test-setup/factories';
 import { DEFAULT_GEMINI_MODEL } from '@/features/ai/clients/gemini.client';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { geminiClient } from './gemini.client';

@@ -1,4 +1,4 @@
-import { createMockProjectsWithTasksLoaderData, createMockTask } from '@/core/tests/factories';
+import { createMockProjectsWithTasksLoaderData, createMockTask } from '@/core/test-setup/factories';
 import { Task } from '@/features/tasks/types';
 import { render, screen } from '@testing-library/react';
 import { userEvent } from '@testing-library/user-event';

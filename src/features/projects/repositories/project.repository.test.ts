@@ -1,6 +1,6 @@
 import { env } from '@/core/config/env.config';
 import { databases } from '@/core/lib/appwrite';
-import { createMockProject, createMockProjects } from '@/core/tests/factories';
+import { createMockProject, createMockProjects } from '@/core/test-setup/factories';
 import { projectQueries } from '@/features/projects/repositories/project.queries';
 import { ProjectCreateInput, ProjectUpdateInput } from '@/features/projects/types';
 import { beforeEach, describe, expect, it, vi } from 'vitest';

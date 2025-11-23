@@ -1,4 +1,4 @@
-import { createMockLoaderArgs, createMockProject, createMockProjects } from '@/core/tests/factories';
+import { createMockLoaderArgs, createMockProject, createMockProjects } from '@/core/test-setup/factories';
 import { projectService } from '@/features/projects/services/project.service';
 import type { ProjectDetailLoaderData, ProjectDetailWithRecentLoaderData } from '@/shared/types';
 import { beforeEach, describe, expect, it, vi } from 'vitest';

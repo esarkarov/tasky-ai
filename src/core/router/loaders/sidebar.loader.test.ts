@@ -1,5 +1,5 @@
 import { sidebarLoader } from '@/core/router/loaders/sidebar.loader';
-import { createMockLoaderArgs, createMockProjects, createMockTaskCounts } from '@/core/tests/factories';
+import { createMockLoaderArgs, createMockProjects, createMockTaskCounts } from '@/core/test-setup/factories';
 import { projectService } from '@/features/projects/services/project.service';
 import { taskService } from '@/features/tasks/services/task.service';
 import { SidebarLoaderData } from '@/shared/types';

@@ -1,4 +1,4 @@
-import { createMockTask } from '@/core/tests/factories';
+import { createMockTask } from '@/core/test-setup/factories';
 import { Task } from '@/features/tasks/types';
 import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';

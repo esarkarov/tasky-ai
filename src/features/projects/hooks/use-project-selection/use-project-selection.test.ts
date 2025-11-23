@@ -1,4 +1,4 @@
-import { createMockProject } from '@/core/tests/factories';
+import { createMockProject } from '@/core/test-setup/factories';
 import type { ProjectListItem } from '@/features/projects/types';
 import { act, renderHook, waitFor } from '@testing-library/react';
 import { describe, expect, it } from 'vitest';

@@ -16,9 +16,52 @@ env:
   PNPM_VERSION: '9'
 
 jobs:
-  quality-check:
-    name: Code Quality & Tests
+  setup:
+    name: Setup Dependencies
     runs-on: ubuntu-latest
+    timeout-minutes: 5
+    outputs:
+      pnpm-cache-hit: ${{ steps.pnpm-cache.outputs.cache-hit }}
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: ${{ env.PNPM_VERSION }}
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: 'pnpm'
+
+      - name: Get pnpm store directory
+        id: pnpm-cache-dir
+        shell: bash
+        run: echo "STORE_PATH=$(pnpm store path)" >> $GITHUB_OUTPUT
+
+      - name: Cache pnpm dependencies
+        id: pnpm-cache
+        uses: actions/cache@v4
+        with:
+          path: |
+            ${{ steps.pnpm-cache-dir.outputs.STORE_PATH }}
+            node_modules
+          key: ${{ runner.os }}-pnpm-${{ hashFiles('**/pnpm-lock.yaml') }}
+          restore-keys: |
+            ${{ runner.os }}-pnpm-
+
+      - name: Install dependencies
+        if: steps.pnpm-cache.outputs.cache-hit != 'true'
+        run: pnpm install --frozen-lockfile
+
+  quality-check:
+    name: Code Quality & Unit Tests
+    runs-on: ubuntu-latest
+    needs: setup
     timeout-minutes: 10
 
     steps:
@@ -36,8 +79,18 @@ jobs:
           node-version: ${{ env.NODE_VERSION }}
           cache: 'pnpm'
 
-      - name: Install dependencies
-        run: pnpm install --frozen-lockfile
+      - name: Restore pnpm dependencies
+        uses: actions/cache@v4
+        with:
+          path: |
+            ~/.local/share/pnpm/store
+            node_modules
+          key: ${{ runner.os }}-pnpm-${{ hashFiles('**/pnpm-lock.yaml') }}
+          restore-keys: |
+            ${{ runner.os }}-pnpm-
+
+      - name: Install dependencies (if cache miss)
+        run: pnpm install --frozen-lockfile --prefer-offline
 
       - name: Run Prettier
         run: pnpm run prettier:check
@@ -49,19 +102,91 @@ jobs:
         run: pnpm exec tsc --noEmit
 
       - name: Run tests with coverage
-        run: pnpm run test:run
+        run: pnpm run test:coverage
 
-      - name: Upload coverage to Codecov (optional)
+      - name: Upload coverage report
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: coverage-report
+          path: coverage/
+          retention-days: 14
+
+      - name: Upload coverage to Codecov
         uses: codecov/codecov-action@v4
-        if: github.event_name == 'push'
+        if: github.event_name == 'push' && !cancelled()
         with:
           files: ./coverage/coverage-final.json
           fail_ci_if_error: false
         continue-on-error: true
 
+  e2e-tests:
+    name: E2E Tests with Playwright
+    runs-on: ubuntu-latest
+    needs: setup
+    timeout-minutes: 60
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: ${{ env.PNPM_VERSION }}
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: 'pnpm'
+
+      - name: Restore pnpm dependencies
+        uses: actions/cache@v4
+        with:
+          path: |
+            ~/.local/share/pnpm/store
+            node_modules
+          key: ${{ runner.os }}-pnpm-${{ hashFiles('**/pnpm-lock.yaml') }}
+          restore-keys: |
+            ${{ runner.os }}-pnpm-
+
+      - name: Install dependencies (if cache miss)
+        run: pnpm install --frozen-lockfile --prefer-offline
+
+      - name: Cache Playwright browsers
+        id: playwright-cache
+        uses: actions/cache@v4
+        with:
+          path: ~/.cache/ms-playwright
+          key: ${{ runner.os }}-playwright-${{ hashFiles('**/pnpm-lock.yaml') }}
+          restore-keys: |
+            ${{ runner.os }}-playwright-
+
+      - name: Install Playwright browsers
+        if: steps.playwright-cache.outputs.cache-hit != 'true'
+        run: pnpm exec playwright install --with-deps
+
+      - name: Install Playwright system dependencies (if cache hit)
+        if: steps.playwright-cache.outputs.cache-hit == 'true'
+        run: pnpm exec playwright install-deps
+
+      - name: Run Playwright tests
+        run: pnpm exec playwright test
+
+      - name: Upload Playwright report
+        uses: actions/upload-artifact@v4
+        if: ${{ !cancelled() }}
+        with:
+          name: playwright-report
+          path: playwright-report/
+          retention-days: 30
+          compression-level: 6
+
   security-audit:
     name: Security Audit
     runs-on: ubuntu-latest
+    needs: setup
     timeout-minutes: 5
 
     steps:
@@ -79,17 +204,23 @@ jobs:
           node-version: ${{ env.NODE_VERSION }}
           cache: 'pnpm'
 
-      - name: Install dependencies
-        run: pnpm install --frozen-lockfile
+      - name: Restore pnpm dependencies
+        uses: actions/cache@v4
+        with:
+          path: |
+            ~/.local/share/pnpm/store
+            node_modules
+          key: ${{ runner.os }}-pnpm-${{ hashFiles('**/pnpm-lock.yaml') }}
+          restore-keys: |
+            ${{ runner.os }}-pnpm-
+
+      - name: Install dependencies (if cache miss)
+        run: pnpm install --frozen-lockfile --prefer-offline
 
       - name: Run dependency audit
-        run: pnpm audit
-        continue-on-error: true
-
-      - name: Check for known vulnerabilities
         run: |
           pnpm audit --json > audit-report.json || true
-          echo "Audit complete. Review report if failures occur."
+          echo "Security audit complete. Review report for any critical issues."
 
       - name: Upload audit report
         uses: actions/upload-artifact@v4
@@ -113,13 +244,13 @@ jobs:
         uses: actions/checkout@v4
 
       - name: Initialize CodeQL
-        uses: github/codeql-action/init@v4
+        uses: github/codeql-action/init@v3
         with:
           languages: javascript-typescript
           queries: security-and-quality
 
       - name: Perform CodeQL Analysis
-        uses: github/codeql-action/analyze@v4
+        uses: github/codeql-action/analyze@v3
         with:
           category: '/language:javascript-typescript'
 
@@ -144,27 +275,50 @@ jobs:
           node-version: ${{ env.NODE_VERSION }}
           cache: 'pnpm'
 
-      - name: Install dependencies
-        run: pnpm install --frozen-lockfile
+      - name: Restore pnpm dependencies
+        uses: actions/cache@v4
+        with:
+          path: |
+            ~/.local/share/pnpm/store
+            node_modules
+          key: ${{ runner.os }}-pnpm-${{ hashFiles('**/pnpm-lock.yaml') }}
+          restore-keys: |
+            ${{ runner.os }}-pnpm-
+
+      - name: Install dependencies (if cache miss)
+        run: pnpm install --frozen-lockfile --prefer-offline
+
+      - name: Cache build output
+        uses: actions/cache@v4
+        with:
+          path: |
+            dist
+            .vite
+          key: ${{ runner.os }}-build-${{ github.sha }}
+          restore-keys: |
+            ${{ runner.os }}-build-
 
       - name: Build production bundle
         run: pnpm run build
         env:
           NODE_ENV: production
 
-      - name: Check build output
+      - name: Verify build output
         run: |
           if [ ! -d "dist" ] || [ -z "$(ls -A dist)" ]; then
-            echo "Build failed: dist directory is empty"
+            echo "❌ Build failed: dist directory is empty or missing"
             exit 1
           fi
-          echo "Build successful. Output size:"
+          echo "✅ Build successful"
+          echo "📦 Build output size:"
           du -sh dist/
+          echo "📄 Files created:"
+          ls -lh dist/
 
       - name: Upload build artifacts
         uses: actions/upload-artifact@v4
         with:
-          name: production-build
+          name: production-build-${{ github.sha }}
           path: dist/
           retention-days: 7
-          compression-level: 6
+          compression-level: 9

@@ -1,4 +1,4 @@
-import { createMockProject, createMockTask } from '@/core/tests/factories';
+import { createMockProject, createMockTask } from '@/core/test-setup/factories';
 import { Project } from '@/features/projects/types';
 import { Task } from '@/features/tasks/types';
 import { render, screen } from '@testing-library/react';

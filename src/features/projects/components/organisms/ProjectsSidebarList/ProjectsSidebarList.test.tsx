@@ -1,4 +1,4 @@
-import { createMockProject } from '@/core/tests/factories';
+import { createMockProject } from '@/core/test-setup/factories';
 import type { ProjectListItem } from '@/features/projects/types';
 import type { ProjectsLoaderData } from '@/shared/types';
 import { render, screen } from '@testing-library/react';

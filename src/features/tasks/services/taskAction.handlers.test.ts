@@ -1,4 +1,4 @@
-import { createMockTask } from '@/core/tests/factories';
+import { createMockTask } from '@/core/test-setup/factories';
 import type { TaskFormInput } from '@/features/tasks/types';
 import { HTTP_STATUS } from '@/shared/constants';
 import { errorResponse, successResponse } from '@/shared/utils/response/response.utils';

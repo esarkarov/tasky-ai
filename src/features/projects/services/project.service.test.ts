@@ -1,4 +1,4 @@
-import { createMockProject, createMockProjects } from '@/core/tests/factories';
+import { createMockProject, createMockProjects } from '@/core/test-setup/factories';
 import { projectRepository } from '@/features/projects/repositories/project.repository';
 import { DEFAULT_FETCH_LIMIT, projectService } from '@/features/projects/services/project.service';
 import { ProjectFormInput } from '@/features/projects/types';

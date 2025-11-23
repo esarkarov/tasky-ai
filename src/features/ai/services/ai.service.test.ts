@@ -1,4 +1,4 @@
-import { createMockAIContentResponse } from '@/core/tests/factories';
+import { createMockAIContentResponse } from '@/core/test-setup/factories';
 import { geminiClient } from '@/features/ai/clients/gemini.client';
 import { aiService } from '@/features/ai/services/ai.service';
 import { AIGeneratedTask } from '@/features/ai/types';

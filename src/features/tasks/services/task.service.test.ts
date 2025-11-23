@@ -1,4 +1,4 @@
-import { createMockTask, createMockTasks } from '@/core/tests/factories';
+import { createMockTask, createMockTasks } from '@/core/test-setup/factories';
 import { AIGeneratedTask } from '@/features/ai/types';
 import { taskRepository } from '@/features/tasks/repositories/task.repository';
 import { taskService } from '@/features/tasks/services/task.service';

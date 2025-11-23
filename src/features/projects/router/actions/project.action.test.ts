@@ -3,7 +3,7 @@ import { HTTP_METHODS, HTTP_STATUS } from '@/shared/constants';
 import { errorResponse } from '@/shared/utils/response/response.utils';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { projectAction } from './project.action';
-import { createMockActionArgs, createMockRequest } from '@/core/tests/factories';
+import { createMockActionArgs, createMockRequest } from '@/core/test-setup/factories';
 
 vi.mock('@/features/projects/services/projectAction.handlers', () => ({
   projectActionHandlers: {

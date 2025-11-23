@@ -1,4 +1,4 @@
-import { createMockProject } from '@/core/tests/factories';
+import { createMockProject } from '@/core/test-setup/factories';
 import { aiService } from '@/features/ai/services/ai.service';
 import type { ProjectFormInput } from '@/features/projects/types';
 import { taskService } from '@/features/tasks/services/task.service';
