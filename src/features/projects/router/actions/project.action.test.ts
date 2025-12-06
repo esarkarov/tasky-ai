@@ -1,9 +1,9 @@
-import { projectActionHandlers } from '@/features/projects/services/projectAction.handlers';
-import { HTTP_METHODS, HTTP_STATUS } from '@/shared/constants';
-import { errorResponse } from '@/shared/utils/response/response.utils';
-import { beforeEach, describe, expect, it, vi } from 'vitest';
+import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { projectAction } from './project.action';
+import { projectActionHandlers } from '@/features/projects/services/projectAction.handlers';
+import { errorResponse } from '@/shared/utils/response/response.utils';
 import { createMockActionArgs, createMockRequest } from '@/core/test-setup/factories';
+import { HTTP_METHODS, HTTP_STATUS } from '@/shared/constants';
 
 vi.mock('@/features/projects/services/projectAction.handlers', () => ({
   projectActionHandlers: {
@@ -20,13 +20,13 @@ vi.mock('@/shared/utils/response/response.utils', () => ({
 const mockHandlers = vi.mocked(projectActionHandlers);
 const mockErrorResponse = vi.mocked(errorResponse);
 
-beforeEach(() => {
-  vi.clearAllMocks();
-});
-
 describe('projectAction', () => {
-  describe('HTTP method handling', () => {
-    it('calls handleCreate when method is POST', async () => {
+  beforeEach(() => {
+    vi.clearAllMocks();
+  });
+
+  describe('HTTP method routing', () => {
+    it('should route POST request to handleCreate', async () => {
       const request = createMockRequest(HTTP_METHODS.POST);
       const mockResponse = new Response('created', { status: 201 });
       mockHandlers.handleCreate.mockResolvedValue(mockResponse);
@@ -34,10 +34,11 @@ describe('projectAction', () => {
       const result = await projectAction(createMockActionArgs(request));
 
       expect(mockHandlers.handleCreate).toHaveBeenCalledWith(request);
+      expect(mockHandlers.handleCreate).toHaveBeenCalledOnce();
       expect(result).toBe(mockResponse);
     });
 
-    it('calls handleUpdate when method is PUT', async () => {
+    it('should route PUT request to handleUpdate', async () => {
       const request = createMockRequest(HTTP_METHODS.PUT);
       const mockResponse = new Response('updated', { status: 200 });
       mockHandlers.handleUpdate.mockResolvedValue(mockResponse);
@@ -45,10 +46,11 @@ describe('projectAction', () => {
       const result = await projectAction(createMockActionArgs(request));
 
       expect(mockHandlers.handleUpdate).toHaveBeenCalledWith(request);
+      expect(mockHandlers.handleUpdate).toHaveBeenCalledOnce();
       expect(result).toBe(mockResponse);
     });
 
-    it('calls handleDelete when method is DELETE', async () => {
+    it('should route DELETE request to handleDelete', async () => {
       const request = createMockRequest(HTTP_METHODS.DELETE);
       const mockResponse = new Response(null, { status: 204 });
       mockHandlers.handleDelete.mockResolvedValue(mockResponse);
@@ -56,10 +58,11 @@ describe('projectAction', () => {
       const result = await projectAction(createMockActionArgs(request));
 
       expect(mockHandlers.handleDelete).toHaveBeenCalledWith(request);
+      expect(mockHandlers.handleDelete).toHaveBeenCalledOnce();
       expect(result).toBe(mockResponse);
     });
 
-    it('returns errorResponse when method is unsupported', async () => {
+    it('should return error response for unsupported HTTP methods', async () => {
       const request = createMockRequest(HTTP_METHODS.GET);
       const errorRes = new Response('not allowed', { status: 405 });
       mockErrorResponse.mockReturnValue(errorRes);
@@ -72,23 +75,22 @@ describe('projectAction', () => {
   });
 
   describe('error handling', () => {
-    it('returns errorResponse when handler throws an Error instance', async () => {
+    it('should return error response with error message when handler throws Error', async () => {
       const request = createMockRequest(HTTP_METHODS.POST);
-      const thrownError = new Error('Handler failed');
       const errorRes = new Response('error', { status: 500 });
-      mockHandlers.handleCreate.mockRejectedValue(thrownError);
+      mockHandlers.handleCreate.mockRejectedValue(new Error('Database connection failed'));
       mockErrorResponse.mockReturnValue(errorRes);
 
       const result = await projectAction(createMockActionArgs(request));
 
-      expect(mockErrorResponse).toHaveBeenCalledWith('Handler failed', HTTP_STATUS.INTERNAL_SERVER_ERROR);
+      expect(mockErrorResponse).toHaveBeenCalledWith('Database connection failed', HTTP_STATUS.INTERNAL_SERVER_ERROR);
       expect(result).toBe(errorRes);
     });
 
-    it('returns generic errorResponse when thrown error is not an Error instance', async () => {
+    it('should return generic error response when handler throws non-Error value', async () => {
       const request = createMockRequest(HTTP_METHODS.PUT);
       const errorRes = new Response('error', { status: 500 });
-      mockHandlers.handleUpdate.mockRejectedValue('Unknown error');
+      mockHandlers.handleUpdate.mockRejectedValue(new Error('Failed to process request'));
       mockErrorResponse.mockReturnValue(errorRes);
 
       const result = await projectAction(createMockActionArgs(request));
