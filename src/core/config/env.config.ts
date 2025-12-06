@@ -1,6 +1,6 @@
 import { z } from 'zod';
 
-const envSchema = z.object({
+export const envSchema = z.object({
   VITE_CLERK_PUBLISHABLE_KEY: z.string().nonempty().readonly(),
   VITE_CLERK_USER_STORAGE_KEY: z.string().nonempty().readonly(),
   VITE_APPWRITE_PROJECT_ID: z.string().nonempty().readonly(),
@@ -11,7 +11,7 @@ const envSchema = z.object({
   VITE_GEMINI_API_KEY: z.string().nonempty().readonly(),
 });
 
-const testDefaults = {
+export const testDefaults: EnvSchema = {
   VITE_CLERK_PUBLISHABLE_KEY: 'test-key',
   VITE_CLERK_USER_STORAGE_KEY: 'test-storage-key',
   VITE_APPWRITE_PROJECT_ID: 'test-project-id',
@@ -40,3 +40,5 @@ export const env = {
   appwriteDatabaseId: parsedEnv.data.VITE_APPWRITE_DATABASE_ID,
   geminiApiKey: parsedEnv.data.VITE_GEMINI_API_KEY,
 };
+
+export type EnvSchema = z.infer<typeof envSchema>;

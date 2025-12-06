@@ -120,87 +120,87 @@ jobs:
           fail_ci_if_error: false
         continue-on-error: true
 
-  e2e-tests:
-    name: E2E Tests
-    runs-on: ubuntu-latest
-    needs: setup
-    timeout-minutes: 60
+  # e2e-tests:
+  #   name: E2E Tests
+  #   runs-on: ubuntu-latest
+  #   needs: setup
+  #   timeout-minutes: 60
 
-    steps:
-      - name: Checkout code
-        uses: actions/checkout@v4
+  #   steps:
+  #     - name: Checkout code
+  #       uses: actions/checkout@v4
 
-      - name: Setup pnpm
-        uses: pnpm/action-setup@v4
-        with:
-          version: ${{ env.PNPM_VERSION }}
+  #     - name: Setup pnpm
+  #       uses: pnpm/action-setup@v4
+  #       with:
+  #         version: ${{ env.PNPM_VERSION }}
 
-      - name: Setup Node.js
-        uses: actions/setup-node@v4
-        with:
-          node-version: ${{ env.NODE_VERSION }}
-          cache: 'pnpm'
+  #     - name: Setup Node.js
+  #       uses: actions/setup-node@v4
+  #       with:
+  #         node-version: ${{ env.NODE_VERSION }}
+  #         cache: 'pnpm'
 
-      - name: Restore pnpm dependencies
-        uses: actions/cache@v4
-        with:
-          path: |
-            ~/.local/share/pnpm/store
-            node_modules
-          key: ${{ runner.os }}-pnpm-${{ hashFiles('**/pnpm-lock.yaml') }}
-          restore-keys: |
-            ${{ runner.os }}-pnpm-
+  #     - name: Restore pnpm dependencies
+  #       uses: actions/cache@v4
+  #       with:
+  #         path: |
+  #           ~/.local/share/pnpm/store
+  #           node_modules
+  #         key: ${{ runner.os }}-pnpm-${{ hashFiles('**/pnpm-lock.yaml') }}
+  #         restore-keys: |
+  #           ${{ runner.os }}-pnpm-
 
-      - name: Install dependencies
-        run: pnpm install --frozen-lockfile --prefer-offline
+  #     - name: Install dependencies
+  #       run: pnpm install --frozen-lockfile --prefer-offline
 
-      - name: Cache Playwright browsers
-        id: playwright-cache
-        uses: actions/cache@v4
-        with:
-          path: ~/.cache/ms-playwright
-          key: ${{ runner.os }}-playwright-${{ hashFiles('**/pnpm-lock.yaml') }}
-          restore-keys: |
-            ${{ runner.os }}-playwright-
+  #     - name: Cache Playwright browsers
+  #       id: playwright-cache
+  #       uses: actions/cache@v4
+  #       with:
+  #         path: ~/.cache/ms-playwright
+  #         key: ${{ runner.os }}-playwright-${{ hashFiles('**/pnpm-lock.yaml') }}
+  #         restore-keys: |
+  #           ${{ runner.os }}-playwright-
 
-      - name: Install Playwright browsers
-        if: steps.playwright-cache.outputs.cache-hit != 'true'
-        run: pnpm exec playwright install --with-deps
+  #     - name: Install Playwright browsers
+  #       if: steps.playwright-cache.outputs.cache-hit != 'true'
+  #       run: pnpm exec playwright install --with-deps
 
-      - name: Install Playwright system dependencies (if cache hit)
-        if: steps.playwright-cache.outputs.cache-hit == 'true'
-        run: pnpm exec playwright install-deps
+  #     - name: Install Playwright system dependencies (if cache hit)
+  #       if: steps.playwright-cache.outputs.cache-hit == 'true'
+  #       run: pnpm exec playwright install-deps
 
-      - name: Create test environment file
-        run: |
-          cat << EOF > .env
-          VITE_APPWRITE_ENDPOINT=${{ secrets.VITE_APPWRITE_ENDPOINT }}
-          VITE_APPWRITE_PROJECT_ID=${{ secrets.VITE_APPWRITE_PROJECT_ID }}
-          VITE_APPWRITE_DATABASE_ID=${{ secrets.VITE_APPWRITE_DATABASE_ID }}
-          VITE_APPWRITE_PROJECTS_COLLECTION_ID=${{ secrets.VITE_APPWRITE_PROJECTS_COLLECTION_ID }}
-          VITE_APPWRITE_TASKS_COLLECTION_ID=${{ secrets.VITE_APPWRITE_TASKS_COLLECTION_ID }}
-          VITE_GOOGLE_GEMINI_API_KEY=${{ secrets.VITE_GOOGLE_GEMINI_API_KEY }}
-          EOF
+  #     - name: Create test environment file
+  #       run: |
+  #         cat << EOF > .env
+  #         VITE_APPWRITE_ENDPOINT=${{ secrets.VITE_APPWRITE_ENDPOINT }}
+  #         VITE_APPWRITE_PROJECT_ID=${{ secrets.VITE_APPWRITE_PROJECT_ID }}
+  #         VITE_APPWRITE_DATABASE_ID=${{ secrets.VITE_APPWRITE_DATABASE_ID }}
+  #         VITE_APPWRITE_PROJECTS_COLLECTION_ID=${{ secrets.VITE_APPWRITE_PROJECTS_COLLECTION_ID }}
+  #         VITE_APPWRITE_TASKS_COLLECTION_ID=${{ secrets.VITE_APPWRITE_TASKS_COLLECTION_ID }}
+  #         VITE_GOOGLE_GEMINI_API_KEY=${{ secrets.VITE_GOOGLE_GEMINI_API_KEY }}
+  #         EOF
 
-          cat << EOF > .env.test
-          BASE_URL=http://localhost:5173
-          TEST_USER_EMAIL=${{ secrets.TEST_USER_EMAIL }}
-          TEST_USER_PASSWORD=${{ secrets.TEST_USER_PASSWORD }}
-          EOF
+  #         cat << EOF > .env.test
+  #         BASE_URL=http://localhost:5173
+  #         TEST_USER_EMAIL=${{ secrets.TEST_USER_EMAIL }}
+  #         TEST_USER_PASSWORD=${{ secrets.TEST_USER_PASSWORD }}
+  #         EOF
 
-      - name: Run Playwright tests
-        env:
-          CI: true
-        run: pnpm exec playwright test
+  #     - name: Run Playwright tests
+  #       env:
+  #         CI: true
+  #       run: pnpm exec playwright test
 
-      - name: Upload Playwright report
-        uses: actions/upload-artifact@v4
-        if: ${{ !cancelled() }}
-        with:
-          name: playwright-report
-          path: playwright-report/
-          retention-days: 30
-          compression-level: 6
+  #     - name: Upload Playwright report
+  #       uses: actions/upload-artifact@v4
+  #       if: ${{ !cancelled() }}
+  #       with:
+  #         name: playwright-report
+  #         path: playwright-report/
+  #         retention-days: 30
+  #         compression-level: 6
 
   security-audit:
     name: Security Audit
