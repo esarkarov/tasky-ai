@@ -1,10 +1,10 @@
 import { createMockTask } from '@/core/test-setup/factories';
+import { taskService } from '@/features/tasks/services/task.service';
+import { taskActionHandlers } from '@/features/tasks/services/taskAction.handlers';
 import type { TaskFormInput } from '@/features/tasks/types';
 import { HTTP_STATUS } from '@/shared/constants';
 import { errorResponse, successResponse } from '@/shared/utils/response/response.utils';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
-import { taskService } from './task.service';
-import { taskActionHandlers } from './taskAction.handlers';
 
 vi.mock('./task.service', () => ({
   taskService: {
@@ -23,54 +23,69 @@ const mockTaskService = vi.mocked(taskService);
 const mockErrorResponse = vi.mocked(errorResponse);
 const mockSuccessResponse = vi.mocked(successResponse);
 
-const createRequest = (body: object) =>
-  new Request('http://localhost', {
-    method: 'POST',
-    body: JSON.stringify(body),
-  });
-
-beforeEach(() => {
-  vi.clearAllMocks();
-});
-
 describe('taskActionHandlers', () => {
-  describe('handleCreate', () => {
-    it('returns error when task content is missing or blank', async () => {
-      const invalidData = { content: '   ' } as TaskFormInput;
-      const request = createRequest(invalidData);
-
-      await taskActionHandlers.handleCreate(request);
-
-      expect(mockErrorResponse).toHaveBeenCalledWith('Task content is required', HTTP_STATUS.BAD_REQUEST);
-      expect(mockTaskService.create).not.toHaveBeenCalled();
+  const createMockRequest = (body: Partial<TaskFormInput> | { id?: string }) =>
+    new Request('http://localhost', {
+      method: 'POST',
+      body: JSON.stringify(body),
     });
 
-    it('creates task successfully with valid input', async () => {
-      const validData: TaskFormInput = {
-        content: 'New task',
-        due_date: null,
-        projectId: null,
-      };
-      const createdTask = createMockTask();
+  beforeEach(() => {
+    vi.clearAllMocks();
+  });
 
-      const request = createRequest(validData);
-      mockTaskService.create.mockResolvedValue(createdTask);
+  describe('handleCreate', () => {
+    describe('validation', () => {
+      it('should return error when task content is empty', async () => {
+        const invalidData: Partial<TaskFormInput> = { content: '' };
+        const request = createMockRequest(invalidData);
 
-      await taskActionHandlers.handleCreate(request);
+        await taskActionHandlers.handleCreate(request);
 
-      expect(mockTaskService.create).toHaveBeenCalledWith(validData);
-      expect(mockSuccessResponse).toHaveBeenCalledWith(
-        'Task created successfully',
-        { task: createdTask },
-        HTTP_STATUS.CREATED
-      );
+        expect(mockErrorResponse).toHaveBeenCalledWith('Task content is required', HTTP_STATUS.BAD_REQUEST);
+        expect(mockTaskService.create).not.toHaveBeenCalled();
+      });
+
+      it('should return error when task content is only whitespace', async () => {
+        const invalidData: Partial<TaskFormInput> = { content: '   ' };
+        const request = createMockRequest(invalidData);
+
+        await taskActionHandlers.handleCreate(request);
+
+        expect(mockErrorResponse).toHaveBeenCalledWith('Task content is required', HTTP_STATUS.BAD_REQUEST);
+        expect(mockTaskService.create).not.toHaveBeenCalled();
+      });
+    });
+
+    describe('successful task creation', () => {
+      it('should create task with valid input', async () => {
+        const validData: Partial<TaskFormInput> = {
+          content: 'Complete project documentation',
+          due_date: null,
+          projectId: null,
+        };
+        const createdTask = createMockTask();
+        const request = createMockRequest(validData);
+        mockTaskService.create.mockResolvedValue(createdTask);
+
+        await taskActionHandlers.handleCreate(request);
+
+        expect(mockTaskService.create).toHaveBeenCalledWith(validData);
+        expect(mockTaskService.create).toHaveBeenCalledOnce();
+        expect(mockSuccessResponse).toHaveBeenCalledWith(
+          'Task created successfully',
+          { task: createdTask },
+          HTTP_STATUS.CREATED
+        );
+        expect(mockSuccessResponse).toHaveBeenCalledOnce();
+      });
     });
   });
 
   describe('handleUpdate', () => {
-    it('returns error when ID is missing', async () => {
-      const data = { content: 'Missing ID' } as TaskFormInput;
-      const request = createRequest(data);
+    it('should return error when task ID is missing', async () => {
+      const invalidData: Partial<TaskFormInput> = { content: 'Task without ID' };
+      const request = createMockRequest(invalidData);
 
       await taskActionHandlers.handleUpdate(request);
 
@@ -78,34 +93,36 @@ describe('taskActionHandlers', () => {
       expect(mockTaskService.update).not.toHaveBeenCalled();
     });
 
-    it('updates task successfully with valid ID', async () => {
-      const data: TaskFormInput = {
-        id: 'task-2',
-        content: 'Updated task',
-        due_date: null,
-        projectId: null,
+    it('should update task with valid ID and data', async () => {
+      const dueDate = new Date('2025-12-31');
+      const data: Partial<TaskFormInput> = {
+        id: 'task-123',
+        content: 'Updated task content',
+        due_date: dueDate,
+        projectId: 'project-456',
       };
       const updatedTask = createMockTask();
-
-      const request = createRequest(data);
+      const request = createMockRequest(data);
       mockTaskService.update.mockResolvedValue(updatedTask);
 
       await taskActionHandlers.handleUpdate(request);
 
-      expect(mockTaskService.update).toHaveBeenCalledWith('task-2', {
-        content: 'Updated task',
-        due_date: null,
-        projectId: null,
+      expect(mockTaskService.update).toHaveBeenCalledWith('task-123', {
+        content: 'Updated task content',
+        due_date: dueDate.toISOString(),
+        projectId: 'project-456',
       });
+      expect(mockTaskService.update).toHaveBeenCalledOnce();
       expect(mockSuccessResponse).toHaveBeenCalledWith('Task updated successfully', {
         task: updatedTask,
       });
+      expect(mockSuccessResponse).toHaveBeenCalledOnce();
     });
   });
 
   describe('handleDelete', () => {
-    it('returns error when ID is missing', async () => {
-      const request = createRequest({});
+    it('should return error when task ID is missing', async () => {
+      const request = createMockRequest({});
 
       await taskActionHandlers.handleDelete(request);
 
@@ -113,13 +130,15 @@ describe('taskActionHandlers', () => {
       expect(mockTaskService.delete).not.toHaveBeenCalled();
     });
 
-    it('deletes task successfully with valid ID', async () => {
-      const request = createRequest({ id: 'task-3' });
+    it('should delete task with valid ID', async () => {
+      const request = createMockRequest({ id: 'task-789' });
 
       await taskActionHandlers.handleDelete(request);
 
-      expect(mockTaskService.delete).toHaveBeenCalledWith('task-3');
+      expect(mockTaskService.delete).toHaveBeenCalledWith('task-789');
+      expect(mockTaskService.delete).toHaveBeenCalledOnce();
       expect(mockSuccessResponse).toHaveBeenCalledWith('Task deleted successfully');
+      expect(mockSuccessResponse).toHaveBeenCalledOnce();
     });
   });
 });

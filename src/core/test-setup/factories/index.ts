@@ -1,3 +1,4 @@
+import { AIGeneratedTask } from '@/features/ai/types';
 import { Project, ProjectsListResponse } from '@/features/projects/types';
 import { Task, TaskCounts, TasksResponse } from '@/features/tasks/types';
 import { HttpMethod, ProjectsWithTasksLoaderData, TasksLoaderData } from '@/shared/types';
@@ -75,6 +76,19 @@ export const createMockAIContentResponse = (
   codeExecutionResult: '',
   ...overrides,
 });
+
+export const createMockAITasks = (): AIGeneratedTask[] => [
+  {
+    content: 'Setup React project',
+    due_date: null,
+    completed: false,
+  },
+  {
+    content: 'Install dependencies',
+    due_date: null,
+    completed: false,
+  },
+];
 
 export const createMockProjectsWithTasksLoaderData = (
   tasks: Task[] = [createMockTask()],

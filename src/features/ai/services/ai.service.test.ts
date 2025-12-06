@@ -1,101 +1,126 @@
-import { createMockAIContentResponse } from '@/core/test-setup/factories';
-import { geminiClient } from '@/features/ai/clients/gemini.client';
+import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { aiService } from '@/features/ai/services/ai.service';
-import { AIGeneratedTask } from '@/features/ai/types';
+import { geminiClient } from '@/features/ai/clients/gemini.client';
 import { buildTaskGenerationPrompt } from '@/features/ai/utils/ai.utils';
-import { beforeEach, describe, expect, it, vi } from 'vitest';
+import { createMockAIContentResponse, createMockAITasks } from '@/core/test-setup/factories';
 
 vi.mock('@/features/ai/clients/gemini.client', () => ({
   geminiClient: {
     generateContent: vi.fn(),
   },
 }));
+
 vi.mock('@/features/ai/utils/ai.utils', () => ({
   buildTaskGenerationPrompt: vi.fn(),
 }));
 
-const mockedGeminiClient = vi.mocked(geminiClient);
-const mockedbuildTaskGenerationPrompt = vi.mocked(buildTaskGenerationPrompt);
+const mockGeminiClient = vi.mocked(geminiClient);
+const mockBuildPrompt = vi.mocked(buildTaskGenerationPrompt);
 
 describe('aiService', () => {
-  const MOCK_PROMPT = 'Create a project for building a website';
-  const MOCK_GENERATED_CONTENTS = 'generated-contents';
-
-  const createMockTasks = (): AIGeneratedTask[] => [
-    {
-      content: 'Setup React project',
-      due_date: null,
-      completed: false,
-    },
-    {
-      content: 'Install dependencies',
-      due_date: null,
-      completed: false,
-    },
-  ];
+  const VALID_PROMPT = 'Create a project for building a website';
+  const BUILT_PROMPT = 'System: Generate tasks. User: Create a project for building a website';
 
   beforeEach(() => {
     vi.clearAllMocks();
   });
 
   describe('generateProjectTasks', () => {
-    describe('when prompt is invalid', () => {
-      const mockInvalidPrompts = [
-        { description: 'empty string', prompt: '' },
-        { description: 'only whitespace', prompt: '   ' },
-      ];
-
-      it.each(mockInvalidPrompts)('should return empty array when prompt is $description', async ({ prompt }) => {
-        const result = await aiService.generateProjectTasks(prompt);
-
-        expect(result).toEqual([]);
-        expect(mockedbuildTaskGenerationPrompt).not.toHaveBeenCalled();
-        expect(mockedGeminiClient.generateContent).not.toHaveBeenCalled();
-      });
-    });
-
-    describe('when prompt is valid', () => {
-      it('should generate tasks successfully', async () => {
-        const mockTasks = createMockTasks();
+    describe('successful task generation', () => {
+      it('should generate tasks from valid prompt', async () => {
+        const mockTasks = createMockAITasks();
         const mockResponse = createMockAIContentResponse(JSON.stringify(mockTasks));
-        mockedbuildTaskGenerationPrompt.mockReturnValue(MOCK_GENERATED_CONTENTS);
-        mockedGeminiClient.generateContent.mockResolvedValue(mockResponse);
+        mockBuildPrompt.mockReturnValue(BUILT_PROMPT);
+        mockGeminiClient.generateContent.mockResolvedValue(mockResponse);
 
-        const result = await aiService.generateProjectTasks(MOCK_PROMPT);
+        const result = await aiService.generateProjectTasks(VALID_PROMPT);
 
-        expect(mockedbuildTaskGenerationPrompt).toHaveBeenCalledWith(MOCK_PROMPT);
-        expect(mockedGeminiClient.generateContent).toHaveBeenCalledWith(MOCK_GENERATED_CONTENTS);
+        expect(mockBuildPrompt).toHaveBeenCalledWith(VALID_PROMPT);
+        expect(mockBuildPrompt).toHaveBeenCalledOnce();
+        expect(mockGeminiClient.generateContent).toHaveBeenCalledWith(BUILT_PROMPT);
+        expect(mockGeminiClient.generateContent).toHaveBeenCalledOnce();
         expect(result).toEqual(mockTasks);
       });
     });
 
-    describe('when AI response is invalid', () => {
-      const mockInvalidResponses = [
-        { description: 'empty string', responseText: '' },
-        { description: 'only whitespace', responseText: '   ' },
-        { description: 'invalid JSON', responseText: 'invalid-json' },
-      ];
+    describe('invalid prompt handling', () => {
+      it('should return empty array when prompt is empty string', async () => {
+        const result = await aiService.generateProjectTasks('');
 
-      it.each(mockInvalidResponses)(
-        'should return empty array when response text is $description',
-        async ({ responseText }) => {
-          const mockResponse = createMockAIContentResponse(responseText);
-          mockedbuildTaskGenerationPrompt.mockReturnValue(MOCK_GENERATED_CONTENTS);
-          mockedGeminiClient.generateContent.mockResolvedValue(mockResponse);
+        expect(result).toEqual([]);
+        expect(mockBuildPrompt).not.toHaveBeenCalled();
+        expect(mockGeminiClient.generateContent).not.toHaveBeenCalled();
+      });
 
-          const result = await aiService.generateProjectTasks(MOCK_PROMPT);
+      it('should return empty array when prompt is only whitespace', async () => {
+        const result = await aiService.generateProjectTasks('   ');
 
-          expect(result).toEqual([]);
-        }
-      );
+        expect(result).toEqual([]);
+        expect(mockBuildPrompt).not.toHaveBeenCalled();
+        expect(mockGeminiClient.generateContent).not.toHaveBeenCalled();
+      });
     });
 
-    describe('when repository fails', () => {
-      it('should return empty array', async () => {
-        mockedbuildTaskGenerationPrompt.mockReturnValue(MOCK_GENERATED_CONTENTS);
-        mockedGeminiClient.generateContent.mockRejectedValue(new Error('API error'));
+    describe('invalid response handling', () => {
+      it('should return empty array when response text is empty', async () => {
+        const mockResponse = createMockAIContentResponse('');
+        mockBuildPrompt.mockReturnValue(BUILT_PROMPT);
+        mockGeminiClient.generateContent.mockResolvedValue(mockResponse);
 
-        const result = await aiService.generateProjectTasks(MOCK_PROMPT);
+        const result = await aiService.generateProjectTasks(VALID_PROMPT);
+
+        expect(result).toEqual([]);
+      });
+
+      it('should return empty array when response text is whitespace', async () => {
+        const mockResponse = createMockAIContentResponse('   ');
+        mockBuildPrompt.mockReturnValue(BUILT_PROMPT);
+        mockGeminiClient.generateContent.mockResolvedValue(mockResponse);
+
+        const result = await aiService.generateProjectTasks(VALID_PROMPT);
+
+        expect(result).toEqual([]);
+      });
+
+      it('should return empty array when response is invalid JSON', async () => {
+        const mockResponse = createMockAIContentResponse('not-valid-json');
+        mockBuildPrompt.mockReturnValue(BUILT_PROMPT);
+        mockGeminiClient.generateContent.mockResolvedValue(mockResponse);
+
+        const result = await aiService.generateProjectTasks(VALID_PROMPT);
+
+        expect(result).toEqual([]);
+      });
+
+      it('should return empty array when response is not an array', async () => {
+        const mockResponse = createMockAIContentResponse(JSON.stringify({ invalid: 'object' }));
+        mockBuildPrompt.mockReturnValue(BUILT_PROMPT);
+        mockGeminiClient.generateContent.mockResolvedValue(mockResponse);
+
+        const result = await aiService.generateProjectTasks(VALID_PROMPT);
+
+        expect(result).toEqual([]);
+      });
+    });
+
+    describe('error handling', () => {
+      it('should return empty array when client throws error', async () => {
+        mockBuildPrompt.mockReturnValue(BUILT_PROMPT);
+        mockGeminiClient.generateContent.mockRejectedValue(new Error('API rate limit exceeded'));
+
+        const result = await aiService.generateProjectTasks(VALID_PROMPT);
+
+        expect(result).toEqual([]);
+        expect(mockBuildPrompt).toHaveBeenCalledOnce();
+        expect(mockGeminiClient.generateContent).toHaveBeenCalledOnce();
+      });
+
+      it('should return empty array when JSON parsing fails', async () => {
+        const mockResponse = createMockAIContentResponse('{"incomplete": json');
+        mockBuildPrompt.mockReturnValue(BUILT_PROMPT);
+        mockGeminiClient.generateContent.mockResolvedValue(mockResponse);
+
+        const result = await aiService.generateProjectTasks(VALID_PROMPT);
 
         expect(result).toEqual([]);
       });

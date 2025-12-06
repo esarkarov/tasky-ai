@@ -1,13 +1,13 @@
 import { createMockProject } from '@/core/test-setup/factories';
 import { aiService } from '@/features/ai/services/ai.service';
+import { projectService } from '@/features/projects/services/project.service';
+import { projectActionHandlers } from '@/features/projects/services/projectAction.handlers';
 import type { ProjectFormInput } from '@/features/projects/types';
 import { taskService } from '@/features/tasks/services/task.service';
 import { HTTP_STATUS, ROUTES } from '@/shared/constants';
 import { errorResponse, successResponse } from '@/shared/utils/response/response.utils';
 import { redirect } from 'react-router';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
-import { projectService } from './project.service';
-import { projectActionHandlers } from './projectAction.handlers';
 
 vi.mock('./project.service', () => ({
   projectService: {
@@ -45,103 +45,157 @@ const mockErrorResponse = vi.mocked(errorResponse);
 const mockSuccessResponse = vi.mocked(successResponse);
 const mockRedirect = vi.mocked(redirect);
 
-const createMockRequest = (body: object) =>
-  new Request('http://localhost', {
-    method: 'POST',
-    body: JSON.stringify(body),
+describe('projectActionHandlers', () => {
+  const createMockRequest = (body: Partial<ProjectFormInput> | { id?: string }) =>
+    new Request('http://localhost', {
+      method: 'POST',
+      body: JSON.stringify(body),
+    });
+
+  beforeEach(() => {
+    vi.clearAllMocks();
   });
 
-beforeEach(() => {
-  vi.clearAllMocks();
-});
-
-describe('projectActionHandlers', () => {
   describe('handleCreate', () => {
-    it('returns error when name is missing or blank', async () => {
-      const invalidData = { name: '   ' } as ProjectFormInput;
-      const request = createMockRequest(invalidData);
+    describe('validation', () => {
+      it('should return error when project name is empty', async () => {
+        const invalidData: Partial<ProjectFormInput> = { name: '' };
+        const request = createMockRequest(invalidData);
 
-      await projectActionHandlers.handleCreate(request);
+        await projectActionHandlers.handleCreate(request);
 
-      expect(mockErrorResponse).toHaveBeenCalledWith('Project name is required', HTTP_STATUS.BAD_REQUEST);
-      expect(mockProjectService.create).not.toHaveBeenCalled();
+        expect(mockErrorResponse).toHaveBeenCalledWith('Project name is required', HTTP_STATUS.BAD_REQUEST);
+        expect(mockProjectService.create).not.toHaveBeenCalled();
+      });
+
+      it('should return error when project name is only whitespace', async () => {
+        const invalidData: Partial<ProjectFormInput> = { name: '   ' };
+        const request = createMockRequest(invalidData);
+
+        await projectActionHandlers.handleCreate(request);
+
+        expect(mockErrorResponse).toHaveBeenCalledWith('Project name is required', HTTP_STATUS.BAD_REQUEST);
+        expect(mockProjectService.create).not.toHaveBeenCalled();
+      });
     });
 
-    it('creates project and redirects to its route', async () => {
-      const mockProject = createMockProject();
-      const validData = { name: 'Test Project', ai_task_gen: false, task_gen_prompt: '' } as ProjectFormInput;
-      const request = createMockRequest(validData);
+    describe('basic project creation', () => {
+      it('should create project and redirect to project page', async () => {
+        const mockProject = createMockProject();
+        const validData: Partial<ProjectFormInput> = {
+          name: 'Test Project',
+          ai_task_gen: false,
+          task_gen_prompt: '',
+        };
+        const request = createMockRequest(validData);
+        mockProjectService.create.mockResolvedValue(mockProject);
 
-      mockProjectService.create.mockResolvedValue(mockProject);
+        await projectActionHandlers.handleCreate(request);
 
-      await projectActionHandlers.handleCreate(request);
-
-      expect(mockProjectService.create).toHaveBeenCalledWith(validData);
-      expect(mockRedirect).toHaveBeenCalledWith(ROUTES.PROJECT('project-1'));
+        expect(mockProjectService.create).toHaveBeenCalledWith(validData);
+        expect(mockProjectService.create).toHaveBeenCalledOnce();
+        expect(mockRedirect).toHaveBeenCalledWith(ROUTES.PROJECT(mockProject.$id));
+        expect(mockRedirect).toHaveBeenCalledOnce();
+      });
     });
 
-    it('generates AI tasks when ai_task_gen is true and prompt provided', async () => {
-      const mockProject = createMockProject();
-      const aiTasks = [{ content: 'AI task 1' }];
-      const data = {
-        name: 'AI Project',
-        ai_task_gen: true,
-        task_gen_prompt: 'Generate tasks',
-      } as ProjectFormInput;
+    describe('AI task generation', () => {
+      it('should generate and create AI tasks when ai_task_gen is enabled', async () => {
+        const mockProject = createMockProject();
+        const aiTasks = [{ content: 'AI generated task', title: 'Task 1' }];
+        const data: Partial<ProjectFormInput> = {
+          name: 'AI Project',
+          ai_task_gen: true,
+          task_gen_prompt: 'Generate project tasks',
+        };
+        const request = createMockRequest(data);
+        mockProjectService.create.mockResolvedValue(mockProject);
+        mockAiService.generateProjectTasks.mockResolvedValue(aiTasks);
 
-      const request = createMockRequest(data);
+        await projectActionHandlers.handleCreate(request);
 
-      mockProjectService.create.mockResolvedValue(mockProject);
-      mockAiService.generateProjectTasks.mockResolvedValue(aiTasks);
+        expect(mockAiService.generateProjectTasks).toHaveBeenCalledWith('Generate project tasks');
+        expect(mockAiService.generateProjectTasks).toHaveBeenCalledOnce();
+        expect(mockTaskService.createMany).toHaveBeenCalledWith(mockProject.$id, aiTasks);
+        expect(mockTaskService.createMany).toHaveBeenCalledOnce();
+        expect(mockRedirect).toHaveBeenCalledWith(ROUTES.PROJECT(mockProject.$id));
+      });
 
-      await projectActionHandlers.handleCreate(request);
+      it('should not create tasks when AI returns empty array', async () => {
+        const mockProject = createMockProject();
+        const data: Partial<ProjectFormInput> = {
+          name: 'Empty AI Project',
+          ai_task_gen: true,
+          task_gen_prompt: 'Generate nothing',
+        };
+        const request = createMockRequest(data);
+        mockProjectService.create.mockResolvedValue(mockProject);
+        mockAiService.generateProjectTasks.mockResolvedValue([]);
 
-      expect(mockAiService.generateProjectTasks).toHaveBeenCalledWith('Generate tasks');
-      expect(mockTaskService.createMany).toHaveBeenCalledWith('project-1', aiTasks);
-      expect(mockRedirect).toHaveBeenCalledWith(ROUTES.PROJECT('project-1'));
-    });
+        await projectActionHandlers.handleCreate(request);
 
-    it('does not create tasks when AI returns empty list', async () => {
-      const mockProject = createMockProject();
-      const data = {
-        name: 'Empty AI Project',
-        ai_task_gen: true,
-        task_gen_prompt: 'Empty result',
-      } as ProjectFormInput;
+        expect(mockAiService.generateProjectTasks).toHaveBeenCalledOnce();
+        expect(mockTaskService.createMany).not.toHaveBeenCalled();
+        expect(mockRedirect).toHaveBeenCalledWith(ROUTES.PROJECT(mockProject.$id));
+      });
 
-      const request = createMockRequest(data);
+      it('should skip AI generation when ai_task_gen is false', async () => {
+        const mockProject = createMockProject();
+        const data: Partial<ProjectFormInput> = {
+          name: 'Manual Project',
+          ai_task_gen: false,
+          task_gen_prompt: 'This should be ignored',
+        };
+        const request = createMockRequest(data);
+        mockProjectService.create.mockResolvedValue(mockProject);
 
-      mockProjectService.create.mockResolvedValue(mockProject);
-      mockAiService.generateProjectTasks.mockResolvedValue([]);
+        await projectActionHandlers.handleCreate(request);
 
-      await projectActionHandlers.handleCreate(request);
+        expect(mockAiService.generateProjectTasks).not.toHaveBeenCalled();
+        expect(mockTaskService.createMany).not.toHaveBeenCalled();
+        expect(mockRedirect).toHaveBeenCalledWith(ROUTES.PROJECT(mockProject.$id));
+      });
 
-      expect(mockTaskService.createMany).not.toHaveBeenCalled();
-      expect(mockRedirect).toHaveBeenCalledWith(ROUTES.PROJECT('project-1'));
-    });
+      it('should skip AI generation when prompt is empty', async () => {
+        const mockProject = createMockProject();
+        const data: Partial<ProjectFormInput> = {
+          name: 'Project with empty prompt',
+          ai_task_gen: true,
+          task_gen_prompt: '',
+        };
+        const request = createMockRequest(data);
+        mockProjectService.create.mockResolvedValue(mockProject);
 
-    it('handles AI task generation errors gracefully', async () => {
-      const mockProject = createMockProject();
-      const data = {
-        name: 'Error AI Project',
-        ai_task_gen: true,
-        task_gen_prompt: 'Error prompt',
-      } as ProjectFormInput;
-      const request = createMockRequest(data);
+        await projectActionHandlers.handleCreate(request);
 
-      mockProjectService.create.mockResolvedValue(mockProject);
-      mockAiService.generateProjectTasks.mockRejectedValue(new Error('AI service failed'));
+        expect(mockAiService.generateProjectTasks).not.toHaveBeenCalled();
+        expect(mockTaskService.createMany).not.toHaveBeenCalled();
+        expect(mockRedirect).toHaveBeenCalledWith(ROUTES.PROJECT(mockProject.$id));
+      });
 
-      await projectActionHandlers.handleCreate(request);
+      it('should continue with redirect when AI task generation fails', async () => {
+        const mockProject = createMockProject();
+        const data: Partial<ProjectFormInput> = {
+          name: 'Error Project',
+          ai_task_gen: true,
+          task_gen_prompt: 'Generate tasks',
+        };
+        const request = createMockRequest(data);
+        mockProjectService.create.mockResolvedValue(mockProject);
+        mockAiService.generateProjectTasks.mockRejectedValue(new Error('AI service unavailable'));
 
-      expect(mockTaskService.createMany).not.toHaveBeenCalled();
-      expect(mockRedirect).toHaveBeenCalledWith(ROUTES.PROJECT('project-1'));
+        await projectActionHandlers.handleCreate(request);
+
+        expect(mockAiService.generateProjectTasks).toHaveBeenCalledOnce();
+        expect(mockTaskService.createMany).not.toHaveBeenCalled();
+        expect(mockRedirect).toHaveBeenCalledWith(ROUTES.PROJECT(mockProject.$id));
+      });
     });
   });
 
   describe('handleUpdate', () => {
-    it('returns error if project ID is missing', async () => {
-      const invalidData = { name: 'Project without ID' } as ProjectFormInput;
+    it('should return error when project ID is missing', async () => {
+      const invalidData: Partial<ProjectFormInput> = { name: 'Project without ID' };
       const request = createMockRequest(invalidData);
 
       await projectActionHandlers.handleUpdate(request);
@@ -150,36 +204,49 @@ describe('projectActionHandlers', () => {
       expect(mockProjectService.update).not.toHaveBeenCalled();
     });
 
-    it('updates project and returns success response', async () => {
+    it('should update project and return success response', async () => {
       const mockProject = createMockProject();
-      const data = { id: '101', name: 'Updated Project' } as ProjectFormInput;
+      const data: Partial<ProjectFormInput> = {
+        id: 'project-123',
+        name: 'Updated Project Name',
+        color_name: 'red',
+        color_hex: '#FF0000',
+      };
       const request = createMockRequest(data);
-
       mockProjectService.update.mockResolvedValue(mockProject);
 
       await projectActionHandlers.handleUpdate(request);
 
-      expect(mockProjectService.update).toHaveBeenCalledWith('101', { name: 'Updated Project' });
+      expect(mockProjectService.update).toHaveBeenCalledWith('project-123', {
+        name: 'Updated Project Name',
+        color_name: 'red',
+        color_hex: '#FF0000',
+      });
+      expect(mockProjectService.update).toHaveBeenCalledOnce();
       expect(mockSuccessResponse).toHaveBeenCalledWith('Project updated successfully', { project: mockProject });
+      expect(mockSuccessResponse).toHaveBeenCalledOnce();
     });
   });
 
   describe('handleDelete', () => {
-    it('returns error if ID is missing', async () => {
+    it('should return error when project ID is missing', async () => {
       const request = createMockRequest({});
+
       await projectActionHandlers.handleDelete(request);
 
       expect(mockErrorResponse).toHaveBeenCalledWith('Project ID is required', HTTP_STATUS.BAD_REQUEST);
       expect(mockProjectService.delete).not.toHaveBeenCalled();
     });
 
-    it('deletes project and returns success response', async () => {
-      const request = createMockRequest({ id: '321' });
+    it('should delete project and return success response', async () => {
+      const request = createMockRequest({ id: 'project-456' });
 
       await projectActionHandlers.handleDelete(request);
 
-      expect(mockProjectService.delete).toHaveBeenCalledWith('321');
+      expect(mockProjectService.delete).toHaveBeenCalledWith('project-456');
+      expect(mockProjectService.delete).toHaveBeenCalledOnce();
       expect(mockSuccessResponse).toHaveBeenCalledWith('Project deleted successfully');
+      expect(mockSuccessResponse).toHaveBeenCalledOnce();
     });
   });
 });

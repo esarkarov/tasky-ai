@@ -2,20 +2,30 @@ import { geminiClient } from '@/features/ai/clients/gemini.client';
 import { AIGeneratedTask } from '@/features/ai/types';
 import { buildTaskGenerationPrompt } from '@/features/ai/utils/ai.utils';
 
+function isValidTasksArray(data: unknown): data is AIGeneratedTask[] {
+  return Array.isArray(data) && data.every((item) => item && typeof item === 'object');
+}
+
 export const aiService = {
   async generateProjectTasks(prompt: string): Promise<AIGeneratedTask[]> {
     if (!prompt?.trim()) return [];
 
     try {
-      const contentResponse = await geminiClient.generateContent(buildTaskGenerationPrompt(prompt));
-      const contentResponseText = contentResponse.text?.trim();
+      const contentPrompt = buildTaskGenerationPrompt(prompt);
+      const response = await geminiClient.generateContent(contentPrompt);
 
-      if (!contentResponseText) return [];
+      const text = response.text?.trim();
+      if (!text) return [];
 
-      const aiTasks = JSON.parse(contentResponseText) as AIGeneratedTask[];
+      const parsed = JSON.parse(text);
 
-      return aiTasks;
-    } catch {
+      if (!isValidTasksArray(parsed)) {
+        return [];
+      }
+
+      return parsed;
+    } catch (error) {
+      console.error('Failed to generate tasks:', error);
       return [];
     }
   },

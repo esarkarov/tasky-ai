@@ -1,40 +1,42 @@
-import { createMockProject, createMockProjects } from '@/core/test-setup/factories';
+import { describe, it, expect, vi, beforeEach } from 'vitest';
+import { projectService, DEFAULT_FETCH_LIMIT } from '@/features/projects/services/project.service';
 import { projectRepository } from '@/features/projects/repositories/project.repository';
-import { DEFAULT_FETCH_LIMIT, projectService } from '@/features/projects/services/project.service';
-import { ProjectFormInput } from '@/features/projects/types';
 import { getUserId } from '@/shared/utils/auth/auth.utils';
 import { generateID } from '@/shared/utils/text/text.utils';
-import { beforeEach, describe, expect, it, vi } from 'vitest';
+import { createMockProject, createMockProjects } from '@/core/test-setup/factories';
+import type { ProjectFormInput } from '@/features/projects/types';
 
 vi.mock('@/features/projects/repositories/project.repository', () => ({
   projectRepository: {
     findById: vi.fn(),
     findByUserId: vi.fn(),
     create: vi.fn(),
-    delete: vi.fn(),
     update: vi.fn(),
+    delete: vi.fn(),
   },
 }));
+
 vi.mock('@/shared/utils/auth/auth.utils', () => ({
   getUserId: vi.fn(),
 }));
+
 vi.mock('@/shared/utils/text/text.utils', () => ({
   generateID: vi.fn(),
 }));
 
-const mockedProjectRepository = vi.mocked(projectRepository);
-const mockedGetUserId = vi.mocked(getUserId);
-const mockedGenerateID = vi.mocked(generateID);
+const mockRepository = vi.mocked(projectRepository);
+const mockGetUserId = vi.mocked(getUserId);
+const mockGenerateID = vi.mocked(generateID);
 
 describe('projectService', () => {
-  const MOCK_USER_ID = 'user-1';
-  const MOCK_PROJECT_ID = 'project-1';
-  const MOCK_GENERATED_ID = 'generated-id-123';
+  const MOCK_USER_ID = 'user-123';
+  const MOCK_PROJECT_ID = 'project-456';
+  const MOCK_GENERATED_ID = 'generated-789';
 
   const createMockFormData = (overrides?: Partial<ProjectFormInput>): ProjectFormInput => ({
-    name: 'New Project',
-    color_name: 'red',
-    color_hex: '#FF0000',
+    name: 'Test Project',
+    color_name: 'blue',
+    color_hex: '#0000FF',
     ai_task_gen: false,
     task_gen_prompt: '',
     ...overrides,
@@ -42,145 +44,158 @@ describe('projectService', () => {
 
   beforeEach(() => {
     vi.clearAllMocks();
-    mockedGetUserId.mockReturnValue(MOCK_USER_ID);
+    mockGetUserId.mockReturnValue(MOCK_USER_ID);
+    mockGenerateID.mockReturnValue(MOCK_GENERATED_ID);
   });
 
   describe('findById', () => {
     it('should return project when found', async () => {
       const mockProject = createMockProject();
-      mockedProjectRepository.findById.mockResolvedValue(mockProject);
+      mockRepository.findById.mockResolvedValue(mockProject);
 
       const result = await projectService.findById(MOCK_PROJECT_ID);
 
-      expect(mockedProjectRepository.findById).toHaveBeenCalledWith(MOCK_PROJECT_ID);
+      expect(mockRepository.findById).toHaveBeenCalledWith(MOCK_PROJECT_ID);
+      expect(mockRepository.findById).toHaveBeenCalledOnce();
       expect(result).toEqual(mockProject);
     });
 
     it('should throw error when repository fails', async () => {
-      mockedProjectRepository.findById.mockRejectedValue(new Error('Database error'));
+      mockRepository.findById.mockRejectedValue(new Error('Search id unavailable'));
 
       await expect(projectService.findById(MOCK_PROJECT_ID)).rejects.toThrow('Failed to load project');
-      expect(mockedProjectRepository.findById).toHaveBeenCalledWith(MOCK_PROJECT_ID);
+      expect(mockRepository.findById).toHaveBeenCalledOnce();
     });
   });
 
   describe('search', () => {
-    it('should return user projects with search query', async () => {
-      const searchQuery = 'test';
-      const mockResponse = createMockProjects();
-      mockedProjectRepository.findByUserId.mockResolvedValue(mockResponse);
+    it('should return projects matching search query', async () => {
+      const searchQuery = 'website';
+      const mockProjects = createMockProjects();
+      mockRepository.findByUserId.mockResolvedValue(mockProjects);
 
       const result = await projectService.search(searchQuery);
 
-      expect(mockedGetUserId).toHaveBeenCalled();
-      expect(mockedProjectRepository.findByUserId).toHaveBeenCalledWith(MOCK_USER_ID, { search: searchQuery });
-      expect(result).toEqual(mockResponse);
+      expect(mockGetUserId).toHaveBeenCalledOnce();
+      expect(mockRepository.findByUserId).toHaveBeenCalledWith(MOCK_USER_ID, { search: searchQuery });
+      expect(mockRepository.findByUserId).toHaveBeenCalledOnce();
+      expect(result).toEqual(mockProjects);
     });
 
     it('should throw error when repository fails', async () => {
-      const searchQuery = 'test';
-      mockedProjectRepository.findByUserId.mockRejectedValue(new Error('Database error'));
+      mockRepository.findByUserId.mockRejectedValue(new Error('Search id unavailable'));
 
-      await expect(projectService.search(searchQuery)).rejects.toThrow('Failed to load projects');
+      await expect(projectService.search('test')).rejects.toThrow('Failed to load projects');
+      expect(mockRepository.findByUserId).toHaveBeenCalledOnce();
     });
   });
 
   describe('findRecent', () => {
     it('should return recent projects with default limit', async () => {
-      const mockResponse = createMockProjects();
-      mockedProjectRepository.findByUserId.mockResolvedValue(mockResponse);
+      const mockProjects = createMockProjects();
+      mockRepository.findByUserId.mockResolvedValue(mockProjects);
 
       const result = await projectService.findRecent();
 
-      expect(mockedGetUserId).toHaveBeenCalled();
-      expect(mockedProjectRepository.findByUserId).toHaveBeenCalledWith(MOCK_USER_ID, { limit: DEFAULT_FETCH_LIMIT });
-      expect(result).toEqual(mockResponse);
+      expect(mockGetUserId).toHaveBeenCalledOnce();
+      expect(mockRepository.findByUserId).toHaveBeenCalledWith(MOCK_USER_ID, { limit: DEFAULT_FETCH_LIMIT });
+      expect(mockRepository.findByUserId).toHaveBeenCalledOnce();
+      expect(result).toEqual(mockProjects);
     });
 
     it('should return recent projects with custom limit', async () => {
-      const customLimit = 5;
-      const mockResponse = createMockProjects();
-      mockedProjectRepository.findByUserId.mockResolvedValue(mockResponse);
+      const customLimit = 10;
+      const mockProjects = createMockProjects();
+      mockRepository.findByUserId.mockResolvedValue(mockProjects);
 
       const result = await projectService.findRecent(customLimit);
 
-      expect(mockedProjectRepository.findByUserId).toHaveBeenCalledWith(MOCK_USER_ID, { limit: customLimit });
-      expect(result).toEqual(mockResponse);
+      expect(mockRepository.findByUserId).toHaveBeenCalledWith(MOCK_USER_ID, { limit: customLimit });
+      expect(result).toEqual(mockProjects);
     });
 
     it('should throw error when repository fails', async () => {
-      mockedProjectRepository.findByUserId.mockRejectedValue(new Error('Database error'));
+      mockRepository.findByUserId.mockRejectedValue(new Error('Search id unavailable'));
 
       await expect(projectService.findRecent()).rejects.toThrow('Failed to load recent projects');
+      expect(mockRepository.findByUserId).toHaveBeenCalledOnce();
     });
   });
 
   describe('create', () => {
-    it('should create project successfully', async () => {
+    it('should create project with form data', async () => {
       const formData = createMockFormData();
-      const mockProject = createMockProject();
-      mockedGenerateID.mockReturnValue(MOCK_GENERATED_ID);
-      mockedProjectRepository.create.mockResolvedValue(mockProject);
+      const mockProject = createMockProject(formData);
+      mockRepository.create.mockResolvedValue(mockProject);
 
       const result = await projectService.create(formData);
 
-      expect(mockedGetUserId).toHaveBeenCalled();
-      expect(mockedGenerateID).toHaveBeenCalled();
-      expect(mockedProjectRepository.create).toHaveBeenCalledWith(MOCK_GENERATED_ID, {
+      expect(mockGetUserId).toHaveBeenCalledOnce();
+      expect(mockGenerateID).toHaveBeenCalledOnce();
+      expect(mockRepository.create).toHaveBeenCalledWith(MOCK_GENERATED_ID, {
         name: formData.name,
         color_name: formData.color_name,
         color_hex: formData.color_hex,
         userId: MOCK_USER_ID,
       });
+      expect(mockRepository.create).toHaveBeenCalledOnce();
       expect(result).toEqual(mockProject);
     });
 
     it('should throw error when repository fails', async () => {
       const formData = createMockFormData();
-      mockedGenerateID.mockReturnValue(MOCK_GENERATED_ID);
-      mockedProjectRepository.create.mockRejectedValue(new Error('Database error'));
+      mockRepository.create.mockRejectedValue(new Error('Failed to create project'));
 
       await expect(projectService.create(formData)).rejects.toThrow('Failed to create project');
+      expect(mockRepository.create).toHaveBeenCalledOnce();
     });
   });
 
   describe('update', () => {
-    it('should update project successfully', async () => {
-      const updateData = createMockFormData({ name: 'Updated Project', color_name: 'green', color_hex: '#00FF00' });
-      const updatedProject = createMockProject(updateData);
-      mockedProjectRepository.update.mockResolvedValue(updatedProject);
-
-      const result = await projectService.update(MOCK_PROJECT_ID, updateData);
-
-      expect(mockedProjectRepository.update).toHaveBeenCalledWith(MOCK_PROJECT_ID, {
-        name: updateData.name,
-        color_name: updateData.color_name,
-        color_hex: updateData.color_hex,
+    it('should update project with form data', async () => {
+      const formData = createMockFormData({
+        name: 'Updated Project',
+        color_name: 'green',
+        color_hex: '#00FF00',
       });
+      const updatedProject = createMockProject(formData);
+      mockRepository.update.mockResolvedValue(updatedProject);
+
+      const result = await projectService.update(MOCK_PROJECT_ID, formData);
+
+      expect(mockRepository.update).toHaveBeenCalledWith(MOCK_PROJECT_ID, {
+        name: formData.name,
+        color_name: formData.color_name,
+        color_hex: formData.color_hex,
+      });
+      expect(mockRepository.update).toHaveBeenCalledOnce();
       expect(result).toEqual(updatedProject);
     });
 
     it('should throw error when repository fails', async () => {
-      const updateData = createMockFormData();
-      mockedProjectRepository.update.mockRejectedValue(new Error('Database error'));
+      const formData = createMockFormData();
+      mockRepository.update.mockRejectedValue(new Error('Failed to update project'));
 
-      await expect(projectService.update(MOCK_PROJECT_ID, updateData)).rejects.toThrow('Failed to update project');
+      await expect(projectService.update(MOCK_PROJECT_ID, formData)).rejects.toThrow('Failed to update project');
+      expect(mockRepository.update).toHaveBeenCalledOnce();
     });
   });
 
   describe('delete', () => {
     it('should delete project successfully', async () => {
-      mockedProjectRepository.delete.mockResolvedValue({});
+      mockRepository.delete.mockResolvedValue({});
 
       await projectService.delete(MOCK_PROJECT_ID);
 
-      expect(mockedProjectRepository.delete).toHaveBeenCalledWith(MOCK_PROJECT_ID);
+      expect(mockRepository.delete).toHaveBeenCalledWith(MOCK_PROJECT_ID);
+      expect(mockRepository.delete).toHaveBeenCalledOnce();
     });
 
     it('should throw error when repository fails', async () => {
-      mockedProjectRepository.delete.mockRejectedValue(new Error('Database error'));
+      mockRepository.delete.mockRejectedValue(new Error('Failed to delete project'));
 
       await expect(projectService.delete(MOCK_PROJECT_ID)).rejects.toThrow('Failed to delete project');
+      expect(mockRepository.delete).toHaveBeenCalledOnce();
     });
   });
 });
