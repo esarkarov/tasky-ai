@@ -1,9 +1,9 @@
 import { createMockProjects, createMockTask, createMockTasks } from '@/core/test-setup/factories';
 import { projectService } from '@/features/projects/services/project.service';
+import { tasksInboxLoader } from '@/features/tasks/router/loaders/tasks-inbox/tasks-inbox.loader';
 import { taskService } from '@/features/tasks/services/task.service';
-import type { ProjectsWithTasksLoaderData, TasksLoaderData } from '@/shared/types';
+import type { ProjectsWithTasksLoaderData } from '@/shared/types';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
-import { tasksInboxLoader } from './tasks-inbox.loader';
 
 vi.mock('@/features/tasks/services/task.service', () => ({
   taskService: {
@@ -20,104 +20,85 @@ vi.mock('@/features/projects/services/project.service', () => ({
 const mockTaskService = vi.mocked(taskService);
 const mockProjectService = vi.mocked(projectService);
 
-beforeEach(() => {
-  vi.clearAllMocks();
-});
-
 describe('tasksInboxLoader', () => {
-  describe('success cases', () => {
-    it('returns inbox tasks and recent projects', async () => {
-      const tasks = createMockTasks([
-        createMockTask({ content: 'Inbox 1' }),
-        createMockTask({ id: '2', $id: 'task-456', content: 'Inbox 2', completed: true }),
-      ]);
-      const projects = createMockProjects();
+  beforeEach(() => {
+    vi.clearAllMocks();
+  });
 
-      mockTaskService.findInboxTasks.mockResolvedValue(tasks);
-      mockProjectService.findRecent.mockResolvedValue(projects);
+  describe('successful data loading', () => {
+    it('should return inbox tasks and recent projects', async () => {
+      const mockTasks = createMockTasks([
+        createMockTask({ content: 'Inbox task 1' }),
+        createMockTask({ id: '2', $id: 'task-456', content: 'Inbox task 2', completed: true }),
+      ]);
+      const mockProjects = createMockProjects();
+      mockTaskService.findInboxTasks.mockResolvedValue(mockTasks);
+      mockProjectService.findRecent.mockResolvedValue(mockProjects);
 
       const result = (await tasksInboxLoader()) as ProjectsWithTasksLoaderData;
 
-      expect(result.tasks).toEqual(tasks);
-      expect(result.projects).toEqual(projects);
+      expect(result).toEqual({
+        tasks: mockTasks,
+        projects: mockProjects,
+      });
       expect(mockTaskService.findInboxTasks).toHaveBeenCalledOnce();
       expect(mockProjectService.findRecent).toHaveBeenCalledOnce();
     });
 
-    it('handles inbox tasks with due dates', async () => {
-      const tasks = createMockTasks([createMockTask({ content: 'With date', due_date: new Date('2025-01-01') })]);
-      const projects = createMockProjects();
-
-      mockTaskService.findInboxTasks.mockResolvedValue(tasks);
-      mockProjectService.findRecent.mockResolvedValue(projects);
-
-      const result = (await tasksInboxLoader()) as TasksLoaderData;
-
-      expect(result.tasks.documents[0].due_date).toBeInstanceOf(Date);
-    });
-
-    it('ensures all inbox tasks have no projectId', async () => {
-      const tasks = createMockTasks([
-        createMockTask({ content: 'Inbox 1' }),
-        createMockTask({ id: '2', $id: 'task-456', content: 'Inbox 2' }),
-      ]);
-      const projects = createMockProjects();
-
-      mockTaskService.findInboxTasks.mockResolvedValue(tasks);
-      mockProjectService.findRecent.mockResolvedValue(projects);
-
-      const result = (await tasksInboxLoader()) as TasksLoaderData;
-
-      const allAreInbox = result.tasks.documents.every((task) => task.projectId === null);
-      expect(allAreInbox).toBe(true);
-    });
-  });
-
-  describe('empty state', () => {
-    it('returns empty tasks and projects arrays', async () => {
-      const tasks = createMockTasks([]);
-      const projects = createMockProjects([]);
-
-      mockTaskService.findInboxTasks.mockResolvedValue(tasks);
-      mockProjectService.findRecent.mockResolvedValue(projects);
+    it('should return empty collections when no data exists', async () => {
+      const emptyTasks = createMockTasks([]);
+      const emptyProjects = createMockProjects([]);
+      mockTaskService.findInboxTasks.mockResolvedValue(emptyTasks);
+      mockProjectService.findRecent.mockResolvedValue(emptyProjects);
 
       const result = (await tasksInboxLoader()) as ProjectsWithTasksLoaderData;
 
       expect(result.tasks.total).toBe(0);
       expect(result.projects.total).toBe(0);
     });
-  });
 
-  describe('error handling', () => {
-    it('throws if task service fails', async () => {
-      mockTaskService.findInboxTasks.mockRejectedValue(new Error('Task service error'));
-      mockProjectService.findRecent.mockResolvedValue(createMockProjects());
-
-      await expect(tasksInboxLoader()).rejects.toThrow('Task service error');
-    });
-
-    it('throws if project service fails', async () => {
-      mockTaskService.findInboxTasks.mockResolvedValue(createMockTasks());
-      mockProjectService.findRecent.mockRejectedValue(new Error('Project service error'));
-
-      await expect(tasksInboxLoader()).rejects.toThrow('Project service error');
-    });
-  });
-
-  describe('data validation', () => {
-    it('returns a valid TasksLoaderData shape', async () => {
-      const tasks = createMockTasks();
+    it('should preserve task due dates', async () => {
+      const dueDate = new Date('2025-01-01');
+      const taskWithDueDate = createMockTask({ content: 'Task with date', due_date: dueDate });
+      const tasks = createMockTasks([taskWithDueDate]);
       const projects = createMockProjects();
-
       mockTaskService.findInboxTasks.mockResolvedValue(tasks);
       mockProjectService.findRecent.mockResolvedValue(projects);
 
       const result = (await tasksInboxLoader()) as ProjectsWithTasksLoaderData;
 
-      expect(result).toHaveProperty('tasks');
-      expect(result).toHaveProperty('projects');
-      expect(Array.isArray(result.tasks.documents)).toBe(true);
-      expect(Array.isArray(result.projects.documents)).toBe(true);
+      expect(result.tasks.documents[0].due_date).toEqual(dueDate);
+    });
+
+    it('should ensure inbox tasks have no project assignment', async () => {
+      const mockTasks = createMockTasks([
+        createMockTask({ content: 'Inbox task 1' }),
+        createMockTask({ id: '2', $id: 'task-456', content: 'Inbox task 2' }),
+      ]);
+      const projects = createMockProjects();
+      mockTaskService.findInboxTasks.mockResolvedValue(mockTasks);
+      mockProjectService.findRecent.mockResolvedValue(projects);
+
+      const result = (await tasksInboxLoader()) as ProjectsWithTasksLoaderData;
+
+      const allTasksAreInbox = result.tasks.documents.every((task) => task.projectId === null);
+      expect(allTasksAreInbox).toBe(true);
+    });
+  });
+
+  describe('error handling', () => {
+    it('should throw error when task service fails', async () => {
+      mockTaskService.findInboxTasks.mockRejectedValue(new Error('Task service failed'));
+      mockProjectService.findRecent.mockResolvedValue(createMockProjects());
+
+      await expect(tasksInboxLoader()).rejects.toThrow('Task service failed');
+    });
+
+    it('should throw error when project service fails', async () => {
+      mockTaskService.findInboxTasks.mockResolvedValue(createMockTasks());
+      mockProjectService.findRecent.mockRejectedValue(new Error('Project service failed'));
+
+      await expect(tasksInboxLoader()).rejects.toThrow('Project service failed');
     });
   });
 });

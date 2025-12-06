@@ -1,14 +1,37 @@
-import { AppTemplate, RootTemplate, sidebarLoader } from '@/core/router/lazy';
-import { protectedRoutes } from '@/core/router/routes/protected.routes';
-import { publicRoutes } from '@/core/router/routes/public.routes';
+import { AppTemplate, HomePage, LoginPage, RegisterPage, RootTemplate, sidebarLoader } from '@/core/router/lazy';
+import { projectRoutes } from '@/features/projects/router';
 import { taskAction } from '@/features/tasks/router/lazy';
+import { taskRoutes } from '@/features/tasks/router';
 import { ErrorPage } from '@/pages/ErrorPage/ErrorPage';
 import { Loader } from '@/shared/components/atoms/Loader/Loader';
 import { RedirectIfAuthenticated } from '@/shared/components/guards/RedirectIfAuthenticated/RedirectIfAuthenticated';
 import { RequireAuth } from '@/shared/components/guards/RequireAuth/RequireAuth';
 import { ROUTES } from '@/shared/constants';
 import { createElement } from 'react';
-import { createBrowserRouter } from 'react-router';
+import { createBrowserRouter, RouteObject } from 'react-router';
+
+export const protectedRoutes: RouteObject[] = [...taskRoutes, ...projectRoutes];
+
+export const publicRoutes: RouteObject[] = [
+  {
+    index: true,
+    lazy: {
+      element: HomePage,
+    },
+  },
+  {
+    path: ROUTES.REGISTER,
+    lazy: {
+      element: RegisterPage,
+    },
+  },
+  {
+    path: ROUTES.LOGIN,
+    lazy: {
+      element: LoginPage,
+    },
+  },
+];
 
 export const router = createBrowserRouter([
   {
