@@ -4,23 +4,33 @@ import { describe, expect, it } from 'vitest';
 
 describe('useDisclosure', () => {
   describe('initial state', () => {
-    it('should start with isOpen as false', () => {
+    it('should initialize with isOpen as false', () => {
       const { result } = renderHook(() => useDisclosure());
 
       expect(result.current.isOpen).toBe(false);
     });
 
-    it('should provide all required functions', () => {
+    it('should provide open function', () => {
       const { result } = renderHook(() => useDisclosure());
 
       expect(typeof result.current.open).toBe('function');
+    });
+
+    it('should provide close function', () => {
+      const { result } = renderHook(() => useDisclosure());
+
       expect(typeof result.current.close).toBe('function');
+    });
+
+    it('should provide setIsOpen function', () => {
+      const { result } = renderHook(() => useDisclosure());
+
       expect(typeof result.current.setIsOpen).toBe('function');
     });
   });
 
-  describe('opening', () => {
-    it('should set isOpen to true when open is called', () => {
+  describe('open', () => {
+    it('should set isOpen to true', () => {
       const { result } = renderHook(() => useDisclosure());
 
       act(() => {
@@ -30,7 +40,7 @@ describe('useDisclosure', () => {
       expect(result.current.isOpen).toBe(true);
     });
 
-    it('should remain true when open is called multiple times', () => {
+    it('should remain true when called multiple times', () => {
       const { result } = renderHook(() => useDisclosure());
 
       act(() => {
@@ -40,18 +50,35 @@ describe('useDisclosure', () => {
       });
 
       expect(result.current.isOpen).toBe(true);
+    });
+
+    it('should maintain stable function reference across renders', () => {
+      const { result, rerender } = renderHook(() => useDisclosure());
+      const initialOpen = result.current.open;
+
+      rerender();
+
+      expect(result.current.open).toBe(initialOpen);
+    });
+
+    it('should maintain stable function reference after state change', () => {
+      const { result } = renderHook(() => useDisclosure());
+      const initialOpen = result.current.open;
+
+      act(() => {
+        result.current.open();
+      });
+
+      expect(result.current.open).toBe(initialOpen);
     });
   });
 
-  describe('closing', () => {
-    it('should set isOpen to false when close is called', () => {
+  describe('close', () => {
+    it('should set isOpen to false when already open', () => {
       const { result } = renderHook(() => useDisclosure());
-
       act(() => {
         result.current.open();
       });
-
-      expect(result.current.isOpen).toBe(true);
 
       act(() => {
         result.current.close();
@@ -60,7 +87,7 @@ describe('useDisclosure', () => {
       expect(result.current.isOpen).toBe(false);
     });
 
-    it('should remain false when close is called multiple times', () => {
+    it('should remain false when called on closed state', () => {
       const { result } = renderHook(() => useDisclosure());
 
       act(() => {
@@ -69,6 +96,26 @@ describe('useDisclosure', () => {
       });
 
       expect(result.current.isOpen).toBe(false);
+    });
+
+    it('should maintain stable function reference across renders', () => {
+      const { result, rerender } = renderHook(() => useDisclosure());
+      const initialClose = result.current.close;
+
+      rerender();
+
+      expect(result.current.close).toBe(initialClose);
+    });
+
+    it('should maintain stable function reference after state change', () => {
+      const { result } = renderHook(() => useDisclosure());
+      const initialClose = result.current.close;
+
+      act(() => {
+        result.current.close();
+      });
+
+      expect(result.current.close).toBe(initialClose);
     });
   });
 
@@ -85,7 +132,6 @@ describe('useDisclosure', () => {
 
     it('should set isOpen to false when called with false', () => {
       const { result } = renderHook(() => useDisclosure());
-
       act(() => {
         result.current.setIsOpen(true);
       });
@@ -97,8 +143,10 @@ describe('useDisclosure', () => {
       expect(result.current.isOpen).toBe(false);
     });
 
-    it('should toggle state multiple times', () => {
+    it('should toggle state from false to true to false', () => {
       const { result } = renderHook(() => useDisclosure());
+
+      expect(result.current.isOpen).toBe(false);
 
       act(() => {
         result.current.setIsOpen(true);
@@ -118,7 +166,7 @@ describe('useDisclosure', () => {
   });
 
   describe('state transitions', () => {
-    it('should handle open -> close -> open sequence', () => {
+    it('should handle open-close-open sequence', () => {
       const { result } = renderHook(() => useDisclosure());
 
       act(() => {
@@ -137,7 +185,7 @@ describe('useDisclosure', () => {
       expect(result.current.isOpen).toBe(true);
     });
 
-    it('should handle mixed setIsOpen and open/close calls', () => {
+    it('should handle mixed setIsOpen and method calls', () => {
       const { result } = renderHook(() => useDisclosure());
 
       act(() => {
@@ -159,34 +207,6 @@ describe('useDisclosure', () => {
         result.current.setIsOpen(false);
       });
       expect(result.current.isOpen).toBe(false);
-    });
-  });
-
-  describe('function stability', () => {
-    it('should maintain stable function references', () => {
-      const { result, rerender } = renderHook(() => useDisclosure());
-
-      const initialOpen = result.current.open;
-      const initialClose = result.current.close;
-
-      rerender();
-
-      expect(result.current.open).toBe(initialOpen);
-      expect(result.current.close).toBe(initialClose);
-    });
-
-    it('should maintain stable function references after state changes', () => {
-      const { result } = renderHook(() => useDisclosure());
-
-      const initialOpen = result.current.open;
-      const initialClose = result.current.close;
-
-      act(() => {
-        result.current.open();
-      });
-
-      expect(result.current.open).toBe(initialOpen);
-      expect(result.current.close).toBe(initialClose);
     });
   });
 });

@@ -3,36 +3,56 @@ import { act, renderHook } from '@testing-library/react';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
 describe('useLoadMore', () => {
+  const MOCK_ITEMS = Array.from({ length: 50 }, (_, i) => ({
+    id: i,
+    name: `Item ${i}`,
+  }));
+
   beforeEach(() => {
     vi.useFakeTimers();
   });
 
   afterEach(() => {
-    vi.restoreAllMocks();
+    vi.useRealTimers();
   });
 
-  const mockItems = Array.from({ length: 50 }, (_, i) => ({ id: i, name: `Item ${i}` }));
-
   describe('initial state', () => {
-    it('should initialize with default values', () => {
-      const { result } = renderHook(() => useLoadMore(mockItems));
+    it('should initialize with default count', () => {
+      const { result } = renderHook(() => useLoadMore(MOCK_ITEMS));
 
       expect(result.current.count).toBe(INITIAL_COUNT);
+    });
+
+    it('should initialize with default items length', () => {
+      const { result } = renderHook(() => useLoadMore(MOCK_ITEMS));
+
       expect(result.current.items).toHaveLength(INITIAL_COUNT);
+    });
+
+    it('should initialize with loading as false', () => {
+      const { result } = renderHook(() => useLoadMore(MOCK_ITEMS));
+
       expect(result.current.isLoading).toBe(false);
+    });
+
+    it('should initialize with hasMore as true when items exceed count', () => {
+      const { result } = renderHook(() => useLoadMore(MOCK_ITEMS));
+
       expect(result.current.hasMore).toBe(true);
     });
 
-    it('should initialize with custom initial count', () => {
+    it('should use custom initial count when provided', () => {
       const customCount = 5;
-      const { result } = renderHook(() => useLoadMore(mockItems, { initialCount: customCount }));
+
+      const { result } = renderHook(() => useLoadMore(MOCK_ITEMS, { initialCount: customCount }));
 
       expect(result.current.count).toBe(customCount);
       expect(result.current.items).toHaveLength(customCount);
     });
 
-    it('should return all items when count exceeds total items', () => {
+    it('should set hasMore to false when items are less than initial count', () => {
       const smallList = [{ id: 1 }, { id: 2 }];
+
       const { result } = renderHook(() => useLoadMore(smallList));
 
       expect(result.current.items).toHaveLength(2);
@@ -47,28 +67,62 @@ describe('useLoadMore', () => {
     });
   });
 
-  describe('load more', () => {
-    it('should load more items when handleLoadMore is called', async () => {
-      const { result } = renderHook(() => useLoadMore(mockItems));
+  describe('handleLoadMore', () => {
+    it('should set loading state to true immediately', () => {
+      const { result } = renderHook(() => useLoadMore(MOCK_ITEMS));
 
       act(() => {
         result.current.handleLoadMore();
       });
 
       expect(result.current.isLoading).toBe(true);
+    });
+
+    it('should increase count by page size after delay', async () => {
+      const { result } = renderHook(() => useLoadMore(MOCK_ITEMS));
+
+      act(() => {
+        result.current.handleLoadMore();
+      });
+
+      await act(async () => {
+        vi.runAllTimers();
+      });
+
+      expect(result.current.count).toBe(INITIAL_COUNT + PAGE_SIZE);
+    });
+
+    it('should increase items length by page size after delay', async () => {
+      const { result } = renderHook(() => useLoadMore(MOCK_ITEMS));
+
+      act(() => {
+        result.current.handleLoadMore();
+      });
+
+      await act(async () => {
+        vi.runAllTimers();
+      });
+
+      expect(result.current.items).toHaveLength(INITIAL_COUNT + PAGE_SIZE);
+    });
+
+    it('should set loading state to false after delay', async () => {
+      const { result } = renderHook(() => useLoadMore(MOCK_ITEMS));
+
+      act(() => {
+        result.current.handleLoadMore();
+      });
 
       await act(async () => {
         vi.runAllTimers();
       });
 
       expect(result.current.isLoading).toBe(false);
-      expect(result.current.count).toBe(INITIAL_COUNT + PAGE_SIZE);
-      expect(result.current.items).toHaveLength(INITIAL_COUNT + PAGE_SIZE);
     });
 
-    it('should use custom page size', async () => {
-      const customPageSize = 5;
-      const { result } = renderHook(() => useLoadMore(mockItems, { pageSize: customPageSize }));
+    it('should use custom page size when provided', async () => {
+      const customPageSize = 7;
+      const { result } = renderHook(() => useLoadMore(MOCK_ITEMS, { pageSize: customPageSize }));
 
       act(() => {
         result.current.handleLoadMore();
@@ -81,23 +135,19 @@ describe('useLoadMore', () => {
       expect(result.current.count).toBe(INITIAL_COUNT + customPageSize);
     });
 
-    it('should handle multiple load more calls', async () => {
-      const { result } = renderHook(() => useLoadMore(mockItems));
+    it('should handle multiple consecutive loads', async () => {
+      const { result } = renderHook(() => useLoadMore(MOCK_ITEMS));
 
       act(() => {
         result.current.handleLoadMore();
       });
-
       await act(async () => {
         vi.runAllTimers();
       });
 
-      expect(result.current.count).toBe(INITIAL_COUNT + PAGE_SIZE);
-
       act(() => {
         result.current.handleLoadMore();
       });
-
       await act(async () => {
         vi.runAllTimers();
       });
@@ -105,55 +155,101 @@ describe('useLoadMore', () => {
       expect(result.current.count).toBe(INITIAL_COUNT + PAGE_SIZE * 2);
     });
 
-    it('should update hasMore correctly', async () => {
+    it('should set hasMore to false when all items are loaded', async () => {
       const smallList = Array.from({ length: 15 }, (_, i) => ({ id: i }));
       const { result } = renderHook(() => useLoadMore(smallList, { initialCount: 10, pageSize: 5 }));
-
-      expect(result.current.hasMore).toBe(true);
 
       act(() => {
         result.current.handleLoadMore();
       });
-
       await act(async () => {
         vi.runAllTimers();
       });
 
       expect(result.current.hasMore).toBe(false);
     });
-  });
 
-  describe('reset', () => {
-    it('should reset count to initial value', async () => {
-      const { result } = renderHook(() => useLoadMore(mockItems));
+    it('should not exceed total items length', async () => {
+      const smallList = Array.from({ length: 12 }, (_, i) => ({ id: i }));
+      const { result } = renderHook(() => useLoadMore(smallList, { initialCount: 5, pageSize: 10 }));
 
       act(() => {
         result.current.handleLoadMore();
       });
-
       await act(async () => {
         vi.runAllTimers();
       });
 
-      expect(result.current.count).toBe(INITIAL_COUNT + PAGE_SIZE);
+      expect(result.current.items).toHaveLength(12);
+      expect(result.current.count).toBe(15);
+      expect(result.current.hasMore).toBe(false);
+    });
+
+    it('should maintain stable function reference across renders', () => {
+      const { result, rerender } = renderHook(() => useLoadMore(MOCK_ITEMS));
+      const initialFunction = result.current.handleLoadMore;
+
+      rerender();
+
+      expect(result.current.handleLoadMore).toBe(initialFunction);
+    });
+  });
+
+  describe('handleReset', () => {
+    it('should reset count to initial value', async () => {
+      const { result } = renderHook(() => useLoadMore(MOCK_ITEMS));
+      act(() => {
+        result.current.handleLoadMore();
+      });
+      await act(async () => {
+        vi.runAllTimers();
+      });
 
       act(() => {
         result.current.handleReset();
       });
 
       expect(result.current.count).toBe(INITIAL_COUNT);
-      expect(result.current.items).toHaveLength(INITIAL_COUNT);
-      expect(result.current.isLoading).toBe(false);
     });
 
-    it('should reset to custom initial count', async () => {
-      const customCount = 5;
-      const { result } = renderHook(() => useLoadMore(mockItems, { initialCount: customCount }));
-
+    it('should reset items to initial length', async () => {
+      const { result } = renderHook(() => useLoadMore(MOCK_ITEMS));
       act(() => {
         result.current.handleLoadMore();
       });
+      await act(async () => {
+        vi.runAllTimers();
+      });
 
+      act(() => {
+        result.current.handleReset();
+      });
+
+      expect(result.current.items).toHaveLength(INITIAL_COUNT);
+    });
+
+    it('should reset loading state to false', async () => {
+      const { result } = renderHook(() => useLoadMore(MOCK_ITEMS));
+      act(() => {
+        result.current.handleLoadMore();
+      });
+      await act(async () => {
+        vi.runAllTimers();
+      });
+
+      act(() => {
+        result.current.handleReset();
+      });
+
+      expect(result.current.isLoading).toBe(false);
+    });
+
+    it('should reset to custom initial count when provided', async () => {
+      const customCount = 5;
+      const { result } = renderHook(() => useLoadMore(MOCK_ITEMS, { initialCount: customCount }));
+      act(() => {
+        result.current.handleLoadMore();
+      });
       await act(async () => {
         vi.runAllTimers();
       });
@@ -165,13 +261,11 @@ describe('useLoadMore', () => {
       expect(result.current.count).toBe(customCount);
     });
 
-    it('should cancel loading state on reset', () => {
-      const { result } = renderHook(() => useLoadMore(mockItems));
-
+    it('should cancel loading state when called during load', () => {
+      const { result } = renderHook(() => useLoadMore(MOCK_ITEMS));
       act(() => {
         result.current.handleLoadMore();
       });
-
       expect(result.current.isLoading).toBe(true);
 
       act(() => {
@@ -180,58 +274,96 @@ describe('useLoadMore', () => {
 
       expect(result.current.isLoading).toBe(false);
     });
-  });
 
-  describe('edge cases', () => {
-    it('should not exceed total items length', async () => {
-      const smallList = Array.from({ length: 12 }, (_, i) => ({ id: i }));
-      const { result } = renderHook(() => useLoadMore(smallList, { initialCount: 5, pageSize: 10 }));
-
-      act(() => {
-        result.current.handleLoadMore();
-      });
-
-      await act(async () => {
-        vi.runAllTimers();
-      });
-
-      expect(result.current.items).toHaveLength(12);
-      expect(result.current.count).toBe(15);
-      expect(result.current.hasMore).toBe(false);
-    });
-
-    it('should handle rapid successive calls', async () => {
-      const { result } = renderHook(() => useLoadMore(mockItems));
-
-      act(() => {
-        result.current.handleLoadMore();
-        result.current.handleLoadMore();
-        result.current.handleLoadMore();
-      });
-
-      await act(async () => {
-        vi.runAllTimers();
-      });
-
-      expect(result.current.isLoading).toBe(false);
-    });
-  });
-
-  describe('function stability', () => {
-    it('should maintain stable function references', () => {
-      const { result, rerender } = renderHook(() => useLoadMore(mockItems));
-
-      const initialHandleLoadMore = result.current.handleLoadMore;
-      const initialHandleReset = result.current.handleReset;
-      const initialGetItemClassName = result.current.getItemClassName;
-      const initialGetItemStyle = result.current.getItemStyle;
+    it('should maintain stable function reference across renders', () => {
+      const { result, rerender } = renderHook(() => useLoadMore(MOCK_ITEMS));
+      const initialFunction = result.current.handleReset;
 
       rerender();
 
-      expect(result.current.handleLoadMore).toBe(initialHandleLoadMore);
-      expect(result.current.handleReset).toBe(initialHandleReset);
-      expect(result.current.getItemClassName).toBe(initialGetItemClassName);
-      expect(result.current.getItemStyle).toBe(initialGetItemStyle);
+      expect(result.current.handleReset).toBe(initialFunction);
+    });
+  });
+
+  describe('getItemClassName', () => {
+    it('should return animation class for newly added items', async () => {
+      const { result } = renderHook(() => useLoadMore(MOCK_ITEMS));
+      act(() => {
+        result.current.handleLoadMore();
+      });
+      await act(async () => {
+        vi.runAllTimers();
+      });
+
+      const className = result.current.getItemClassName(INITIAL_COUNT);
+
+      expect(className).toContain('animate-in fade-in slide-in-from-bottom-4');
+    });
+
+    it('should return basic animation class for existing items', () => {
+      const { result } = renderHook(() => useLoadMore(MOCK_ITEMS));
+
+      const className = result.current.getItemClassName(0);
+
+      expect(className).toBe('animate-in fade-in');
+    });
+
+    it('should maintain stable function reference across renders', () => {
+      const { result, rerender } = renderHook(() => useLoadMore(MOCK_ITEMS));
+      const initialFunction = result.current.getItemClassName;
+
+      rerender();
+
+      expect(result.current.getItemClassName).toBe(initialFunction);
+    });
+  });
+
+  describe('getItemStyle', () => {
+    it('should return animation delay for newly added items', async () => {
+      const { result } = renderHook(() => useLoadMore(MOCK_ITEMS));
+      act(() => {
+        result.current.handleLoadMore();
+      });
+      await act(async () => {
+        vi.runAllTimers();
+      });
+
+      const style = result.current.getItemStyle(INITIAL_COUNT);
+
+      expect(style.animationDelay).toBe('0s');
+    });
+
+    it('should return zero delay for existing items', () => {
+      const { result } = renderHook(() => useLoadMore(MOCK_ITEMS));
+
+      const style = result.current.getItemStyle(0);
+
+      expect(style.animationDelay).toBe('0s');
+    });
+
+    it('should calculate staggered delay for multiple new items', async () => {
+      const { result } = renderHook(() => useLoadMore(MOCK_ITEMS));
+      act(() => {
+        result.current.handleLoadMore();
+      });
+      await act(async () => {
+        vi.runAllTimers();
+      });
+
+      const style1 = result.current.getItemStyle(INITIAL_COUNT);
+      const style2 = result.current.getItemStyle(INITIAL_COUNT + 1);
+
+      expect(style1.animationDelay).toBe('0s');
+      expect(style2.animationDelay).toBe('0.05s');
+    });
+
+    it('should maintain stable function reference across renders', () => {
+      const { result, rerender } = renderHook(() => useLoadMore(MOCK_ITEMS));
+      const initialFunction = result.current.getItemStyle;
+
+      rerender();
+
+      expect(result.current.getItemStyle).toBe(initialFunction);
     });
   });
 });
