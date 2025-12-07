@@ -20,60 +20,83 @@ vi.mock('react-router', () => ({
   redirect: vi.fn(),
 }));
 
-const mockedRedirect = vi.mocked(redirect);
+const mockRedirect = vi.mocked(redirect);
 
-describe('auth utils', () => {
+describe('getUserId', () => {
   const STORAGE_KEY = env.clerkUserStorageKey;
+  const MOCK_USER_ID = 'user-123';
 
   beforeEach(() => {
     vi.clearAllMocks();
     localStorage.clear();
   });
 
-  describe('getUserId', () => {
-    const setUserId = (userId: string | null) => {
-      if (userId === null) {
-        localStorage.removeItem(STORAGE_KEY);
-      } else {
-        localStorage.setItem(STORAGE_KEY, userId);
-      }
-    };
+  describe('successful authentication', () => {
+    it('should return user ID when present in localStorage', () => {
+      localStorage.setItem(STORAGE_KEY, MOCK_USER_ID);
 
-    describe('when user ID exists in session storage', () => {
-      it('should return the user ID and not redirect', () => {
-        const mockUserId = 'user-123';
-        setUserId(mockUserId);
+      const result = getUserId();
 
-        const result = getUserId();
-
-        expect(result).toBe(mockUserId);
-        expect(mockedRedirect).not.toHaveBeenCalled();
-      });
+      expect(result).toBe(MOCK_USER_ID);
+      expect(mockRedirect).not.toHaveBeenCalled();
     });
 
-    describe('when user ID is missing or invalid', () => {
-      it.each([
-        { scenario: 'not present', userId: null },
-        { scenario: 'empty string', userId: '' },
-      ])('should redirect to auth sync when user ID is $scenario', ({ userId }) => {
-        setUserId(userId);
+    it('should not redirect when user ID is valid', () => {
+      localStorage.setItem(STORAGE_KEY, 'user-456');
 
-        const result = getUserId();
+      getUserId();
 
-        expect(result).toBe('');
-        expect(mockedRedirect).toHaveBeenCalledWith(ROUTES.LOGIN);
-      });
+      expect(mockRedirect).not.toHaveBeenCalled();
+    });
+  });
+
+  describe('missing authentication', () => {
+    it('should redirect to login when user ID is not in localStorage', () => {
+      const result = getUserId();
+
+      expect(result).toBe('');
+      expect(mockRedirect).toHaveBeenCalledWith(ROUTES.LOGIN);
+      expect(mockRedirect).toHaveBeenCalledOnce();
     });
 
-    describe('storage key configuration', () => {
-      it('should use the storage key from environment config', () => {
-        const mockUserId = 'user-456';
-        setUserId(mockUserId);
+    it('should redirect to login when user ID is empty string', () => {
+      localStorage.setItem(STORAGE_KEY, '');
 
-        getUserId();
+      const result = getUserId();
 
-        expect(localStorage.getItem(STORAGE_KEY)).toBe(mockUserId);
-      });
+      expect(result).toBe('');
+      expect(mockRedirect).toHaveBeenCalledWith(ROUTES.LOGIN);
+      expect(mockRedirect).toHaveBeenCalledOnce();
+    });
+
+    it('should return empty string when redirecting', () => {
+      localStorage.removeItem(STORAGE_KEY);
+
+      const result = getUserId();
+
+      expect(result).toBe('');
+    });
+  });
+
+  describe('storage key usage', () => {
+    it('should use clerk storage key from environment config', () => {
+      localStorage.setItem(STORAGE_KEY, MOCK_USER_ID);
+
+      const result = getUserId();
+
+      expect(localStorage.getItem(STORAGE_KEY)).toBe(MOCK_USER_ID);
+      expect(result).toBe(MOCK_USER_ID);
+    });
+
+    it('should read from correct localStorage key', () => {
+      const differentKey = 'different-key';
+      localStorage.setItem(differentKey, 'other-user');
+      localStorage.setItem(STORAGE_KEY, MOCK_USER_ID);
+
+      const result = getUserId();
+
+      expect(result).toBe(MOCK_USER_ID);
+      expect(result).not.toBe('other-user');
     });
   });
 });

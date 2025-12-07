@@ -1,167 +1,161 @@
-import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
-import { formatCustomDate } from './date.utils';
+import { formatCustomDate } from '@/shared/utils/date/date.utils';
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
 describe('formatCustomDate', () => {
+  const MOCK_CURRENT_DATE = new Date('2025-06-15T12:00:00Z');
+
   beforeEach(() => {
     vi.useFakeTimers();
-    vi.setSystemTime(new Date('2025-06-15T12:00:00Z'));
+    vi.setSystemTime(MOCK_CURRENT_DATE);
   });
 
   afterEach(() => {
     vi.useRealTimers();
   });
 
-  describe('relative day formatting', () => {
-    it('returns "Today" for current date', () => {
-      const date = new Date('2025-06-15T14:30:00Z');
+  describe('relative day labels', () => {
+    it('should return "Today" when date is current day', () => {
+      const todayDate = new Date('2025-06-15T14:30:00Z');
 
-      const result = formatCustomDate(date);
+      const result = formatCustomDate(todayDate);
 
       expect(result).toBe('Today');
     });
 
-    it('returns "Tomorrow" for next day', () => {
-      const date = new Date('2025-06-16T10:00:00Z');
+    it('should return "Tomorrow" when date is next day', () => {
+      const tomorrowDate = new Date('2025-06-16T10:00:00Z');
 
-      const result = formatCustomDate(date);
+      const result = formatCustomDate(tomorrowDate);
 
       expect(result).toBe('Tomorrow');
     });
 
-    it('returns "Yesterday" for previous day', () => {
-      const date = new Date('2025-06-14T18:00:00Z');
+    it('should return "Yesterday" when date is previous day', () => {
+      const yesterdayDate = new Date('2025-06-14T18:00:00Z');
 
-      const result = formatCustomDate(date);
+      const result = formatCustomDate(yesterdayDate);
 
       expect(result).toBe('Yesterday');
     });
 
-    it('returns weekday name for dates within past week', () => {
-      const friday = new Date('2025-06-13T10:00:00Z');
+    it('should return weekday name when date is within past week', () => {
+      const fridayDate = new Date('2025-06-13T10:00:00Z');
 
-      const result = formatCustomDate(friday);
+      const result = formatCustomDate(fridayDate);
 
       expect(result).toBe('13 Jun');
     });
-
-    it('returns formatted date for dates beyond relative range', () => {
-      const weekAgo = new Date('2025-06-08T10:00:00Z');
-
-      const result = formatCustomDate(weekAgo);
-
-      expect(result).toBe('08 Jun');
-    });
   });
 
-  describe('date formatting for same year', () => {
-    it('formats date as "dd MMM" when in same year but not a relative day', () => {
-      const date = new Date('2025-01-10T10:00:00Z');
+  describe('same year formatting', () => {
+    it('should format as "dd MMM" when date is in same year', () => {
+      const januaryDate = new Date('2025-01-10T10:00:00Z');
 
-      const result = formatCustomDate(date);
+      const result = formatCustomDate(januaryDate);
 
       expect(result).toBe('10 Jan');
     });
 
-    it('formats future date as "dd MMM" when in same year', () => {
-      const date = new Date('2025-12-25T10:00:00Z');
+    it('should format as "dd MMM" for future date in same year', () => {
+      const decemberDate = new Date('2025-12-25T10:00:00Z');
 
-      const result = formatCustomDate(date);
+      const result = formatCustomDate(decemberDate);
 
       expect(result).toBe('25 Dec');
     });
 
-    it('formats date at start of year as "dd MMM"', () => {
-      const date = new Date('2025-01-01T00:00:00Z');
+    it('should format as "dd MMM" for start of year', () => {
+      const newYearDate = new Date('2025-01-01T00:00:00Z');
 
-      const result = formatCustomDate(date);
+      const result = formatCustomDate(newYearDate);
 
       expect(result).toBe('01 Jan');
     });
   });
 
-  describe('date formatting for different years', () => {
-    it('formats date as "dd MMM yyyy" when in previous year', () => {
-      const date = new Date('2024-03-15T10:00:00Z');
+  describe('different year formatting', () => {
+    it('should format as "dd MMM yyyy" when date is in previous year', () => {
+      const lastYearDate = new Date('2024-03-15T10:00:00Z');
 
-      const result = formatCustomDate(date);
+      const result = formatCustomDate(lastYearDate);
 
       expect(result).toBe('15 Mar 2024');
     });
 
-    it('formats date as "dd MMM yyyy" when in future year', () => {
-      const date = new Date('2026-08-20T10:00:00Z');
+    it('should format as "dd MMM yyyy" when date is in future year', () => {
+      const nextYearDate = new Date('2026-08-20T10:00:00Z');
 
-      const result = formatCustomDate(date);
+      const result = formatCustomDate(nextYearDate);
 
       expect(result).toBe('20 Aug 2026');
     });
 
-    it('formats very old date with full year', () => {
-      const date = new Date('2020-01-01T00:00:00Z');
+    it('should format as "dd MMM yyyy" for date several years ago', () => {
+      const oldDate = new Date('2020-01-01T00:00:00Z');
 
-      const result = formatCustomDate(date);
+      const result = formatCustomDate(oldDate);
 
       expect(result).toBe('01 Jan 2020');
     });
 
-    it('formats far future date with full year', () => {
-      const date = new Date('2031-12-31T00:00:00Z');
+    it('should format as "dd MMM yyyy" for date far in future', () => {
+      const futureDate = new Date('2031-12-31T00:00:00Z');
 
-      const result = formatCustomDate(date);
+      const result = formatCustomDate(futureDate);
 
       expect(result).toBe('31 Dec 2031');
     });
   });
 
   describe('string input handling', () => {
-    it('accepts and formats ISO string date', () => {
-      const dateString = '2025-06-15T10:00:00Z';
+    it('should accept ISO string and format as relative day', () => {
+      const isoString = '2025-06-15T10:00:00Z';
 
-      const result = formatCustomDate(dateString);
+      const result = formatCustomDate(isoString);
 
       expect(result).toBe('Today');
     });
 
-    it('accepts and formats date string for different year', () => {
-      const dateString = '2024-07-20T15:30:00Z';
+    it('should accept ISO string and format with year when different year', () => {
+      const isoStringDifferentYear = '2024-07-20T15:30:00Z';
 
-      const result = formatCustomDate(dateString);
+      const result = formatCustomDate(isoStringDifferentYear);
 
       expect(result).toBe('20 Jul 2024');
     });
 
-    it('accepts and formats simple date string', () => {
-      const dateString = '2025-03-10';
+    it('should accept simple date string and format correctly', () => {
+      const simpleDateString = '2025-03-10';
 
-      const result = formatCustomDate(dateString);
+      const result = formatCustomDate(simpleDateString);
 
       expect(result).toBe('10 Mar');
     });
   });
 
   describe('edge cases', () => {
-    it('handles dates at midnight', () => {
-      const date = new Date('2025-06-15T00:00:00Z');
+    it('should handle date at midnight as today', () => {
+      const midnightDate = new Date('2025-06-15T00:00:00Z');
 
-      const result = formatCustomDate(date);
+      const result = formatCustomDate(midnightDate);
 
       expect(result).toBe('Today');
     });
 
-    it('handles dates just before midnight', () => {
-      const date = new Date('2025-06-15T23:59:59Z');
+    it('should handle leap year date correctly', () => {
+      const leapYearDate = new Date('2024-02-29T12:00:00Z');
 
-      const result = formatCustomDate(date);
-
-      expect(['Today', 'Tomorrow']).toContain(result);
-    });
-
-    it('handles leap year date', () => {
-      const date = new Date('2024-02-29T12:00:00Z');
-
-      const result = formatCustomDate(date);
+      const result = formatCustomDate(leapYearDate);
 
       expect(result).toBe('29 Feb 2024');
+    });
+
+    it('should handle date at end of day', () => {
+      const endOfDayDate = new Date('2025-06-15T23:59:59Z');
+
+      const result = formatCustomDate(endOfDayDate);
+
+      expect(['Today', 'Tomorrow']).toContain(result);
     });
   });
 });

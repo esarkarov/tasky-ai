@@ -1,4 +1,4 @@
-import { TaskCounts } from '@/features/tasks/types';
+import { createMockTaskCounts } from '@/core/test-setup/factories';
 import { ROUTES } from '@/shared/constants';
 import { cn, createEmptyState, getBadgeCount, getTaskDueDateColorClass } from '@/shared/utils/ui/ui.utils';
 import clsx from 'clsx';
@@ -24,190 +24,292 @@ vi.mock('@/shared/constants', () => ({
   },
 }));
 
-const mockedClsx = vi.mocked(clsx);
-const mockedTwMerge = vi.mocked(twMerge);
-const mockedIsBefore = vi.mocked(isBefore);
-const mockedIsToday = vi.mocked(isToday);
-const mockedIsTomorrow = vi.mocked(isTomorrow);
-const mockedStartOfToday = vi.mocked(startOfToday);
+const mockClsx = vi.mocked(clsx);
+const mockTwMerge = vi.mocked(twMerge);
+const mockIsBefore = vi.mocked(isBefore);
+const mockIsToday = vi.mocked(isToday);
+const mockIsTomorrow = vi.mocked(isTomorrow);
+const mockStartOfToday = vi.mocked(startOfToday);
 
 describe('ui utils', () => {
   beforeEach(() => {
-    vi.resetAllMocks();
+    vi.clearAllMocks();
   });
 
   describe('cn', () => {
-    it('should combine class names using clsx and twMerge', () => {
+    it('should call clsx with provided class names', () => {
+      const classNames = ['class1', 'class2', 'class3'];
+      const clsxResult = 'class1 class2 class3';
+      mockClsx.mockReturnValue(clsxResult);
+      mockTwMerge.mockReturnValue('merged-result');
+
+      cn(...classNames);
+
+      expect(mockClsx).toHaveBeenCalledWith(classNames);
+      expect(mockClsx).toHaveBeenCalledOnce();
+    });
+
+    it('should call twMerge with clsx result', () => {
       const classNames = ['class1', 'class2'];
       const clsxResult = 'class1 class2';
-      const expectedResult = 'merged-class1 merged-class2';
+      mockClsx.mockReturnValue(clsxResult);
+      mockTwMerge.mockReturnValue('merged-result');
 
-      mockedClsx.mockReturnValue(clsxResult);
-      mockedTwMerge.mockReturnValue(expectedResult);
+      cn(...classNames);
+
+      expect(mockTwMerge).toHaveBeenCalledWith(clsxResult);
+      expect(mockTwMerge).toHaveBeenCalledOnce();
+    });
+
+    it('should return twMerge result', () => {
+      const classNames = ['class1', 'class2'];
+      const expectedResult = 'merged-class1 merged-class2';
+      mockClsx.mockReturnValue('class1 class2');
+      mockTwMerge.mockReturnValue(expectedResult);
 
       const result = cn(...classNames);
 
-      expect(mockedClsx).toHaveBeenCalledWith(classNames);
-      expect(mockedTwMerge).toHaveBeenCalledWith(clsxResult);
       expect(result).toBe(expectedResult);
     });
   });
 
   describe('getTaskDueDateColorClass', () => {
-    const MOCK_TODAY = new Date('2023-01-15');
-    const OVERDUE_DATE = new Date('2023-01-14');
-    const TODAY_DATE = new Date('2023-01-15');
-    const TOMORROW_DATE = new Date('2023-01-16');
-    const FUTURE_DATE = new Date('2023-01-17');
+    const MOCK_TODAY = new Date('2025-01-15T12:00:00Z');
 
     beforeEach(() => {
       vi.useFakeTimers();
       vi.setSystemTime(MOCK_TODAY);
-      mockedStartOfToday.mockReturnValue(MOCK_TODAY);
+      mockStartOfToday.mockReturnValue(MOCK_TODAY);
     });
 
     afterEach(() => {
       vi.useRealTimers();
     });
 
-    const setupDateMocks = (isBeforeValue: boolean, isTodayValue: boolean, isTomorrowValue: boolean) => {
-      mockedIsBefore.mockReturnValue(isBeforeValue);
-      mockedIsToday.mockReturnValue(isTodayValue);
-      mockedIsTomorrow.mockReturnValue(isTomorrowValue);
-    };
+    it('should return undefined when dueDate is null', () => {
+      const dueDate = null;
+      const completed = false;
 
-    describe('when dueDate is null/undefined', () => {
-      it('should return undefined when dueDate is null', () => {
-        const dueDate = null;
-        const completed = false;
+      const result = getTaskDueDateColorClass(dueDate, completed);
 
-        const result = getTaskDueDateColorClass(dueDate, completed);
-
-        expect(result).toBeUndefined();
-      });
+      expect(result).toBeUndefined();
     });
 
-    describe('when task is incomplete', () => {
-      it('should return red color for overdue tasks', () => {
-        setupDateMocks(true, false, false);
+    it('should return red color for overdue incomplete tasks', () => {
+      const overdueDate = new Date('2025-01-14T10:00:00Z');
+      const completed = false;
+      mockIsBefore.mockReturnValue(true);
+      mockIsToday.mockReturnValue(false);
+      mockIsTomorrow.mockReturnValue(false);
 
-        const result = getTaskDueDateColorClass(OVERDUE_DATE, false);
+      const result = getTaskDueDateColorClass(overdueDate, completed);
 
-        expect(mockedIsBefore).toHaveBeenCalledWith(OVERDUE_DATE, MOCK_TODAY);
-        expect(result).toBe('text-red-500');
-      });
-
-      it('should return emerald color for tasks due today', () => {
-        setupDateMocks(false, true, false);
-
-        const result = getTaskDueDateColorClass(TODAY_DATE, false);
-
-        expect(mockedIsToday).toHaveBeenCalledWith(TODAY_DATE);
-        expect(result).toBe('text-emerald-500');
-      });
-
-      it('should return amber color for tasks due tomorrow', () => {
-        setupDateMocks(false, false, true);
-
-        const result = getTaskDueDateColorClass(TOMORROW_DATE, false);
-
-        expect(mockedIsTomorrow).toHaveBeenCalledWith(TOMORROW_DATE);
-        expect(result).toBe('text-amber-500');
-      });
-
-      it('should return undefined for tasks due beyond tomorrow', () => {
-        setupDateMocks(false, false, false);
-
-        const result = getTaskDueDateColorClass(FUTURE_DATE, false);
-
-        expect(result).toBeUndefined();
-      });
+      expect(mockIsBefore).toHaveBeenCalledWith(overdueDate, MOCK_TODAY);
+      expect(mockIsBefore).toHaveBeenCalledOnce();
+      expect(result).toBe('text-red-500');
     });
 
-    describe('when task is completed', () => {
-      it('should return undefined for tasks due tomorrow', () => {
-        setupDateMocks(false, false, true);
+    it('should not return red color for overdue completed tasks', () => {
+      const overdueDate = new Date('2025-01-14T10:00:00Z');
+      const completed = true;
+      mockIsBefore.mockReturnValue(true);
+      mockIsToday.mockReturnValue(false);
+      mockIsTomorrow.mockReturnValue(false);
 
-        const result = getTaskDueDateColorClass(TOMORROW_DATE, true);
+      const result = getTaskDueDateColorClass(overdueDate, completed);
 
-        expect(result).toBeUndefined();
-      });
+      expect(result).toBeUndefined();
+    });
+
+    it('should return emerald color for tasks due today', () => {
+      const todayDate = new Date('2025-01-15T14:00:00Z');
+      const completed = false;
+      mockIsBefore.mockReturnValue(false);
+      mockIsToday.mockReturnValue(true);
+      mockIsTomorrow.mockReturnValue(false);
+
+      const result = getTaskDueDateColorClass(todayDate, completed);
+
+      expect(mockIsToday).toHaveBeenCalledWith(todayDate);
+      expect(mockIsToday).toHaveBeenCalledOnce();
+      expect(result).toBe('text-emerald-500');
+    });
+
+    it('should return emerald color for completed tasks due today', () => {
+      const todayDate = new Date('2025-01-15T14:00:00Z');
+      const completed = true;
+      mockIsBefore.mockReturnValue(false);
+      mockIsToday.mockReturnValue(true);
+      mockIsTomorrow.mockReturnValue(false);
+
+      const result = getTaskDueDateColorClass(todayDate, completed);
+
+      expect(result).toBe('text-emerald-500');
+    });
+
+    it('should return amber color for incomplete tasks due tomorrow', () => {
+      const tomorrowDate = new Date('2025-01-16T10:00:00Z');
+      const completed = false;
+      mockIsBefore.mockReturnValue(false);
+      mockIsToday.mockReturnValue(false);
+      mockIsTomorrow.mockReturnValue(true);
+
+      const result = getTaskDueDateColorClass(tomorrowDate, completed);
+
+      expect(mockIsTomorrow).toHaveBeenCalledWith(tomorrowDate);
+      expect(mockIsTomorrow).toHaveBeenCalledOnce();
+      expect(result).toBe('text-amber-500');
+    });
+
+    it('should return undefined for completed tasks due tomorrow', () => {
+      const tomorrowDate = new Date('2025-01-16T10:00:00Z');
+      const completed = true;
+      mockIsBefore.mockReturnValue(false);
+      mockIsToday.mockReturnValue(false);
+      mockIsTomorrow.mockReturnValue(true);
+
+      const result = getTaskDueDateColorClass(tomorrowDate, completed);
+
+      expect(result).toBeUndefined();
+    });
+
+    it('should return undefined for tasks due beyond tomorrow', () => {
+      const futureDate = new Date('2025-01-20T10:00:00Z');
+      const completed = false;
+      mockIsBefore.mockReturnValue(false);
+      mockIsToday.mockReturnValue(false);
+      mockIsTomorrow.mockReturnValue(false);
+
+      const result = getTaskDueDateColorClass(futureDate, completed);
+
+      expect(result).toBeUndefined();
     });
   });
 
   describe('getBadgeCount', () => {
-    const createTaskCounts = (inboxTasks: number, todayTasks: number): TaskCounts => ({
-      inboxTasks,
-      todayTasks,
-    });
-
-    it('should return inbox tasks count for inbox route', () => {
-      const taskCounts = createTaskCounts(5, 3);
+    it('should return inbox task count for inbox route', () => {
+      const taskCounts = createMockTaskCounts(3, 7);
 
       const result = getBadgeCount(ROUTES.INBOX, taskCounts);
 
-      expect(result).toBe(5);
+      expect(result).toBe(7);
     });
 
-    it('should return today tasks count for today route', () => {
-      const taskCounts = createTaskCounts(5, 3);
+    it('should return today task count for today route', () => {
+      const taskCounts = createMockTaskCounts(12, 5);
 
       const result = getBadgeCount(ROUTES.TODAY, taskCounts);
 
-      expect(result).toBe(3);
+      expect(result).toBe(12);
     });
 
-    it('should return undefined for routes without badge counts', () => {
-      const taskCounts = createTaskCounts(5, 3);
+    it('should return undefined for upcoming route', () => {
+      const taskCounts = createMockTaskCounts(0, 5);
 
       const result = getBadgeCount(ROUTES.UPCOMING, taskCounts);
 
       expect(result).toBeUndefined();
     });
 
-    it('should return zero when count is zero', () => {
-      const taskCounts = createTaskCounts(0, 0);
+    it('should return zero when inbox count is zero', () => {
+      const taskCounts = createMockTaskCounts(5, 0);
 
       const result = getBadgeCount(ROUTES.INBOX, taskCounts);
 
       expect(result).toBe(0);
     });
+
+    it('should return zero when today count is zero', () => {
+      const taskCounts = createMockTaskCounts(0, 5);
+
+      const result = getBadgeCount(ROUTES.TODAY, taskCounts);
+
+      expect(result).toBe(0);
+    });
+
+    it('should return undefined for unknown route', () => {
+      const taskCounts = createMockTaskCounts(3, 5);
+      const unknownRoute = '/unknown';
+
+      const result = getBadgeCount(unknownRoute, taskCounts);
+
+      expect(result).toBeUndefined();
+    });
   });
 
   describe('createEmptyState', () => {
-    const SRC = '/images/empty.png';
-    const WIDTH = 420;
-    const TITLE = 'No Data';
-    const DESCRIPTION = 'There are no tasks available.';
+    it('should create empty state with correct structure', () => {
+      const src = '/images/empty.png';
+      const width = 420;
+      const title = 'No Tasks';
+      const description = 'You have no tasks in your inbox';
 
-    it('should return correct empty state structure', () => {
-      const expectedHeight = 260;
-
-      const result = createEmptyState(SRC, WIDTH, TITLE, DESCRIPTION);
+      const result = createEmptyState(src, width, title, description);
 
       expect(result).toEqual({
         img: {
-          src: SRC,
-          width: WIDTH,
-          height: expectedHeight,
+          src: '/images/empty.png',
+          width: 420,
+          height: 260,
         },
-        title: TITLE,
-        description: DESCRIPTION,
+        title: 'No Tasks',
+        description: 'You have no tasks in your inbox',
       });
     });
 
-    it('should correctly assign provided values to image and text fields', () => {
-      const customSrc = '/random/path.svg';
-      const customWidth = 300;
-      const customTitle = 'Empty Projects';
-      const customDescription = 'You have no active projects yet.';
+    it('should set image source correctly', () => {
+      const src = '/custom/path/image.svg';
+      const width = 300;
+      const title = 'Empty';
+      const description = 'No data';
 
-      const result = createEmptyState(customSrc, customWidth, customTitle, customDescription);
+      const result = createEmptyState(src, width, title, description);
 
-      expect(result.img.src).toBe(customSrc);
-      expect(result.img.width).toBe(customWidth);
-      expect(result.title).toBe(customTitle);
-      expect(result.description).toBe(customDescription);
+      expect(result.img.src).toBe('/custom/path/image.svg');
+    });
+
+    it('should set image width correctly', () => {
+      const src = '/image.png';
+      const width = 500;
+      const title = 'Empty';
+      const description = 'No data';
+
+      const result = createEmptyState(src, width, title, description);
+
+      expect(result.img.width).toBe(500);
+    });
+
+    it('should always set height to 260', () => {
+      const src = '/image.png';
+      const width = 300;
+      const title = 'Empty';
+      const description = 'No data';
+
+      const result = createEmptyState(src, width, title, description);
+
+      expect(result.img.height).toBe(260);
+    });
+
+    it('should set title correctly', () => {
+      const src = '/image.png';
+      const width = 300;
+      const title = 'No Projects Found';
+      const description = 'Create your first project';
+
+      const result = createEmptyState(src, width, title, description);
+
+      expect(result.title).toBe('No Projects Found');
+    });
+
+    it('should set description correctly', () => {
+      const src = '/image.png';
+      const width = 300;
+      const title = 'Empty';
+      const description = 'Start by adding your first item to the list';
+
+      const result = createEmptyState(src, width, title, description);
+
+      expect(result.description).toBe('Start by adding your first item to the list');
     });
   });
 });

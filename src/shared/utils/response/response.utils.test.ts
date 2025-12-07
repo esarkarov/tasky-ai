@@ -1,11 +1,10 @@
 import { HTTP_STATUS } from '@/shared/constants';
-import { HttpStatusCode } from '@/shared/types';
 import { errorResponse, jsonResponse, successResponse } from '@/shared/utils/response/response.utils';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 
 vi.stubGlobal('Response', vi.fn());
 
-const mockedResponse = vi.mocked(Response);
+const mockResponse = vi.mocked(Response);
 
 describe('response utils', () => {
   const JSON_HEADERS = { 'Content-Type': 'application/json' };
@@ -14,90 +13,161 @@ describe('response utils', () => {
     vi.clearAllMocks();
   });
 
-  const expectResponseCalledWith = (data: unknown, status: HttpStatusCode) => {
-    expect(mockedResponse).toHaveBeenCalledWith(JSON.stringify(data), {
-      status,
-      headers: JSON_HEADERS,
-    });
-  };
-
   describe('jsonResponse', () => {
-    const mockResponses = [
-      {
-        description: 'object data',
-        data: { message: 'test' },
-        status: HTTP_STATUS.OK,
-      },
-      {
-        description: 'array data',
-        data: [1, 2, 3],
-        status: HTTP_STATUS.CREATED,
-      },
-      {
-        description: 'null data',
-        data: null,
-        status: HTTP_STATUS.NO_CONTENT,
-      },
-    ];
+    it('should create Response with JSON stringified data', () => {
+      const data = { message: 'test', count: 42 };
+      const status = HTTP_STATUS.OK;
 
-    it.each(mockResponses)('should create response with $description and status code', ({ data, status }) => {
       jsonResponse(data, status);
 
-      expectResponseCalledWith(data, status);
+      expect(mockResponse).toHaveBeenCalledWith(JSON.stringify(data), {
+        status,
+        headers: JSON_HEADERS,
+      });
+      expect(mockResponse).toHaveBeenCalledOnce();
+    });
+
+    it('should create Response with array data', () => {
+      const data = [1, 2, 3, 4, 5];
+      const status = HTTP_STATUS.CREATED;
+
+      jsonResponse(data, status);
+
+      expect(mockResponse).toHaveBeenCalledWith(JSON.stringify(data), {
+        status,
+        headers: JSON_HEADERS,
+      });
+      expect(mockResponse).toHaveBeenCalledOnce();
+    });
+
+    it('should create Response with null data', () => {
+      const data = null;
+      const status = HTTP_STATUS.NO_CONTENT;
+
+      jsonResponse(data, status);
+
+      expect(mockResponse).toHaveBeenCalledWith(JSON.stringify(data), {
+        status,
+        headers: JSON_HEADERS,
+      });
+      expect(mockResponse).toHaveBeenCalledOnce();
+    });
+
+    it('should set correct Content-Type header', () => {
+      const data = { test: 'data' };
+      const status = HTTP_STATUS.OK;
+
+      jsonResponse(data, status);
+
+      expect(mockResponse).toHaveBeenCalledWith(
+        expect.any(String),
+        expect.objectContaining({
+          headers: { 'Content-Type': 'application/json' },
+        })
+      );
     });
   });
 
   describe('errorResponse', () => {
-    const mockHttpErrors = [
-      { message: 'Not found', status: HTTP_STATUS.NOT_FOUND },
-      { message: 'Internal server error', status: HTTP_STATUS.INTERNAL_SERVER_ERROR },
-      { message: 'Bad request', status: HTTP_STATUS.BAD_REQUEST },
-    ];
+    it('should create error response with success false', () => {
+      const message = 'Resource not found';
+      const status = HTTP_STATUS.NOT_FOUND;
 
-    it.each(mockHttpErrors)(
-      'should create error response with message "$message" and status $status',
-      ({ message, status }) => {
-        const expectedData = { success: false, message };
+      errorResponse(message, status);
 
-        errorResponse(message, status);
+      expect(mockResponse).toHaveBeenCalledWith(JSON.stringify({ success: false, message }), {
+        status,
+        headers: JSON_HEADERS,
+      });
+      expect(mockResponse).toHaveBeenCalledOnce();
+    });
 
-        expectResponseCalledWith(expectedData, status);
-      }
-    );
-  });
+    it('should create error response with custom message', () => {
+      const message = 'Internal server error occurred';
+      const status = HTTP_STATUS.INTERNAL_SERVER_ERROR;
 
-  describe('successResponse', () => {
-    describe('with message only', () => {
-      it('should create response with default status', () => {
-        const message = 'Operation successful';
-        const expectedData = { success: true, message };
+      errorResponse(message, status);
 
-        successResponse(message);
-
-        expectResponseCalledWith(expectedData, HTTP_STATUS.OK);
+      expect(mockResponse).toHaveBeenCalledWith(JSON.stringify({ success: false, message }), {
+        status,
+        headers: JSON_HEADERS,
       });
     });
 
-    describe('with message and data', () => {
-      it('should merge data into response with default status', () => {
-        const message = 'Success with data';
-        const data = { id: 123, name: 'admin' };
-        const expectedData = { success: true, message, ...data };
+    it('should create error response with bad request status', () => {
+      const message = 'Invalid request parameters';
+      const status = HTTP_STATUS.BAD_REQUEST;
 
-        successResponse(message, data);
+      errorResponse(message, status);
 
-        expectResponseCalledWith(expectedData, HTTP_STATUS.OK);
+      expect(mockResponse).toHaveBeenCalledWith(JSON.stringify({ success: false, message }), {
+        status,
+        headers: JSON_HEADERS,
       });
+    });
+  });
 
-      it('should merge data into response with custom status', () => {
-        const message = 'Data retrieved';
-        const data = { items: [1, 2, 3], total: 3 };
-        const status = 201;
-        const expectedData = { success: true, message, ...data };
+  describe('successResponse', () => {
+    it('should create success response with message only', () => {
+      const message = 'Operation completed successfully';
 
-        successResponse(message, data, status);
+      successResponse(message);
 
-        expectResponseCalledWith(expectedData, status);
+      expect(mockResponse).toHaveBeenCalledWith(JSON.stringify({ success: true, message }), {
+        status: HTTP_STATUS.OK,
+        headers: JSON_HEADERS,
+      });
+      expect(mockResponse).toHaveBeenCalledOnce();
+    });
+
+    it('should use default status 200 when not provided', () => {
+      const message = 'Success';
+
+      successResponse(message);
+
+      expect(mockResponse).toHaveBeenCalledWith(
+        expect.any(String),
+        expect.objectContaining({ status: HTTP_STATUS.OK })
+      );
+    });
+
+    it('should merge additional data into response', () => {
+      const message = 'User created successfully';
+      const data = { id: 123, username: 'testuser' };
+
+      successResponse(message, data);
+
+      expect(mockResponse).toHaveBeenCalledWith(
+        JSON.stringify({ success: true, message, id: 123, username: 'testuser' }),
+        {
+          status: HTTP_STATUS.OK,
+          headers: JSON_HEADERS,
+        }
+      );
+    });
+
+    it('should use custom status when provided with data', () => {
+      const message = 'Resource created';
+      const data = { resourceId: 456 };
+      const status = HTTP_STATUS.CREATED;
+
+      successResponse(message, data, status);
+
+      expect(mockResponse).toHaveBeenCalledWith(JSON.stringify({ success: true, message, resourceId: 456 }), {
+        status,
+        headers: JSON_HEADERS,
+      });
+    });
+
+    it('should handle empty data object', () => {
+      const message = 'Task completed';
+      const data = {};
+
+      successResponse(message, data);
+
+      expect(mockResponse).toHaveBeenCalledWith(JSON.stringify({ success: true, message }), {
+        status: HTTP_STATUS.OK,
+        headers: JSON_HEADERS,
       });
     });
   });

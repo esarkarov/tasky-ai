@@ -1,42 +1,70 @@
-import { generateID, toTitleCase, truncateString } from '@/shared/utils/text/text.utils';
-import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
+import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
+import { toTitleCase, truncateString, generateID } from '@/shared/utils/text/text.utils';
 
 describe('text utils', () => {
-  beforeEach(() => {
-    vi.resetAllMocks();
-  });
-
   describe('toTitleCase', () => {
-    const mockCapitalizeStringCases = [
-      { input: 'hello world', expected: 'Hello world', description: 'multi-word string' },
-      { input: 'a', expected: 'A', description: 'single character' },
-      { input: '', expected: '', description: 'empty string' },
-    ];
+    it('should capitalize first letter of multi-word string', () => {
+      const input = 'hello world';
 
-    it.each(mockCapitalizeStringCases)('should handle $description correctly', ({ input, expected }) => {
       const result = toTitleCase(input);
 
-      expect(result).toBe(expected);
+      expect(result).toBe('Hello world');
+    });
+
+    it('should capitalize single character', () => {
+      const input = 'a';
+
+      const result = toTitleCase(input);
+
+      expect(result).toBe('A');
+    });
+
+    it('should return empty string when input is empty', () => {
+      const input = '';
+
+      const result = toTitleCase(input);
+
+      expect(result).toBe('');
+    });
+
+    it('should preserve rest of string as is', () => {
+      const input = 'hello WORLD';
+
+      const result = toTitleCase(input);
+
+      expect(result).toBe('Hello WORLD');
+    });
+
+    it('should handle already capitalized string', () => {
+      const input = 'Hello';
+
+      const result = toTitleCase(input);
+
+      expect(result).toBe('Hello');
     });
   });
 
   describe('truncateString', () => {
-    const ELLIPSIS = '...';
+    it('should truncate string when exceeds max length', () => {
+      const input = 'This is a very long string that needs truncation';
+      const maxLength = 20;
 
-    describe('when string exceeds max length', () => {
-      it('should truncate and append ellipsis', () => {
-        const input = 'This is a very long string that needs truncation';
-        const maxLength = 20;
+      const result = truncateString(input, maxLength);
 
-        const result = truncateString(input, maxLength);
-
-        expect(result).toBe('This is a very long...');
-        expect(result.length).toBe(19 + ELLIPSIS.length);
-      });
+      expect(result).toBe('This is a very long...');
     });
 
-    it('should return original string when shorter', () => {
-      const input = 'Short string';
+    it('should append ellipsis when truncating', () => {
+      const input = 'This is a long string';
+      const maxLength = 10;
+
+      const result = truncateString(input, maxLength);
+
+      expect(result.endsWith('...')).toBe(true);
+    });
+
+    it('should return original string when shorter than max length', () => {
+      const input = 'Short text';
       const maxLength = 20;
 
       const result = truncateString(input, maxLength);
@@ -54,33 +82,31 @@ describe('text utils', () => {
       expect(result.length).toBe(maxLength);
     });
 
-    describe('edge cases', () => {
-      it('should handle empty string', () => {
-        const input = '';
-        const maxLength = 10;
+    it('should handle empty string', () => {
+      const input = '';
+      const maxLength = 10;
 
-        const result = truncateString(input, maxLength);
+      const result = truncateString(input, maxLength);
 
-        expect(result).toBe('');
-      });
+      expect(result).toBe('');
+    });
 
-      it('should handle max length of 1', () => {
-        const input = 'Hello';
-        const maxLength = 1;
+    it('should handle max length of 1', () => {
+      const input = 'Hello';
+      const maxLength = 1;
 
-        const result = truncateString(input, maxLength);
+      const result = truncateString(input, maxLength);
 
-        expect(result).toBe(ELLIPSIS);
-      });
+      expect(result).toBe('...');
+    });
 
-      it('should handle max length of 0', () => {
-        const input = 'Hello';
-        const maxLength = 0;
+    it('should handle max length of 0', () => {
+      const input = 'Hello';
+      const maxLength = 0;
 
-        const result = truncateString(input, maxLength);
+      const result = truncateString(input, maxLength);
 
-        expect(result).toBe('Hell...');
-      });
+      expect(result).toBe('Hell...');
     });
   });
 
@@ -99,14 +125,21 @@ describe('text utils', () => {
       randomSpy.mockRestore();
     });
 
-    it('should generate a valid alphanumeric ID', () => {
+    it('should generate alphanumeric ID', () => {
       vi.setSystemTime(MOCK_TIMESTAMP);
       randomSpy.mockReturnValue(0.123456789);
 
       const result = generateID();
 
       expect(result).toMatch(ID_PATTERN);
-      expect(randomSpy).toHaveBeenCalled();
+    });
+
+    it('should call Math.random to generate random component', () => {
+      randomSpy.mockReturnValue(0.5);
+
+      generateID();
+
+      expect(randomSpy).toHaveBeenCalledOnce();
     });
 
     it('should generate unique IDs for different random values', () => {
@@ -130,6 +163,25 @@ describe('text utils', () => {
       const result = generateID();
 
       expect(result).toContain(expectedTimestampPart);
+    });
+
+    it('should generate different IDs at different times', () => {
+      randomSpy.mockReturnValue(0.5);
+      vi.setSystemTime(MOCK_TIMESTAMP);
+      const id1 = generateID();
+
+      vi.setSystemTime(MOCK_TIMESTAMP + 1000);
+      const id2 = generateID();
+
+      expect(id1).not.toBe(id2);
+    });
+
+    it('should generate non-empty ID', () => {
+      randomSpy.mockReturnValue(0.5);
+
+      const result = generateID();
+
+      expect(result.length).toBeGreaterThan(0);
     });
   });
 });
