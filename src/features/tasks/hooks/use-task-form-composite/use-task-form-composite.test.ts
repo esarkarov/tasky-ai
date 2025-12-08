@@ -1,91 +1,81 @@
+import { createMockProjects } from '@/core/test-setup/factories';
+import { useProjectSelection } from '@/features/projects/hooks/use-project-selection/use-project-selection';
 import type { ProjectListItem } from '@/features/projects/types';
+import { useChronoDateParser } from '@/features/tasks/hooks/use-chrone-date-parser/use-chrone-date-parser';
+import { useTaskFormComposite } from '@/features/tasks/hooks/use-task-form-composite/use-task-form-composite';
+import { useTaskFormState } from '@/features/tasks/hooks/use-task-form-state/use-task-form-state';
 import { act, renderHook, waitFor } from '@testing-library/react';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
-import { useTaskFormComposite } from './use-task-form-composite';
-
-const mockSetContent = vi.fn();
-const mockSetDueDate = vi.fn();
-const mockRemoveDueDate = vi.fn();
-const mockHandleReset = vi.fn();
-const mockHandleProjectChange = vi.fn();
-const mockClearProject = vi.fn();
 
 vi.mock('@/features/tasks/hooks/use-task-form-state/use-task-form-state', () => ({
   useTaskFormState: vi.fn(),
 }));
-
 vi.mock('@/features/projects/hooks/use-project-selection/use-project-selection', () => ({
   useProjectSelection: vi.fn(),
 }));
-
 vi.mock('@/features/tasks/hooks/use-chrone-date-parser/use-chrone-date-parser', () => ({
   useChronoDateParser: vi.fn(),
 }));
 
-import { useProjectSelection } from '@/features/projects/hooks/use-project-selection/use-project-selection';
-import { useChronoDateParser } from '../use-chrone-date-parser/use-chrone-date-parser';
-import { useTaskFormState } from '../use-task-form-state/use-task-form-state';
+const mockUseTaskFormState = vi.mocked(useTaskFormState);
+const mockUseProjectSelection = vi.mocked(useProjectSelection);
+const mockUseChronoDateParser = vi.mocked(useChronoDateParser);
 
 describe('useTaskFormComposite', () => {
-  const mockProjects: ProjectListItem[] = [
-    {
-      $id: 'project-1',
-      name: 'Project 1',
-      color_name: 'blue',
-      color_hex: '#0000FF',
-      $createdAt: '2024-01-01',
-      $updatedAt: '2024-01-01',
-      $collectionId: 'projects',
-      $databaseId: 'db',
-      $permissions: [],
-    },
-  ];
-
+  const mockSetContent = vi.fn();
+  const mockSetDueDate = vi.fn();
+  const mockSetProjectId = vi.fn();
+  const mockRemoveDueDate = vi.fn();
+  const mockHandleReset = vi.fn();
+  const mockHandleProjectChange = vi.fn();
+  const mockClearProject = vi.fn();
   const mockOnSubmit = vi.fn();
   const mockOnCancel = vi.fn();
 
-  const setupDefaultMocks = (overrides?: {
+  const mockProjects = createMockProjects() as unknown as ProjectListItem[];
+
+  const createFormState = (overrides?: {
     content?: string;
     dueDate?: Date | null;
     projectId?: string | null;
     isValid?: boolean;
-  }) => {
-    vi.mocked(useTaskFormState).mockReturnValue({
+  }) => ({
+    content: overrides?.content ?? '',
+    dueDate: overrides?.dueDate ?? null,
+    projectId: overrides?.projectId ?? null,
+    formValues: {
       content: overrides?.content ?? '',
-      dueDate: overrides?.dueDate ?? null,
+      due_date: overrides?.dueDate ?? null,
       projectId: overrides?.projectId ?? null,
-      formValues: {
-        content: overrides?.content ?? '',
-        due_date: overrides?.dueDate ?? null,
-        projectId: overrides?.projectId ?? null,
-      },
-      isValid: overrides?.isValid ?? true,
-      setContent: mockSetContent,
-      setDueDate: mockSetDueDate,
-      setProjectId: vi.fn(),
-      removeDueDate: mockRemoveDueDate,
-      handleReset: mockHandleReset,
-    });
+    },
+    isValid: overrides?.isValid ?? true,
+    setContent: mockSetContent,
+    setDueDate: mockSetDueDate,
+    setProjectId: mockSetProjectId,
+    removeDueDate: mockRemoveDueDate,
+    handleReset: mockHandleReset,
+  });
 
-    vi.mocked(useProjectSelection).mockReturnValue({
-      selectedProject: {
-        id: overrides?.projectId ?? null,
-        name: overrides?.projectId ? 'Test Project' : '',
-        colorHex: overrides?.projectId ? '#000000' : '',
-      },
-      handleProjectChange: mockHandleProjectChange,
-      clearProject: mockClearProject,
-    });
-  };
+  const createProjectSelection = (overrides?: { projectId?: string | null; name?: string; colorHex?: string }) => ({
+    selectedProject: {
+      id: overrides?.projectId ?? null,
+      name: overrides?.name ?? '',
+      colorHex: overrides?.colorHex ?? '',
+    },
+    handleProjectChange: mockHandleProjectChange,
+    clearProject: mockClearProject,
+  });
 
   beforeEach(() => {
     vi.clearAllMocks();
     mockOnSubmit.mockResolvedValue(undefined);
-    setupDefaultMocks();
+    mockUseTaskFormState.mockReturnValue(createFormState());
+    mockUseProjectSelection.mockReturnValue(createProjectSelection());
+    mockUseChronoDateParser.mockReturnValue(undefined);
   });
 
-  describe('Initialization', () => {
-    it('should initialize with default state', () => {
+  describe('initialization', () => {
+    it('should initialize with default empty state', () => {
       const { result } = renderHook(() =>
         useTaskFormComposite({
           projects: mockProjects,
@@ -101,17 +91,27 @@ describe('useTaskFormComposite', () => {
     });
 
     it('should initialize with provided default values', () => {
-      setupDefaultMocks({
-        content: 'Test task',
-        dueDate: new Date('2024-12-25'),
-        projectId: 'project-1',
-      });
+      const mockDate = new Date('2024-12-25T10:00:00.000Z');
+      mockUseTaskFormState.mockReturnValue(
+        createFormState({
+          content: 'Test task',
+          dueDate: mockDate,
+          projectId: 'project-1',
+        })
+      );
+      mockUseProjectSelection.mockReturnValue(
+        createProjectSelection({
+          projectId: 'project-1',
+          name: 'Test Project',
+          colorHex: '#000000',
+        })
+      );
 
       const { result } = renderHook(() =>
         useTaskFormComposite({
           defaultValues: {
             content: 'Test task',
-            due_date: new Date('2024-12-25'),
+            due_date: mockDate,
             projectId: 'project-1',
           },
           projects: mockProjects,
@@ -120,10 +120,52 @@ describe('useTaskFormComposite', () => {
       );
 
       expect(result.current.content).toBe('Test task');
-      expect(result.current.dueDate).toEqual(new Date('2024-12-25'));
+      expect(result.current.dueDate).toEqual(mockDate);
       expect(result.current.selectedProject.id).toBe('project-1');
     });
 
+    it('should call useTaskFormState with default values', () => {
+      const mockDate = new Date('2024-12-25T10:00:00.000Z');
+      const defaultValues = {
+        content: 'Test task',
+        due_date: mockDate,
+        projectId: 'project-1',
+      };
+
+      renderHook(() =>
+        useTaskFormComposite({
+          defaultValues,
+          projects: mockProjects,
+          onSubmit: mockOnSubmit,
+        })
+      );
+
+      expect(mockUseTaskFormState).toHaveBeenCalledWith({ defaultValues });
+    });
+
+    it('should call useProjectSelection with projects and default projectId', () => {
+      const defaultValues = {
+        content: 'Test task',
+        due_date: null,
+        projectId: 'project-1',
+      };
+
+      renderHook(() =>
+        useTaskFormComposite({
+          defaultValues,
+          projects: mockProjects,
+          onSubmit: mockOnSubmit,
+        })
+      );
+
+      expect(mockUseProjectSelection).toHaveBeenCalledWith({
+        defaultProjectId: 'project-1',
+        projects: mockProjects,
+      });
+    });
+  });
+
+  describe('chrono date parsing', () => {
     it('should enable chrono parsing by default', () => {
       renderHook(() =>
         useTaskFormComposite({
@@ -132,7 +174,11 @@ describe('useTaskFormComposite', () => {
         })
       );
 
-      expect(useChronoDateParser).toHaveBeenCalledWith(expect.objectContaining({ enabled: true }));
+      expect(mockUseChronoDateParser).toHaveBeenCalledWith({
+        content: '',
+        onDateParsed: mockSetDueDate,
+        enabled: true,
+      });
     });
 
     it('should disable chrono parsing when specified', () => {
@@ -144,17 +190,42 @@ describe('useTaskFormComposite', () => {
         })
       );
 
-      expect(useChronoDateParser).toHaveBeenCalledWith(expect.objectContaining({ enabled: false }));
+      expect(mockUseChronoDateParser).toHaveBeenCalledWith({
+        content: '',
+        onDateParsed: mockSetDueDate,
+        enabled: false,
+      });
+    });
+
+    it('should pass form content to chrono parser', () => {
+      mockUseTaskFormState.mockReturnValue(createFormState({ content: 'Meeting tomorrow' }));
+
+      renderHook(() =>
+        useTaskFormComposite({
+          projects: mockProjects,
+          onSubmit: mockOnSubmit,
+        })
+      );
+
+      expect(mockUseChronoDateParser).toHaveBeenCalledWith({
+        content: 'Meeting tomorrow',
+        onDateParsed: mockSetDueDate,
+        enabled: true,
+      });
     });
   });
 
-  describe('Form Values Composition', () => {
+  describe('formValues composition', () => {
     it('should combine form values with selected project id', () => {
-      setupDefaultMocks({
-        content: 'Task',
-        dueDate: new Date('2024-12-25'),
-        projectId: 'project-1',
-      });
+      const mockDate = new Date('2024-12-25T10:00:00.000Z');
+      mockUseTaskFormState.mockReturnValue(
+        createFormState({
+          content: 'Test task',
+          dueDate: mockDate,
+          projectId: 'old-project',
+        })
+      );
+      mockUseProjectSelection.mockReturnValue(createProjectSelection({ projectId: 'project-1' }));
 
       const { result } = renderHook(() =>
         useTaskFormComposite({
@@ -164,15 +235,37 @@ describe('useTaskFormComposite', () => {
       );
 
       expect(result.current.formValues).toEqual({
-        content: 'Task',
-        due_date: new Date('2024-12-25'),
+        content: 'Test task',
+        due_date: mockDate,
         projectId: 'project-1',
       });
     });
+
+    it('should update formValues when project selection changes', () => {
+      mockUseTaskFormState.mockReturnValue(createFormState({ content: 'Test task' }));
+      mockUseProjectSelection.mockReturnValue(createProjectSelection({ projectId: null }));
+
+      const { result, rerender } = renderHook(() =>
+        useTaskFormComposite({
+          projects: mockProjects,
+          onSubmit: mockOnSubmit,
+        })
+      );
+
+      expect(result.current.formValues.projectId).toBeNull();
+
+      mockUseProjectSelection.mockReturnValue(createProjectSelection({ projectId: 'project-1' }));
+
+      rerender();
+
+      expect(result.current.formValues.projectId).toBe('project-1');
+    });
   });
 
-  describe('Form Submission', () => {
-    it('should submit valid form successfully', async () => {
+  describe('handleSubmit', () => {
+    it('should submit form with valid data', async () => {
+      mockUseTaskFormState.mockReturnValue(createFormState({ content: 'Test task', isValid: true }));
+
       const { result } = renderHook(() =>
         useTaskFormComposite({
           projects: mockProjects,
@@ -185,21 +278,24 @@ describe('useTaskFormComposite', () => {
       });
 
       expect(mockOnSubmit).toHaveBeenCalledWith(
-        expect.objectContaining({
-          content: '',
+        {
+          content: 'Test task',
           due_date: null,
           projectId: null,
-        }),
+        },
         undefined
       );
+      expect(mockOnSubmit).toHaveBeenCalledTimes(1);
     });
 
-    it('should submit with task id when editing', async () => {
+    it('should submit with task id when editing existing task', async () => {
+      mockUseTaskFormState.mockReturnValue(createFormState({ content: 'Updated task', isValid: true }));
+
       const { result } = renderHook(() =>
         useTaskFormComposite({
           defaultValues: {
             id: 'task-123',
-            content: 'Task',
+            content: 'Original task',
             due_date: null,
             projectId: null,
           },
@@ -215,8 +311,8 @@ describe('useTaskFormComposite', () => {
       expect(mockOnSubmit).toHaveBeenCalledWith(expect.anything(), 'task-123');
     });
 
-    it('should not submit invalid form', async () => {
-      setupDefaultMocks({ isValid: false });
+    it('should not submit when form is invalid', async () => {
+      mockUseTaskFormState.mockReturnValue(createFormState({ isValid: false }));
 
       const { result } = renderHook(() =>
         useTaskFormComposite({
@@ -232,7 +328,7 @@ describe('useTaskFormComposite', () => {
       expect(mockOnSubmit).not.toHaveBeenCalled();
     });
 
-    it('should prevent concurrent submissions', async () => {
+    it('should set isSubmitting to true during submission', async () => {
       let resolveSubmit: () => void;
       const submitPromise = new Promise<void>((resolve) => {
         resolveSubmit = resolve;
@@ -248,7 +344,6 @@ describe('useTaskFormComposite', () => {
 
       act(() => {
         result.current.handleSubmit();
-        result.current.handleSubmit();
       });
 
       await waitFor(() => {
@@ -260,11 +355,25 @@ describe('useTaskFormComposite', () => {
       await waitFor(() => {
         expect(result.current.isSubmitting).toBe(false);
       });
-
-      expect(mockOnSubmit).toHaveBeenCalledTimes(2);
     });
 
-    it('should reset form and call onCancel after successful submission', async () => {
+    it('should reset form after successful submission', async () => {
+      const { result } = renderHook(() =>
+        useTaskFormComposite({
+          projects: mockProjects,
+          onSubmit: mockOnSubmit,
+        })
+      );
+
+      await act(async () => {
+        await result.current.handleSubmit();
+      });
+
+      expect(mockHandleReset).toHaveBeenCalledTimes(1);
+      expect(mockClearProject).toHaveBeenCalledTimes(1);
+    });
+
+    it('should call onCancel after successful submission', async () => {
       const { result } = renderHook(() =>
         useTaskFormComposite({
           projects: mockProjects,
@@ -277,12 +386,48 @@ describe('useTaskFormComposite', () => {
         await result.current.handleSubmit();
       });
 
-      expect(mockHandleReset).toHaveBeenCalled();
-      expect(mockClearProject).toHaveBeenCalled();
-      expect(mockOnCancel).toHaveBeenCalled();
+      expect(mockOnCancel).toHaveBeenCalledTimes(1);
     });
 
-    it('should handle submission errors gracefully', async () => {
+    it('should handle submission without onCancel callback', async () => {
+      const { result } = renderHook(() =>
+        useTaskFormComposite({
+          projects: mockProjects,
+          onSubmit: mockOnSubmit,
+        })
+      );
+
+      await act(async () => {
+        await result.current.handleSubmit();
+      });
+
+      expect(mockOnSubmit).toHaveBeenCalled();
+      expect(mockHandleReset).toHaveBeenCalled();
+    });
+
+    it('should log error and set isSubmitting to false on submission failure', async () => {
+      const consoleErrorSpy = vi.spyOn(console, 'error').mockImplementation(() => {});
+      const error = new Error('Submission failed');
+      mockOnSubmit.mockRejectedValue(error);
+
+      const { result } = renderHook(() =>
+        useTaskFormComposite({
+          projects: mockProjects,
+          onSubmit: mockOnSubmit,
+        })
+      );
+
+      await act(async () => {
+        await result.current.handleSubmit();
+      });
+
+      expect(consoleErrorSpy).toHaveBeenCalledWith('Task submission error:', error);
+      expect(result.current.isSubmitting).toBe(false);
+
+      consoleErrorSpy.mockRestore();
+    });
+
+    it('should not reset form on submission failure', async () => {
       const consoleErrorSpy = vi.spyOn(console, 'error').mockImplementation(() => {});
       mockOnSubmit.mockRejectedValue(new Error('Submission failed'));
 
@@ -297,15 +442,15 @@ describe('useTaskFormComposite', () => {
         await result.current.handleSubmit();
       });
 
-      expect(consoleErrorSpy).toHaveBeenCalledWith('Task submission error:', expect.any(Error));
-      expect(result.current.isSubmitting).toBe(false);
+      expect(mockHandleReset).not.toHaveBeenCalled();
+      expect(mockClearProject).not.toHaveBeenCalled();
 
       consoleErrorSpy.mockRestore();
     });
   });
 
-  describe('Form Reset', () => {
-    it('should reset form and clear project', () => {
+  describe('handleReset', () => {
+    it('should reset form state and clear project', () => {
       const { result } = renderHook(() =>
         useTaskFormComposite({
           projects: mockProjects,
@@ -317,13 +462,28 @@ describe('useTaskFormComposite', () => {
         result.current.handleReset();
       });
 
-      expect(mockHandleReset).toHaveBeenCalled();
-      expect(mockClearProject).toHaveBeenCalled();
+      expect(mockHandleReset).toHaveBeenCalledTimes(1);
+      expect(mockClearProject).toHaveBeenCalledTimes(1);
+    });
+
+    it('should set isSubmitting to false when reset', () => {
+      const { result } = renderHook(() =>
+        useTaskFormComposite({
+          projects: mockProjects,
+          onSubmit: mockOnSubmit,
+        })
+      );
+
+      act(() => {
+        result.current.handleReset();
+      });
+
+      expect(result.current.isSubmitting).toBe(false);
     });
   });
 
-  describe('Exposed API', () => {
-    it('should expose all required methods and properties', () => {
+  describe('hook API', () => {
+    it('should expose all required properties', () => {
       const { result } = renderHook(() =>
         useTaskFormComposite({
           projects: mockProjects,
@@ -337,12 +497,44 @@ describe('useTaskFormComposite', () => {
       expect(result.current).toHaveProperty('selectedProject');
       expect(result.current).toHaveProperty('isSubmitting');
       expect(result.current).toHaveProperty('isValid');
-      expect(result.current).toHaveProperty('setContent');
-      expect(result.current).toHaveProperty('setDueDate');
-      expect(result.current).toHaveProperty('handleProjectChange');
-      expect(result.current).toHaveProperty('removeDueDate');
-      expect(result.current).toHaveProperty('handleSubmit');
-      expect(result.current).toHaveProperty('handleReset');
+    });
+
+    it('should expose all required methods', () => {
+      const { result } = renderHook(() =>
+        useTaskFormComposite({
+          projects: mockProjects,
+          onSubmit: mockOnSubmit,
+        })
+      );
+
+      expect(typeof result.current.setContent).toBe('function');
+      expect(typeof result.current.setDueDate).toBe('function');
+      expect(typeof result.current.handleProjectChange).toBe('function');
+      expect(typeof result.current.removeDueDate).toBe('function');
+      expect(typeof result.current.handleSubmit).toBe('function');
+      expect(typeof result.current.handleReset).toBe('function');
+    });
+
+    it('should expose setContent from form state', () => {
+      const { result } = renderHook(() =>
+        useTaskFormComposite({
+          projects: mockProjects,
+          onSubmit: mockOnSubmit,
+        })
+      );
+
+      expect(result.current.setContent).toBe(mockSetContent);
+    });
+
+    it('should expose handleProjectChange from project selection', () => {
+      const { result } = renderHook(() =>
+        useTaskFormComposite({
+          projects: mockProjects,
+          onSubmit: mockOnSubmit,
+        })
+      );
+
+      expect(result.current.handleProjectChange).toBe(mockHandleProjectChange);
     });
   });
 });

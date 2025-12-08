@@ -1,51 +1,88 @@
+import { useChronoDateParser } from '@/features/tasks/hooks/use-chrone-date-parser/use-chrone-date-parser';
 import { renderHook } from '@testing-library/react';
+import * as chrono from 'chrono-node';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
-import { useChronoDateParser } from './use-chrone-date-parser';
 
 vi.mock('chrono-node', () => ({
-  default: {
-    parse: vi.fn(),
-  },
   parse: vi.fn(),
 }));
 
+const mockChronoParse = vi.mocked(chrono.parse);
+
 describe('useChronoDateParser', () => {
   const mockOnDateParsed = vi.fn();
-  let chronoParse: ReturnType<typeof vi.fn>;
+  const mockDate = new Date('2024-12-25T15:00:00.000Z');
 
-  beforeEach(async () => {
+  beforeEach(() => {
     vi.clearAllMocks();
-    const chrono = vi.mocked(await import('chrono-node'));
-    chronoParse = chrono.parse as ReturnType<typeof vi.fn>;
   });
 
-  describe('Date Parsing', () => {
-    it('should parse date from content and call onDateParsed', () => {
-      const mockDate = new Date('2024-12-25');
-      chronoParse.mockReturnValue([
-        {
-          date: () => mockDate,
-        },
-      ]);
+  const createChronoResult = (date: Date) =>
+    ({
+      date: () => date,
+      refDate: date,
+      index: 0,
+      text: '',
+      start: {
+        get: vi.fn(),
+        date: () => date,
+        impliedValues: {},
+        knownValues: {},
+        isCertain: vi.fn(),
+      },
+    }) as unknown as chrono.ParsedResult;
+
+  describe('initialization', () => {
+    it('should parse date and call onDateParsed when enabled by default', () => {
+      mockChronoParse.mockReturnValue([createChronoResult(mockDate)]);
 
       renderHook(() =>
         useChronoDateParser({
           content: 'Meeting tomorrow at 3pm',
           onDateParsed: mockOnDateParsed,
-          enabled: true,
         })
       );
 
-      expect(chronoParse).toHaveBeenCalledWith('Meeting tomorrow at 3pm');
+      expect(mockChronoParse).toHaveBeenCalledWith('Meeting tomorrow at 3pm');
       expect(mockOnDateParsed).toHaveBeenCalledWith(mockDate);
       expect(mockOnDateParsed).toHaveBeenCalledTimes(1);
     });
 
-    it('should use the last parsed date when multiple dates are found', () => {
-      const firstDate = new Date('2024-12-20');
-      const lastDate = new Date('2024-12-25');
+    it('should parse date when explicitly enabled', () => {
+      mockChronoParse.mockReturnValue([createChronoResult(mockDate)]);
 
-      chronoParse.mockReturnValue([{ date: () => firstDate }, { date: () => lastDate }]);
+      renderHook(() =>
+        useChronoDateParser({
+          content: 'Meeting tomorrow',
+          onDateParsed: mockOnDateParsed,
+          enabled: true,
+        })
+      );
+
+      expect(mockChronoParse).toHaveBeenCalledWith('Meeting tomorrow');
+      expect(mockOnDateParsed).toHaveBeenCalledWith(mockDate);
+    });
+
+    it('should not parse when disabled', () => {
+      renderHook(() =>
+        useChronoDateParser({
+          content: 'Meeting tomorrow',
+          onDateParsed: mockOnDateParsed,
+          enabled: false,
+        })
+      );
+
+      expect(mockChronoParse).not.toHaveBeenCalled();
+      expect(mockOnDateParsed).not.toHaveBeenCalled();
+    });
+  });
+
+  describe('date parsing behavior', () => {
+    it('should use the last date when multiple dates are found', () => {
+      const firstDate = new Date('2024-12-20T10:00:00.000Z');
+      const lastDate = new Date('2024-12-25T15:00:00.000Z');
+
+      mockChronoParse.mockReturnValue([createChronoResult(firstDate), createChronoResult(lastDate)]);
 
       renderHook(() =>
         useChronoDateParser({
@@ -56,11 +93,11 @@ describe('useChronoDateParser', () => {
       );
 
       expect(mockOnDateParsed).toHaveBeenCalledWith(lastDate);
-      expect(mockOnDateParsed).not.toHaveBeenCalledWith(firstDate);
+      expect(mockOnDateParsed).toHaveBeenCalledTimes(1);
     });
 
     it('should not call onDateParsed when no dates are found', () => {
-      chronoParse.mockReturnValue([]);
+      mockChronoParse.mockReturnValue([]);
 
       renderHook(() =>
         useChronoDateParser({
@@ -70,63 +107,60 @@ describe('useChronoDateParser', () => {
         })
       );
 
-      expect(chronoParse).toHaveBeenCalledWith('No dates here');
-      expect(mockOnDateParsed).not.toHaveBeenCalled();
-    });
-  });
-
-  describe('Enabled/Disabled State', () => {
-    it('should not parse when enabled is false', () => {
-      renderHook(() =>
-        useChronoDateParser({
-          content: 'Meeting tomorrow',
-          onDateParsed: mockOnDateParsed,
-          enabled: false,
-        })
-      );
-
-      expect(chronoParse).not.toHaveBeenCalled();
+      expect(mockChronoParse).toHaveBeenCalledWith('No dates here');
       expect(mockOnDateParsed).not.toHaveBeenCalled();
     });
 
-    it('should parse when enabled is true', () => {
-      const mockDate = new Date('2024-12-25');
-      chronoParse.mockReturnValue([{ date: () => mockDate }]);
+    it('should not call onDateParsed when content has no date-like strings', () => {
+      mockChronoParse.mockReturnValue([]);
 
       renderHook(() =>
         useChronoDateParser({
-          content: 'Meeting tomorrow',
+          content: 'Just some random text',
           onDateParsed: mockOnDateParsed,
           enabled: true,
         })
       );
 
-      expect(chronoParse).toHaveBeenCalled();
-      expect(mockOnDateParsed).toHaveBeenCalled();
-    });
-
-    it('should default to enabled when enabled prop is not provided', () => {
-      const mockDate = new Date('2024-12-25');
-      chronoParse.mockReturnValue([{ date: () => mockDate }]);
-
-      renderHook(() =>
-        useChronoDateParser({
-          content: 'Meeting tomorrow',
-          onDateParsed: mockOnDateParsed,
-        })
-      );
-
-      expect(chronoParse).toHaveBeenCalled();
-      expect(mockOnDateParsed).toHaveBeenCalled();
+      expect(mockChronoParse).toHaveBeenCalledWith('Just some random text');
+      expect(mockOnDateParsed).not.toHaveBeenCalled();
     });
   });
 
-  describe('Content Changes', () => {
-    it('should re-parse when content changes', () => {
-      const mockDate1 = new Date('2024-12-20');
-      const mockDate2 = new Date('2024-12-25');
+  describe('content validation', () => {
+    it('should not parse when content is empty string', () => {
+      renderHook(() =>
+        useChronoDateParser({
+          content: '',
+          onDateParsed: mockOnDateParsed,
+          enabled: true,
+        })
+      );
 
-      chronoParse.mockReturnValueOnce([{ date: () => mockDate1 }]);
+      expect(mockChronoParse).not.toHaveBeenCalled();
+      expect(mockOnDateParsed).not.toHaveBeenCalled();
+    });
+
+    it('should not parse when content is null', () => {
+      renderHook(() =>
+        useChronoDateParser({
+          content: null as unknown as string,
+          onDateParsed: mockOnDateParsed,
+          enabled: true,
+        })
+      );
+
+      expect(mockChronoParse).not.toHaveBeenCalled();
+      expect(mockOnDateParsed).not.toHaveBeenCalled();
+    });
+  });
+
+  describe('content changes', () => {
+    it('should re-parse when content changes', () => {
+      const firstDate = new Date('2024-12-20T10:00:00.000Z');
+      const secondDate = new Date('2024-12-25T15:00:00.000Z');
+
+      mockChronoParse.mockReturnValueOnce([createChronoResult(firstDate)]);
 
       const { rerender } = renderHook(
         ({ content }) =>
@@ -138,77 +172,21 @@ describe('useChronoDateParser', () => {
         { initialProps: { content: 'Meeting on Monday' } }
       );
 
-      expect(mockOnDateParsed).toHaveBeenCalledWith(mockDate1);
+      expect(mockOnDateParsed).toHaveBeenCalledWith(firstDate);
+      expect(mockChronoParse).toHaveBeenCalledTimes(1);
 
-      chronoParse.mockReturnValueOnce([{ date: () => mockDate2 }]);
+      mockChronoParse.mockReturnValueOnce([createChronoResult(secondDate)]);
 
       rerender({ content: 'Meeting on Friday' });
 
-      expect(chronoParse).toHaveBeenCalledTimes(2);
+      expect(mockChronoParse).toHaveBeenCalledWith('Meeting on Friday');
+      expect(mockChronoParse).toHaveBeenCalledTimes(2);
+      expect(mockOnDateParsed).toHaveBeenCalledWith(secondDate);
       expect(mockOnDateParsed).toHaveBeenCalledTimes(2);
-      expect(mockOnDateParsed).toHaveBeenLastCalledWith(mockDate2);
     });
 
-    it('should not parse when content is empty', () => {
-      renderHook(() =>
-        useChronoDateParser({
-          content: '',
-          onDateParsed: mockOnDateParsed,
-          enabled: true,
-        })
-      );
-
-      expect(chronoParse).not.toHaveBeenCalled();
-      expect(mockOnDateParsed).not.toHaveBeenCalled();
-    });
-
-    it('should not parse when content is null or undefined', () => {
-      renderHook(() =>
-        useChronoDateParser({
-          content: null as unknown as string,
-          onDateParsed: mockOnDateParsed,
-          enabled: true,
-        })
-      );
-
-      expect(chronoParse).not.toHaveBeenCalled();
-      expect(mockOnDateParsed).not.toHaveBeenCalled();
-    });
-  });
-
-  describe('Callback Stability', () => {
-    it('should re-run when onDateParsed callback changes', () => {
-      const mockDate = new Date('2024-12-25');
-      chronoParse.mockReturnValue([{ date: () => mockDate }]);
-
-      const callback1 = vi.fn();
-      const callback2 = vi.fn();
-
-      const { rerender } = renderHook(
-        ({ onDateParsed }) =>
-          useChronoDateParser({
-            content: 'Meeting tomorrow',
-            onDateParsed,
-            enabled: true,
-          }),
-        { initialProps: { onDateParsed: callback1 } }
-      );
-
-      expect(callback1).toHaveBeenCalledWith(mockDate);
-      expect(callback1).toHaveBeenCalledTimes(1);
-
-      rerender({ onDateParsed: callback2 });
-
-      expect(callback2).toHaveBeenCalledWith(mockDate);
-      expect(callback2).toHaveBeenCalledTimes(1);
-      expect(chronoParse).toHaveBeenCalledTimes(2);
-    });
-  });
-
-  describe('Edge Cases', () => {
-    it('should handle various date formats', () => {
-      const mockDate = new Date('2024-12-25');
-      chronoParse.mockReturnValue([{ date: () => mockDate }]);
+    it('should handle various date format changes', () => {
+      mockChronoParse.mockReturnValue([createChronoResult(mockDate)]);
 
       const { rerender } = renderHook(
         ({ content }) =>
@@ -220,28 +198,93 @@ describe('useChronoDateParser', () => {
         { initialProps: { content: 'tomorrow' } }
       );
 
+      expect(mockChronoParse).toHaveBeenCalledWith('tomorrow');
       expect(mockOnDateParsed).toHaveBeenCalledWith(mockDate);
 
       rerender({ content: 'next Friday' });
-      expect(chronoParse).toHaveBeenCalledWith('next Friday');
+      expect(mockChronoParse).toHaveBeenCalledWith('next Friday');
 
       rerender({ content: '2024-12-25' });
-      expect(chronoParse).toHaveBeenCalledWith('2024-12-25');
+      expect(mockChronoParse).toHaveBeenCalledWith('2024-12-25');
+
+      expect(mockChronoParse).toHaveBeenCalledTimes(3);
     });
+  });
 
-    it('should handle content with no date-like strings', () => {
-      chronoParse.mockReturnValue([]);
+  describe('callback changes', () => {
+    it('should re-run parsing when onDateParsed callback changes', () => {
+      mockChronoParse.mockReturnValue([createChronoResult(mockDate)]);
 
-      renderHook(() =>
-        useChronoDateParser({
-          content: 'Just some random text',
-          onDateParsed: mockOnDateParsed,
-          enabled: true,
-        })
+      const firstCallback = vi.fn();
+      const secondCallback = vi.fn();
+
+      const { rerender } = renderHook(
+        ({ onDateParsed }) =>
+          useChronoDateParser({
+            content: 'Meeting tomorrow',
+            onDateParsed,
+            enabled: true,
+          }),
+        { initialProps: { onDateParsed: firstCallback } }
       );
 
-      expect(chronoParse).toHaveBeenCalled();
+      expect(firstCallback).toHaveBeenCalledWith(mockDate);
+      expect(firstCallback).toHaveBeenCalledTimes(1);
+      expect(mockChronoParse).toHaveBeenCalledTimes(1);
+
+      rerender({ onDateParsed: secondCallback });
+
+      expect(secondCallback).toHaveBeenCalledWith(mockDate);
+      expect(secondCallback).toHaveBeenCalledTimes(1);
+      expect(mockChronoParse).toHaveBeenCalledTimes(2);
+    });
+  });
+
+  describe('enabled state changes', () => {
+    it('should not re-parse when changing from enabled to disabled', () => {
+      mockChronoParse.mockReturnValue([createChronoResult(mockDate)]);
+
+      const { rerender } = renderHook(
+        ({ enabled }) =>
+          useChronoDateParser({
+            content: 'Meeting tomorrow',
+            onDateParsed: mockOnDateParsed,
+            enabled,
+          }),
+        { initialProps: { enabled: true } }
+      );
+
+      expect(mockChronoParse).toHaveBeenCalledTimes(1);
+      expect(mockOnDateParsed).toHaveBeenCalledTimes(1);
+
+      rerender({ enabled: false });
+
+      expect(mockChronoParse).toHaveBeenCalledTimes(1);
+      expect(mockOnDateParsed).toHaveBeenCalledTimes(1);
+    });
+
+    it('should re-parse when changing from disabled to enabled', () => {
+      mockChronoParse.mockReturnValue([createChronoResult(mockDate)]);
+
+      const { rerender } = renderHook(
+        ({ enabled }) =>
+          useChronoDateParser({
+            content: 'Meeting tomorrow',
+            onDateParsed: mockOnDateParsed,
+            enabled,
+          }),
+        { initialProps: { enabled: false } }
+      );
+
+      expect(mockChronoParse).not.toHaveBeenCalled();
       expect(mockOnDateParsed).not.toHaveBeenCalled();
+
+      rerender({ enabled: true });
+
+      expect(mockChronoParse).toHaveBeenCalledWith('Meeting tomorrow');
+      expect(mockChronoParse).toHaveBeenCalledTimes(1);
+      expect(mockOnDateParsed).toHaveBeenCalledWith(mockDate);
+      expect(mockOnDateParsed).toHaveBeenCalledTimes(1);
     });
   });
 });
