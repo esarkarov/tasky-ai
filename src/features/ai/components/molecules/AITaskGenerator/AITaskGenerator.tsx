@@ -3,7 +3,7 @@ import { Label } from '@/shared/components/ui/label';
 import { Switch } from '@/shared/components/ui/switch';
 import { Bot } from 'lucide-react';
 
-interface AITaskGeneratorProps {
+export interface AITaskGeneratorProps {
   checked: boolean;
   value: string;
   onCheckedChange: (isEnabled: boolean) => void;

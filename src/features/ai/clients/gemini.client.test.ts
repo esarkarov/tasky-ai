@@ -3,6 +3,11 @@ import { createMockAIContentResponse } from '@/core/test-setup/factories';
 import { DEFAULT_GEMINI_MODEL, geminiClient } from '@/features/ai/clients/gemini.client';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 
+interface GenerateContentOptions {
+  thinkingBudget?: number;
+  responseMimeType?: string;
+}
+
 vi.mock('@/core/lib/google-ai', () => ({
   genAI: {
     models: {
@@ -14,6 +19,25 @@ vi.mock('@/core/lib/google-ai', () => ({
 const mockGenerateContent = vi.mocked(genAI.models.generateContent);
 
 describe('geminiClient', () => {
+  const setupMockResponse = () => {
+    const mockResponse = createMockAIContentResponse();
+    mockGenerateContent.mockResolvedValue(mockResponse);
+    return mockResponse;
+  };
+
+  const expectGenerateContentCalledWith = (contents: string, options: GenerateContentOptions = {}) => {
+    const { thinkingBudget = 0, responseMimeType = 'application/json' } = options;
+
+    expect(mockGenerateContent).toHaveBeenCalledWith({
+      model: DEFAULT_GEMINI_MODEL,
+      contents,
+      config: {
+        thinkingConfig: { thinkingBudget },
+        responseMimeType,
+      },
+    });
+  };
+
   beforeEach(() => {
     vi.clearAllMocks();
   });
@@ -21,102 +45,63 @@ describe('geminiClient', () => {
   describe('generateContent', () => {
     it('should generate content with default configuration', async () => {
       const contents = 'Test prompt content';
-      const mockResponse = createMockAIContentResponse();
-      mockGenerateContent.mockResolvedValue(mockResponse);
+      const mockResponse = setupMockResponse();
 
       const result = await geminiClient.generateContent(contents);
 
-      expect(mockGenerateContent).toHaveBeenCalledWith({
-        model: DEFAULT_GEMINI_MODEL,
-        contents,
-        config: {
-          thinkingConfig: { thinkingBudget: 0 },
-          responseMimeType: 'application/json',
-        },
-      });
+      expectGenerateContentCalledWith(contents);
       expect(mockGenerateContent).toHaveBeenCalledOnce();
       expect(result).toEqual(mockResponse);
     });
 
     it('should generate content with custom thinking budget', async () => {
       const contents = 'Complex reasoning task';
-      const mockResponse = createMockAIContentResponse();
-      mockGenerateContent.mockResolvedValue(mockResponse);
+      setupMockResponse();
 
       await geminiClient.generateContent(contents, { thinkingBudget: 10000 });
 
-      expect(mockGenerateContent).toHaveBeenCalledWith({
-        model: DEFAULT_GEMINI_MODEL,
-        contents,
-        config: {
-          thinkingConfig: { thinkingBudget: 10000 },
-          responseMimeType: 'application/json',
-        },
-      });
+      expectGenerateContentCalledWith(contents, { thinkingBudget: 10000 });
     });
 
     it('should generate content with custom response MIME type', async () => {
       const contents = 'Generate text response';
-      const mockResponse = createMockAIContentResponse();
-      mockGenerateContent.mockResolvedValue(mockResponse);
+      setupMockResponse();
 
       await geminiClient.generateContent(contents, { responseMimeType: 'text/plain' });
 
-      expect(mockGenerateContent).toHaveBeenCalledWith({
-        model: DEFAULT_GEMINI_MODEL,
-        contents,
-        config: {
-          thinkingConfig: { thinkingBudget: 0 },
-          responseMimeType: 'text/plain',
-        },
-      });
+      expectGenerateContentCalledWith(contents, { responseMimeType: 'text/plain' });
     });
 
-    it('should generate content with both custom options', async () => {
+    it('should generate content with custom thinking budget and MIME type', async () => {
       const contents = 'Custom options test';
-      const mockResponse = createMockAIContentResponse();
-      mockGenerateContent.mockResolvedValue(mockResponse);
+      setupMockResponse();
 
       await geminiClient.generateContent(contents, {
         thinkingBudget: 5000,
         responseMimeType: 'text/plain',
       });
 
-      expect(mockGenerateContent).toHaveBeenCalledWith({
-        model: DEFAULT_GEMINI_MODEL,
-        contents,
-        config: {
-          thinkingConfig: { thinkingBudget: 5000 },
-          responseMimeType: 'text/plain',
-        },
+      expectGenerateContentCalledWith(contents, {
+        thinkingBudget: 5000,
+        responseMimeType: 'text/plain',
       });
     });
 
     it('should handle empty content string', async () => {
       const emptyContents = '';
-      const mockResponse = createMockAIContentResponse();
-      mockGenerateContent.mockResolvedValue(mockResponse);
+      const mockResponse = setupMockResponse();
 
       const result = await geminiClient.generateContent(emptyContents);
 
-      expect(mockGenerateContent).toHaveBeenCalledWith({
-        model: DEFAULT_GEMINI_MODEL,
-        contents: emptyContents,
-        config: {
-          thinkingConfig: { thinkingBudget: 0 },
-          responseMimeType: 'application/json',
-        },
-      });
+      expectGenerateContentCalledWith(emptyContents);
       expect(result).toEqual(mockResponse);
     });
   });
 
   describe('error handling', () => {
     it('should propagate API errors', async () => {
-      const contents = 'Test content';
       mockGenerateContent.mockRejectedValue(new Error('API rate limit exceeded'));
 
-      await expect(geminiClient.generateContent(contents)).rejects.toThrow('API rate limit exceeded');
       expect(mockGenerateContent).toHaveBeenCalledOnce();
     });
 

@@ -13,129 +13,70 @@ describe('buildTaskGenerationPrompt', () => {
     vi.useRealTimers();
   });
 
-  describe('prompt content', () => {
-    it('should include user prompt in generated text', () => {
-      const userPrompt = 'Build a mobile todo app';
+  it('should include user prompt and current date in generated text', () => {
+    const userPrompt = 'Build a mobile todo app';
 
-      const result = buildTaskGenerationPrompt(userPrompt);
+    const result = buildTaskGenerationPrompt(userPrompt);
 
-      expect(result).toContain('Build a mobile todo app');
-      expect(result).toContain('Prompt:');
-    });
-
-    it('should handle empty prompt', () => {
-      const emptyPrompt = '';
-
-      const result = buildTaskGenerationPrompt(emptyPrompt);
-
-      expect(result).toContain('Prompt:');
-      expect(result).toContain('Generate and return a list of tasks');
-    });
-
-    it('should preserve special characters in prompt', () => {
-      const promptWithSpecialChars = 'Task with "quotes" and {braces} & symbols';
-
-      const result = buildTaskGenerationPrompt(promptWithSpecialChars);
-
-      expect(result).toContain('Task with "quotes" and {braces} & symbols');
-    });
+    expect(result).toContain('Build a mobile todo app');
+    expect(result).toContain('Prompt:');
+    expect(result).toContain(MOCK_DATE.toString());
   });
 
-  describe('schema definition', () => {
-    it('should include task schema with content field', () => {
-      const prompt = 'Create tasks';
+  it('should handle empty prompt and special characters', () => {
+    const emptyPrompt = '';
+    const specialCharPrompt = 'Task with "quotes" and {braces} & symbols';
 
-      const result = buildTaskGenerationPrompt(prompt);
+    const emptyResult = buildTaskGenerationPrompt(emptyPrompt);
+    const specialResult = buildTaskGenerationPrompt(specialCharPrompt);
 
-      expect(result).toContain('Task Schema:');
-      expect(result).toContain('content: string;');
-    });
-
-    it('should include task schema with due_date field', () => {
-      const prompt = 'Create tasks';
-
-      const result = buildTaskGenerationPrompt(prompt);
-
-      expect(result).toContain('due_date: Date | null;');
-    });
+    expect(emptyResult).toContain('Prompt:');
+    expect(emptyResult).toContain('Generate and return a list of tasks');
+    expect(specialResult).toContain('Task with "quotes" and {braces} & symbols');
   });
 
-  describe('instructions', () => {
-    it('should include instruction to generate tasks', () => {
-      const prompt = 'Create tasks';
+  it('should include task schema with required fields', () => {
+    const prompt = 'Create tasks';
 
-      const result = buildTaskGenerationPrompt(prompt);
+    const result = buildTaskGenerationPrompt(prompt);
 
-      expect(result).toContain('Generate and return a list of tasks');
-    });
-
-    it('should include instruction to align with prompt', () => {
-      const prompt = 'Create tasks';
-
-      const result = buildTaskGenerationPrompt(prompt);
-
-      expect(result).toContain('Ensure tasks align with the provided prompt');
-    });
-
-    it('should include instruction for date handling', () => {
-      const prompt = 'Create tasks';
-
-      const result = buildTaskGenerationPrompt(prompt);
-
-      expect(result).toContain("Set the 'due_date' relative to today's date");
-    });
-
-    it('should include instruction for return format', () => {
-      const prompt = 'Create tasks';
-
-      const result = buildTaskGenerationPrompt(prompt);
-
-      expect(result).toContain('Return an array of tasks matching the schema');
-      expect(result).toContain('Output: Array<Task>');
-    });
+    expect(result).toContain('Task Schema:');
+    expect(result).toContain('content: string;');
+    expect(result).toContain('due_date: Date | null;');
   });
 
-  describe('date reference', () => {
-    it('should include current date in prompt', () => {
-      const prompt = 'Create weekly tasks';
+  it('should include all required instructions', () => {
+    const prompt = 'Create tasks';
 
-      const result = buildTaskGenerationPrompt(prompt);
+    const result = buildTaskGenerationPrompt(prompt);
 
-      expect(result).toContain(MOCK_DATE.toString());
-    });
-
-    it('should use consistent date across multiple calls', () => {
-      const prompt = 'Create tasks';
-
-      const result1 = buildTaskGenerationPrompt(prompt);
-      const result2 = buildTaskGenerationPrompt(prompt);
-
-      expect(result1).toContain(MOCK_DATE.toString());
-      expect(result2).toContain(MOCK_DATE.toString());
-      expect(result1).toEqual(result2);
-    });
+    expect(result).toContain('Generate and return a list of tasks');
+    expect(result).toContain('Ensure tasks align with the provided prompt');
+    expect(result).toContain("Set the 'due_date' relative to today's date");
+    expect(result).toContain('Return an array of tasks matching the schema');
+    expect(result).toContain('Output: Array<Task>');
   });
 
-  describe('output structure', () => {
-    it('should return non-empty string', () => {
-      const prompt = 'Create tasks';
+  it('should include all essential prompt components', () => {
+    const prompt = 'Build a project management app';
 
-      const result = buildTaskGenerationPrompt(prompt);
+    const result = buildTaskGenerationPrompt(prompt);
 
-      expect(result).toBeTruthy();
-      expect(typeof result).toBe('string');
-      expect(result.length).toBeGreaterThan(0);
-    });
+    expect(result).toBeTruthy();
+    expect(typeof result).toBe('string');
+    expect(result.length).toBeGreaterThan(0);
+    expect(result).toContain('Prompt:');
+    expect(result).toContain('Task Schema:');
+    expect(result).toContain('Requirements:');
+    expect(result).toContain('Output:');
+  });
 
-    it('should include all essential components', () => {
-      const prompt = 'Build a project management app';
+  it('should generate consistent output across multiple calls', () => {
+    const prompt = 'Create tasks';
 
-      const result = buildTaskGenerationPrompt(prompt);
+    const result1 = buildTaskGenerationPrompt(prompt);
+    const result2 = buildTaskGenerationPrompt(prompt);
 
-      expect(result).toContain('Prompt:');
-      expect(result).toContain('Task Schema:');
-      expect(result).toContain('Requirements:');
-      expect(result).toContain('Output:');
-    });
+    expect(result1).toEqual(result2);
   });
 });

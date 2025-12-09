@@ -1,5 +1,5 @@
+import { envSchema, EnvSchema, testDefaults } from '@/core/config/env.config';
 import { describe, expect, it } from 'vitest';
-import { envSchema, EnvSchema, testDefaults } from './env.config';
 
 const productionEnv: EnvSchema = {
   VITE_CLERK_PUBLISHABLE_KEY: 'pk_live_abc123',

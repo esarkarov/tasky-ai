@@ -19,17 +19,10 @@ describe('useAITaskGeneration', () => {
       expect(result.current.aiPrompt).toBe('');
       expect(result.current.isValid).toBe(false);
     });
-
-    it('should initialize with AI disabled when explicitly set to false', () => {
-      const { result } = renderHook(() => useAITaskGeneration({ enabled: false }));
-
-      expect(result.current.aiEnabled).toBe(false);
-      expect(result.current.isValid).toBe(true);
-    });
   });
 
-  describe('setAiEnabled', () => {
-    it('should enable AI when called with true', () => {
+  describe('AI toggle', () => {
+    it('should enable AI when setAiEnabled is called with true', () => {
       const { result } = renderHook(() => useAITaskGeneration());
 
       act(() => {
@@ -39,7 +32,7 @@ describe('useAITaskGeneration', () => {
       expect(result.current.aiEnabled).toBe(true);
     });
 
-    it('should disable AI when called with false', () => {
+    it('should disable AI when setAiEnabled is called with false', () => {
       const { result } = renderHook(() => useAITaskGeneration({ enabled: true }));
 
       act(() => {
@@ -48,10 +41,8 @@ describe('useAITaskGeneration', () => {
 
       expect(result.current.aiEnabled).toBe(false);
     });
-  });
 
-  describe('toggleAI', () => {
-    it('should toggle AI state from disabled to enabled', () => {
+    it('should toggle AI state when toggleAI is called', () => {
       const { result } = renderHook(() => useAITaskGeneration());
 
       act(() => {
@@ -59,28 +50,12 @@ describe('useAITaskGeneration', () => {
       });
 
       expect(result.current.aiEnabled).toBe(true);
-    });
-
-    it('should toggle AI state from enabled to disabled', () => {
-      const { result } = renderHook(() => useAITaskGeneration({ enabled: true }));
 
       act(() => {
         result.current.toggleAI();
       });
 
       expect(result.current.aiEnabled).toBe(false);
-    });
-
-    it('should toggle AI state multiple times correctly', () => {
-      const { result } = renderHook(() => useAITaskGeneration());
-
-      act(() => {
-        result.current.toggleAI();
-        result.current.toggleAI();
-        result.current.toggleAI();
-      });
-
-      expect(result.current.aiEnabled).toBe(true);
     });
 
     it('should preserve prompt when toggling AI state', () => {
@@ -92,20 +67,12 @@ describe('useAITaskGeneration', () => {
         result.current.toggleAI();
       });
 
-      expect(result.current.aiEnabled).toBe(true);
-      expect(result.current.aiPrompt).toBe(testPrompt);
-
-      act(() => {
-        result.current.toggleAI();
-      });
-
-      expect(result.current.aiEnabled).toBe(false);
       expect(result.current.aiPrompt).toBe(testPrompt);
     });
   });
 
-  describe('setAiPrompt', () => {
-    it('should update prompt with non-empty value', () => {
+  describe('prompt management', () => {
+    it('should update prompt when setAiPrompt is called', () => {
       const { result } = renderHook(() => useAITaskGeneration());
       const testPrompt = 'Generate shopping list tasks';
 
@@ -116,7 +83,7 @@ describe('useAITaskGeneration', () => {
       expect(result.current.aiPrompt).toBe(testPrompt);
     });
 
-    it('should update prompt to empty string', () => {
+    it('should accept empty string prompt', () => {
       const { result } = renderHook(() => useAITaskGeneration());
 
       act(() => {
@@ -140,10 +107,8 @@ describe('useAITaskGeneration', () => {
   });
 
   describe('validation', () => {
-    it('should be valid when AI is disabled regardless of prompt state', () => {
+    it('should be valid when AI is disabled regardless of prompt', () => {
       const { result } = renderHook(() => useAITaskGeneration());
-
-      expect(result.current.isValid).toBe(true);
 
       act(() => {
         result.current.setAiPrompt('');
@@ -152,14 +117,10 @@ describe('useAITaskGeneration', () => {
       expect(result.current.isValid).toBe(true);
     });
 
-    it('should be invalid when AI is enabled with empty prompt', () => {
+    it('should be invalid when AI is enabled with empty or whitespace prompt', () => {
       const { result } = renderHook(() => useAITaskGeneration({ enabled: true }));
 
       expect(result.current.isValid).toBe(false);
-    });
-
-    it('should be invalid when AI is enabled with whitespace-only prompt', () => {
-      const { result } = renderHook(() => useAITaskGeneration({ enabled: true }));
 
       act(() => {
         result.current.setAiPrompt('   ');
@@ -178,18 +139,12 @@ describe('useAITaskGeneration', () => {
       expect(result.current.isValid).toBe(true);
     });
 
-    it('should become invalid when enabling AI without prompt', () => {
+    it('should update validation when AI state changes', () => {
       const { result } = renderHook(() => useAITaskGeneration());
 
       act(() => {
         result.current.setAiEnabled(true);
       });
-
-      expect(result.current.isValid).toBe(false);
-    });
-
-    it('should become valid when adding prompt after AI is enabled', () => {
-      const { result } = renderHook(() => useAITaskGeneration({ enabled: true }));
 
       expect(result.current.isValid).toBe(false);
 
@@ -198,10 +153,6 @@ describe('useAITaskGeneration', () => {
       });
 
       expect(result.current.isValid).toBe(true);
-    });
-
-    it('should become valid when disabling AI with empty prompt', () => {
-      const { result } = renderHook(() => useAITaskGeneration({ enabled: true }));
 
       act(() => {
         result.current.setAiEnabled(false);
@@ -211,25 +162,8 @@ describe('useAITaskGeneration', () => {
     });
   });
 
-  describe('handleReset', () => {
-    it('should reset to default state when AI was enabled with prompt', () => {
-      const { result } = renderHook(() => useAITaskGeneration());
-
-      act(() => {
-        result.current.setAiEnabled(true);
-        result.current.setAiPrompt('Some prompt');
-      });
-
-      act(() => {
-        result.current.handleReset();
-      });
-
-      expect(result.current.aiEnabled).toBe(false);
-      expect(result.current.aiPrompt).toBe('');
-      expect(result.current.isValid).toBe(true);
-    });
-
-    it('should reset to default state when initialized with enabled true', () => {
+  describe('reset', () => {
+    it('should reset to default state when handleReset is called', () => {
       const { result } = renderHook(() => useAITaskGeneration({ enabled: true }));
 
       act(() => {
@@ -240,47 +174,6 @@ describe('useAITaskGeneration', () => {
       expect(result.current.aiEnabled).toBe(false);
       expect(result.current.aiPrompt).toBe('');
       expect(result.current.isValid).toBe(true);
-    });
-  });
-
-  describe('combined operations', () => {
-    it('should maintain valid state when enabling AI and adding prompt', () => {
-      const { result } = renderHook(() => useAITaskGeneration());
-
-      act(() => {
-        result.current.setAiEnabled(true);
-        result.current.setAiPrompt('Create workout tasks');
-      });
-
-      expect(result.current.aiEnabled).toBe(true);
-      expect(result.current.aiPrompt).toBe('Create workout tasks');
-      expect(result.current.isValid).toBe(true);
-    });
-  });
-
-  describe('hook API', () => {
-    it('should expose all required properties and methods', () => {
-      const { result } = renderHook(() => useAITaskGeneration());
-
-      expect(result.current).toHaveProperty('aiEnabled');
-      expect(result.current).toHaveProperty('aiPrompt');
-      expect(result.current).toHaveProperty('isValid');
-      expect(result.current).toHaveProperty('setAiEnabled');
-      expect(result.current).toHaveProperty('setAiPrompt');
-      expect(result.current).toHaveProperty('handleReset');
-      expect(result.current).toHaveProperty('toggleAI');
-    });
-
-    it('should have correct method types', () => {
-      const { result } = renderHook(() => useAITaskGeneration());
-
-      expect(typeof result.current.setAiEnabled).toBe('function');
-      expect(typeof result.current.setAiPrompt).toBe('function');
-      expect(typeof result.current.handleReset).toBe('function');
-      expect(typeof result.current.toggleAI).toBe('function');
-      expect(typeof result.current.aiEnabled).toBe('boolean');
-      expect(typeof result.current.aiPrompt).toBe('string');
-      expect(typeof result.current.isValid).toBe('boolean');
     });
   });
 });

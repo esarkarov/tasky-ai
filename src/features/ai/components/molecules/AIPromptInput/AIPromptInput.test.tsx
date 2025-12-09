@@ -1,8 +1,8 @@
+import { AIPromptInput } from '@/features/ai/components/molecules/AIPromptInput/AIPromptInput';
 import { MAX_PROMPT_LENGTH } from '@/shared/constants';
 import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
-import { AIPromptInput } from './AIPromptInput';
 
 vi.mock('@/shared/constants', () => ({
   MAX_PROMPT_LENGTH: 500,
@@ -16,14 +16,10 @@ vi.mock('@/shared/components/atoms/InputValueCount/InputValueCount', () => ({
   ),
 }));
 
-const placeholderText = 'Tell me about your project. What do you want to accomplish?';
-const labelText = 'AI task prompt';
-const mockOnChange = vi.fn();
-
 describe('AIPromptInput', () => {
-  beforeEach(() => {
-    vi.clearAllMocks();
-  });
+  const PLACEHOLDER_TEXT = 'Tell me about your project. What do you want to accomplish?';
+  const LABEL_TEXT = 'AI task prompt';
+  const mockOnChange = vi.fn();
 
   const renderComponent = (value = '') => {
     return render(
@@ -34,60 +30,62 @@ describe('AIPromptInput', () => {
     );
   };
 
-  describe('basic rendering', () => {
-    it('renders the textarea with placeholder', () => {
+  beforeEach(() => {
+    vi.clearAllMocks();
+  });
+
+  describe('rendering', () => {
+    it('should render textarea with placeholder and correct attributes', () => {
       renderComponent();
 
-      expect(screen.getByPlaceholderText(placeholderText)).toBeInTheDocument();
+      const textarea = screen.getByRole('textbox');
+      expect(textarea).toHaveAttribute('id', 'ai_prompt');
+      expect(textarea).toHaveAttribute('placeholder', PLACEHOLDER_TEXT);
+      expect(textarea).toHaveAttribute('aria-describedby', 'ai-task-generator-description');
+      expect(textarea).toHaveAttribute('aria-invalid', 'false');
     });
 
-    it('renders the visually hidden label linked to textarea', () => {
+    it('should render visually hidden label linked to textarea', () => {
       renderComponent();
-      const label = screen.getByText(labelText);
 
+      const label = screen.getByText(LABEL_TEXT);
       expect(label).toBeInTheDocument();
       expect(label).toHaveClass('sr-only');
       expect(document.querySelector('label[for="ai_prompt"]')).toBeInTheDocument();
     });
 
-    it('includes the InputValueCount component', () => {
-      renderComponent('test');
+    it('should render character counter with correct count', () => {
+      renderComponent('Hello');
+
       expect(screen.getByTestId('input-value-count')).toBeInTheDocument();
+      expect(screen.getByText('5/500')).toBeInTheDocument();
     });
 
-    it('sets the correct textarea id', () => {
+    it('should autofocus textarea on mount', () => {
       renderComponent();
-      expect(screen.getByPlaceholderText(placeholderText)).toHaveAttribute('id', 'ai_prompt');
+
+      expect(document.activeElement).toBe(screen.getByRole('textbox'));
     });
   });
 
-  describe('controlled input behavior', () => {
-    it('displays current value', () => {
+  describe('user input', () => {
+    it('should display current value', () => {
       renderComponent('Test prompt');
+
       expect(screen.getByDisplayValue('Test prompt')).toBeInTheDocument();
     });
 
-    it('calls onChange when user types', async () => {
+    it('should call onChange when user types', async () => {
       const user = userEvent.setup();
       renderComponent();
-      const textarea = screen.getByPlaceholderText(placeholderText);
-
-      await user.type(textarea, 'New text');
-
-      expect(mockOnChange).toHaveBeenCalled();
-    });
-
-    it('calls onChange with the typed value', async () => {
-      const user = userEvent.setup();
-      renderComponent();
-      const textarea = screen.getByPlaceholderText(placeholderText);
+      const textarea = screen.getByRole('textbox');
 
       await user.type(textarea, 'A');
 
       expect(mockOnChange).toHaveBeenCalledWith('A');
     });
 
-    it('updates displayed value when prop changes', () => {
+    it('should update displayed value when prop changes', () => {
       const { rerender } = renderComponent('Initial');
       expect(screen.getByDisplayValue('Initial')).toBeInTheDocument();
 
@@ -97,103 +95,49 @@ describe('AIPromptInput', () => {
           onChange={mockOnChange}
         />
       );
+
       expect(screen.getByDisplayValue('Updated')).toBeInTheDocument();
+    });
+
+    it('should handle multiline and special character input', async () => {
+      const user = userEvent.setup();
+      renderComponent();
+      const textarea = screen.getByRole('textbox');
+
+      await user.type(textarea, 'Line 1{Enter}@#$%');
+
+      expect(mockOnChange).toHaveBeenCalled();
     });
   });
 
   describe('character counter', () => {
-    it('shows correct character count for empty input', () => {
-      renderComponent();
-      expect(screen.getByText('0/500')).toBeInTheDocument();
-    });
-
-    it('shows correct character count for non-empty input', () => {
-      renderComponent('Hello world');
-      expect(screen.getByText('11/500')).toBeInTheDocument();
-    });
-
-    it('updates character count as user types', async () => {
-      const user = userEvent.setup();
+    it('should show correct count for empty and non-empty input', () => {
       const { rerender } = renderComponent();
-      const textarea = screen.getByRole('textbox');
 
-      await user.type(textarea, 'test');
+      expect(screen.getByText('0/500')).toBeInTheDocument();
 
       rerender(
         <AIPromptInput
-          value="Test"
+          value="Hello world"
           onChange={mockOnChange}
         />
       );
-      expect(screen.getByText('4/500')).toBeInTheDocument();
+
+      expect(screen.getByText('11/500')).toBeInTheDocument();
     });
 
-    it('shows character count at maximum length', () => {
+    it('should show count at maximum length', () => {
       const maxText = 'a'.repeat(MAX_PROMPT_LENGTH);
+
       renderComponent(maxText);
 
       expect(screen.getByText(`${MAX_PROMPT_LENGTH}/${MAX_PROMPT_LENGTH}`)).toBeInTheDocument();
-    });
-  });
-
-  describe('validation', () => {
-    it('sets aria-invalid to false for valid input', () => {
-      renderComponent('Valid');
-
       expect(screen.getByRole('textbox')).toHaveAttribute('aria-invalid', 'false');
     });
 
-    it('sets aria-invalid to false at max length', () => {
-      const maxText = 'a'.repeat(MAX_PROMPT_LENGTH);
-      renderComponent(maxText);
-
-      expect(screen.getByRole('textbox')).toHaveAttribute('aria-invalid', 'false');
-    });
-  });
-
-  describe('accessibility', () => {
-    it('has aria-describedby linking to helper text', () => {
-      renderComponent();
-
-      expect(screen.getByRole('textbox')).toHaveAttribute('aria-describedby', 'ai-task-generator-description');
-    });
-
-    it('autofocuses on mount', () => {
-      renderComponent();
-
-      expect(document.activeElement).toBe(screen.getByRole('textbox'));
-    });
-  });
-
-  describe('edge cases', () => {
-    it('handles multiline input', async () => {
-      const user = userEvent.setup();
-      renderComponent();
-      const textarea = screen.getByRole('textbox');
-
-      await user.type(textarea, 'Line 1{Enter}Line 2');
-
-      expect(mockOnChange).toHaveBeenCalled();
-    });
-
-    it('handles special characters', async () => {
-      const user = userEvent.setup();
-      renderComponent();
-      const textarea = screen.getByRole('textbox');
-
-      await user.type(textarea, '@#$%');
-
-      expect(mockOnChange).toHaveBeenCalled();
-    });
-
-    it('displays empty value', () => {
-      renderComponent();
-
-      expect(screen.getByRole('textbox')).toHaveValue('');
-    });
-
-    it('renders very long input text', () => {
+    it('should handle text exceeding maximum length', () => {
       const longText = 'a'.repeat(1000);
+
       renderComponent(longText);
 
       expect(screen.getByRole('textbox')).toHaveValue(longText);
