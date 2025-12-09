@@ -1,12 +1,12 @@
 import { createMockProject, createMockTask } from '@/core/test-setup/factories';
 import { Project } from '@/features/projects/types';
 import { Task } from '@/features/tasks/types';
+import { ProjectDetailPage } from '@/pages/ProjectDetailPage/ProjectDetailPage';
 import { ProjectDetailLoaderData } from '@/shared/types';
 import { render, screen } from '@testing-library/react';
 import { userEvent } from '@testing-library/user-event';
 import { useLoaderData } from 'react-router';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
-import { ProjectDetailPage } from './ProjectDetailPage';
 
 vi.mock('react-router', () => ({
   useLoaderData: vi.fn(),
@@ -118,51 +118,60 @@ describe('ProjectDetailPage', () => {
   const MOCK_TASK_ID_2 = 'task-2';
   const MOCK_TASK_ID_3 = 'task-3';
 
-  const createMockLoaderData = (project: Project): ProjectDetailLoaderData => ({
-    project,
-  });
+  interface MockSetup {
+    tasks?: Task[];
+    isLoading?: boolean;
+    hasMore?: boolean;
+  }
 
-  const setupDefaultMocks = (tasks: Task[] = [createMockTask()]) => {
+  const setupMocks = ({ tasks = [createMockTask()], isLoading = false, hasMore = false }: MockSetup = {}) => {
+    const mockHandleCreate = vi.fn();
+    const mockHandleLoadMore = vi.fn();
+
     mockUseTaskMutation.mockReturnValue({
-      handleCreate: vi.fn(),
+      handleCreate: mockHandleCreate,
       handleUpdate: vi.fn(),
       handleDelete: vi.fn(),
     });
 
     mockUseLoadMore.mockReturnValue({
       items: tasks,
-      isLoading: false,
-      hasMore: false,
-      handleLoadMore: vi.fn(),
+      isLoading,
+      hasMore,
+      handleLoadMore: mockHandleLoadMore,
       getItemClassName: () => '',
       getItemStyle: () => ({}),
     });
+
+    return { mockHandleCreate, mockHandleLoadMore };
+  };
+
+  const renderWithProject = (project: Project, mockSetup: MockSetup = {}) => {
+    const mockData: ProjectDetailLoaderData = { project };
+    mockedUseLoaderData.mockReturnValue(mockData);
+    const mocks = setupMocks(mockSetup);
+    render(<ProjectDetailPage />);
+    return mocks;
   };
 
   beforeEach(() => {
     vi.clearAllMocks();
   });
 
-  describe('basic rendering', () => {
-    it('should render page title and structure', () => {
-      const project = createMockProject({ name: 'My Project' });
-      const mockData = createMockLoaderData(project);
-      mockedUseLoaderData.mockReturnValue(mockData);
-      setupDefaultMocks([]);
+  describe('rendering', () => {
+    it('should render page title and list structure with project name', () => {
+      const project = createMockProject({ name: 'My Project', tasks: [] });
 
-      render(<ProjectDetailPage />);
+      renderWithProject(project, { tasks: [] });
 
       expect(screen.getByRole('heading', { name: 'My Project' })).toBeInTheDocument();
       expect(screen.getByRole('list', { name: 'Tasks for project My Project' })).toBeInTheDocument();
     });
 
     it('should set document title with project name', () => {
-      const project = createMockProject({ name: 'My Project' });
-      const mockData = createMockLoaderData(project);
-      mockedUseLoaderData.mockReturnValue(mockData);
-      setupDefaultMocks([]);
+      const project = createMockProject({ name: 'My Project', tasks: [] });
 
-      render(<ProjectDetailPage />);
+      renderWithProject(project, { tasks: [] });
 
       expect(document.title).toBe('Tasky AI | My Project');
     });
@@ -170,66 +179,59 @@ describe('ProjectDetailPage', () => {
     it('should render top app bar with project name and task count', () => {
       const tasks = [createMockTask({ $id: MOCK_TASK_ID_1 }), createMockTask({ $id: MOCK_TASK_ID_2 })];
       const project = createMockProject({ name: 'My Project', tasks });
-      const mockData = createMockLoaderData(project);
-      mockedUseLoaderData.mockReturnValue(mockData);
-      setupDefaultMocks(tasks);
 
-      render(<ProjectDetailPage />);
+      renderWithProject(project, { tasks });
 
       const topAppBar = screen.getByTestId('top-app-bar');
       expect(topAppBar).toHaveTextContent('My Project');
       expect(screen.getByTestId('top-app-bar-count')).toHaveTextContent('2');
     });
 
-    it('should render project action menu button', () => {
-      const project = createMockProject({ name: 'My Project' });
-      const mockData = createMockLoaderData(project);
-      mockedUseLoaderData.mockReturnValue(mockData);
-      setupDefaultMocks([]);
+    it('should render project action menu with correct aria-label', () => {
+      const project = createMockProject({ name: 'My Project', tasks: [] });
 
-      render(<ProjectDetailPage />);
+      renderWithProject(project, { tasks: [] });
 
-      const actionButton = screen.getByRole('button', {
-        name: 'More actions for project My Project',
-      });
-      expect(actionButton).toBeInTheDocument();
+      expect(screen.getByRole('button', { name: 'More actions for project My Project' })).toBeInTheDocument();
+    });
+
+    it('should render add task button with correct aria-label', () => {
+      const project = createMockProject({ name: 'My Project', tasks: [] });
+
+      renderWithProject(project, { tasks: [] });
+
+      expect(screen.getByRole('button', { name: 'Add new task to this project' })).toBeInTheDocument();
     });
   });
 
-  describe('task rendering', () => {
-    it('should render all incomplete tasks', () => {
+  describe('task display', () => {
+    it('should render all incomplete tasks with correct content', () => {
       const tasks = [
         createMockTask({ $id: MOCK_TASK_ID_1, content: 'Task 1', completed: false }),
         createMockTask({ $id: MOCK_TASK_ID_2, content: 'Task 2', completed: false }),
       ];
       const project = createMockProject({ tasks });
-      const mockData = createMockLoaderData(project);
-      mockedUseLoaderData.mockReturnValue(mockData);
-      setupDefaultMocks(tasks);
 
-      render(<ProjectDetailPage />);
+      renderWithProject(project, { tasks });
 
       expect(screen.getByTestId(`task-card-${MOCK_TASK_ID_1}`)).toHaveTextContent('Task 1');
       expect(screen.getByTestId(`task-card-${MOCK_TASK_ID_2}`)).toHaveTextContent('Task 2');
     });
 
-    it('should filter out completed tasks', () => {
+    it('should filter out completed tasks from display', () => {
       const tasks = [
         createMockTask({ $id: MOCK_TASK_ID_1, content: 'Task 1', completed: false }),
         createMockTask({ $id: MOCK_TASK_ID_2, content: 'Task 2', completed: true }),
       ];
       const project = createMockProject({ tasks });
-      const mockData = createMockLoaderData(project);
-      mockedUseLoaderData.mockReturnValue(mockData);
-      setupDefaultMocks([tasks[0]]);
 
-      render(<ProjectDetailPage />);
+      renderWithProject(project, { tasks: [tasks[0]] });
 
       expect(screen.getByTestId(`task-card-${MOCK_TASK_ID_1}`)).toBeInTheDocument();
       expect(screen.queryByTestId(`task-card-${MOCK_TASK_ID_2}`)).not.toBeInTheDocument();
     });
 
-    it('should sort tasks by due date', () => {
+    it('should sort tasks by due date with null dates last', () => {
       const tasks = [
         createMockTask({ $id: MOCK_TASK_ID_1, due_date: new Date('2024-12-31') }),
         createMockTask({ $id: MOCK_TASK_ID_2, due_date: new Date('2024-12-01') }),
@@ -237,11 +239,8 @@ describe('ProjectDetailPage', () => {
       ];
       const sortedTasks = [tasks[1], tasks[0], tasks[2]];
       const project = createMockProject({ tasks });
-      const mockData = createMockLoaderData(project);
-      mockedUseLoaderData.mockReturnValue(mockData);
-      setupDefaultMocks(sortedTasks);
 
-      render(<ProjectDetailPage />);
+      renderWithProject(project, { tasks: sortedTasks });
 
       expect(mockUseLoadMore).toHaveBeenCalledWith(
         expect.arrayContaining([
@@ -255,35 +254,26 @@ describe('ProjectDetailPage', () => {
     it('should show total counter when tasks exist', () => {
       const tasks = [createMockTask()];
       const project = createMockProject({ tasks });
-      const mockData = createMockLoaderData(project);
-      mockedUseLoaderData.mockReturnValue(mockData);
-      setupDefaultMocks(tasks);
 
-      render(<ProjectDetailPage />);
+      renderWithProject(project, { tasks });
 
       expect(screen.getByTestId('total-counter')).toHaveTextContent('1');
     });
 
-    it('should not show total counter when no tasks', () => {
+    it('should not show total counter when no tasks exist', () => {
       const project = createMockProject({ tasks: [] });
-      const mockData = createMockLoaderData(project);
-      mockedUseLoaderData.mockReturnValue(mockData);
-      setupDefaultMocks([]);
 
-      render(<ProjectDetailPage />);
+      renderWithProject(project, { tasks: [] });
 
       expect(screen.queryByTestId('total-counter')).not.toBeInTheDocument();
     });
   });
 
-  describe('add task functionality', () => {
-    it('should show add task button when form is not visible', () => {
+  describe('add task', () => {
+    it('should show add task button initially', () => {
       const project = createMockProject({ tasks: [] });
-      const mockData = createMockLoaderData(project);
-      mockedUseLoaderData.mockReturnValue(mockData);
-      setupDefaultMocks([]);
 
-      render(<ProjectDetailPage />);
+      renderWithProject(project, { tasks: [] });
 
       expect(screen.getByTestId('add-task-button')).toBeInTheDocument();
     });
@@ -291,113 +281,62 @@ describe('ProjectDetailPage', () => {
     it('should show task form when add task button is clicked', async () => {
       const user = userEvent.setup();
       const project = createMockProject({ tasks: [] });
-      const mockData = createMockLoaderData(project);
-      mockedUseLoaderData.mockReturnValue(mockData);
-      setupDefaultMocks([]);
+      renderWithProject(project, { tasks: [] });
 
-      render(<ProjectDetailPage />);
-
-      const addButton = screen.getByTestId('add-task-button');
-      await user.click(addButton);
+      await user.click(screen.getByTestId('add-task-button'));
 
       expect(screen.getByTestId('task-form')).toBeInTheDocument();
-    });
-
-    it('should hide add task button when form is visible', async () => {
-      const user = userEvent.setup();
-      const project = createMockProject({ tasks: [] });
-      const mockData = createMockLoaderData(project);
-      mockedUseLoaderData.mockReturnValue(mockData);
-      setupDefaultMocks([]);
-
-      render(<ProjectDetailPage />);
-
-      const addButton = screen.getByTestId('add-task-button');
-      await user.click(addButton);
-
       expect(screen.queryByTestId('add-task-button')).not.toBeInTheDocument();
     });
 
     it('should hide form when cancel button is clicked', async () => {
       const user = userEvent.setup();
       const project = createMockProject({ tasks: [] });
-      const mockData = createMockLoaderData(project);
-      mockedUseLoaderData.mockReturnValue(mockData);
-      setupDefaultMocks([]);
-
-      render(<ProjectDetailPage />);
+      renderWithProject(project, { tasks: [] });
 
       await user.click(screen.getByTestId('add-task-button'));
-      expect(screen.getByTestId('task-form')).toBeInTheDocument();
-
       await user.click(screen.getByTestId('cancel-button'));
+
       expect(screen.queryByTestId('task-form')).not.toBeInTheDocument();
+      expect(screen.getByTestId('add-task-button')).toBeInTheDocument();
     });
 
-    it('should call handleCreateTask when form is submitted', async () => {
+    it('should call handleCreate when form is submitted', async () => {
       const user = userEvent.setup();
-      const mockHandleCreate = vi.fn();
       const project = createMockProject({ tasks: [] });
-      const mockData = createMockLoaderData(project);
-      mockedUseLoaderData.mockReturnValue(mockData);
-
-      mockUseTaskMutation.mockReturnValue({
-        handleCreate: mockHandleCreate,
-        handleUpdate: vi.fn(),
-        handleDelete: vi.fn(),
-      });
-
-      mockUseLoadMore.mockReturnValue({
-        items: [],
-        isLoading: false,
-        hasMore: false,
-        handleLoadMore: vi.fn(),
-        getItemClassName: () => '',
-        getItemStyle: () => ({}),
-      });
-
-      render(<ProjectDetailPage />);
+      const { mockHandleCreate } = renderWithProject(project, { tasks: [] });
 
       await user.click(screen.getByTestId('add-task-button'));
       await user.click(screen.getByTestId('submit-button'));
 
-      expect(mockHandleCreate).toHaveBeenCalled();
+      expect(mockHandleCreate).toHaveBeenCalledTimes(1);
     });
   });
 
   describe('empty state', () => {
-    it('should show empty state when no tasks and form is not visible', () => {
+    it('should show empty state with project variant when no tasks and form closed', () => {
       const project = createMockProject({ tasks: [] });
-      const mockData = createMockLoaderData(project);
-      mockedUseLoaderData.mockReturnValue(mockData);
-      setupDefaultMocks([]);
 
-      render(<ProjectDetailPage />);
+      renderWithProject(project, { tasks: [] });
 
-      expect(screen.getByTestId('empty-state')).toBeInTheDocument();
-      expect(screen.getByTestId('empty-state')).toHaveAttribute('data-variant', 'project');
+      const emptyState = screen.getByTestId('empty-state');
+      expect(emptyState).toBeInTheDocument();
+      expect(emptyState).toHaveAttribute('data-variant', 'project');
     });
 
     it('should not show empty state when tasks exist', () => {
       const tasks = [createMockTask()];
       const project = createMockProject({ tasks });
-      const mockData = createMockLoaderData(project);
-      mockedUseLoaderData.mockReturnValue(mockData);
-      setupDefaultMocks(tasks);
 
-      render(<ProjectDetailPage />);
+      renderWithProject(project, { tasks });
 
       expect(screen.queryByTestId('empty-state')).not.toBeInTheDocument();
     });
 
-    it('should not show empty state when form is visible', async () => {
+    it('should not show empty state when form is open', async () => {
       const user = userEvent.setup();
       const project = createMockProject({ tasks: [] });
-      const mockData = createMockLoaderData(project);
-      mockedUseLoaderData.mockReturnValue(mockData);
-      setupDefaultMocks([]);
-
-      render(<ProjectDetailPage />);
+      renderWithProject(project, { tasks: [] });
 
       await user.click(screen.getByTestId('add-task-button'));
 
@@ -405,29 +344,12 @@ describe('ProjectDetailPage', () => {
     });
   });
 
-  describe('load more functionality', () => {
+  describe('load more', () => {
     it('should show load more button when hasMore is true', () => {
       const tasks = [createMockTask()];
       const project = createMockProject({ tasks });
-      const mockData = createMockLoaderData(project);
-      mockedUseLoaderData.mockReturnValue(mockData);
 
-      mockUseTaskMutation.mockReturnValue({
-        handleCreate: vi.fn(),
-        handleUpdate: vi.fn(),
-        handleDelete: vi.fn(),
-      });
-
-      mockUseLoadMore.mockReturnValue({
-        items: tasks,
-        isLoading: false,
-        hasMore: true,
-        handleLoadMore: vi.fn(),
-        getItemClassName: () => '',
-        getItemStyle: () => ({}),
-      });
-
-      render(<ProjectDetailPage />);
+      renderWithProject(project, { tasks, hasMore: true });
 
       expect(screen.getByTestId('load-more-button')).toBeInTheDocument();
     });
@@ -435,87 +357,32 @@ describe('ProjectDetailPage', () => {
     it('should not show load more button when hasMore is false', () => {
       const tasks = [createMockTask()];
       const project = createMockProject({ tasks });
-      const mockData = createMockLoaderData(project);
-      mockedUseLoaderData.mockReturnValue(mockData);
-      setupDefaultMocks(tasks);
 
-      render(<ProjectDetailPage />);
+      renderWithProject(project, { tasks });
 
       expect(screen.queryByTestId('load-more-button')).not.toBeInTheDocument();
     });
 
-    it('should call handleLoadMore when button is clicked', async () => {
+    it('should call handleLoadMore when load more button is clicked', async () => {
       const user = userEvent.setup();
       const tasks = [createMockTask()];
-      const mockHandleLoadMore = vi.fn();
       const project = createMockProject({ tasks });
-      const mockData = createMockLoaderData(project);
-      mockedUseLoaderData.mockReturnValue(mockData);
+      const { mockHandleLoadMore } = renderWithProject(project, { tasks, hasMore: true });
 
-      mockUseTaskMutation.mockReturnValue({
-        handleCreate: vi.fn(),
-        handleUpdate: vi.fn(),
-        handleDelete: vi.fn(),
-      });
+      await user.click(screen.getByTestId('load-more-button'));
 
-      mockUseLoadMore.mockReturnValue({
-        items: tasks,
-        isLoading: false,
-        hasMore: true,
-        handleLoadMore: mockHandleLoadMore,
-        getItemClassName: () => '',
-        getItemStyle: () => ({}),
-      });
-
-      render(<ProjectDetailPage />);
-
-      const loadMoreButton = screen.getByTestId('load-more-button');
-      await user.click(loadMoreButton);
-
-      expect(mockHandleLoadMore).toHaveBeenCalled();
+      expect(mockHandleLoadMore).toHaveBeenCalledTimes(1);
     });
 
-    it('should disable load more button when loading', () => {
+    it('should disable load more button and show loading text when loading', () => {
       const tasks = [createMockTask()];
       const project = createMockProject({ tasks });
-      const mockData = createMockLoaderData(project);
-      mockedUseLoaderData.mockReturnValue(mockData);
 
-      mockUseTaskMutation.mockReturnValue({
-        handleCreate: vi.fn(),
-        handleUpdate: vi.fn(),
-        handleDelete: vi.fn(),
-      });
-
-      mockUseLoadMore.mockReturnValue({
-        items: tasks,
-        isLoading: true,
-        hasMore: true,
-        handleLoadMore: vi.fn(),
-        getItemClassName: () => '',
-        getItemStyle: () => ({}),
-      });
-
-      render(<ProjectDetailPage />);
+      renderWithProject(project, { tasks, hasMore: true, isLoading: true });
 
       const loadMoreButton = screen.getByTestId('load-more-button');
       expect(loadMoreButton).toBeDisabled();
       expect(loadMoreButton).toHaveTextContent('Loading...');
-    });
-  });
-
-  describe('accessibility', () => {
-    it('should have proper ARIA labels', () => {
-      const project = createMockProject({ name: 'My Project', tasks: [] });
-      const mockData = createMockLoaderData(project);
-      mockedUseLoaderData.mockReturnValue(mockData);
-      setupDefaultMocks([]);
-
-      render(<ProjectDetailPage />);
-
-      expect(screen.getByRole('list', { name: 'Tasks for project My Project' })).toBeInTheDocument();
-      expect(screen.getByRole('button', { name: 'More actions for project My Project' })).toBeInTheDocument();
-      expect(screen.getByRole('button', { name: 'Add new task to this project' })).toBeInTheDocument();
     });
   });
 });

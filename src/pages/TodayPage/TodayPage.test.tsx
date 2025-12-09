@@ -1,10 +1,10 @@
 import { createMockProjectsWithTasksLoaderData, createMockTask } from '@/core/test-setup/factories';
 import { Task } from '@/features/tasks/types';
+import { TodayPage } from '@/pages/TodayPage/TodayPage';
 import { render, screen } from '@testing-library/react';
 import { userEvent } from '@testing-library/user-event';
 import { useLoaderData } from 'react-router';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
-import { TodayPage } from './TodayPage';
 
 vi.mock('react-router', () => ({
   useLoaderData: vi.fn(),
@@ -129,207 +129,160 @@ describe('TodayPage', () => {
   const MOCK_TASK_ID_1 = 'task-1';
   const MOCK_TASK_ID_2 = 'task-2';
 
-  const setupDefaultMocks = (tasks: Task[] = [createMockTask()]) => {
+  interface MockSetup {
+    filteredTasks?: Task[];
+    items?: Task[];
+    isLoading?: boolean;
+    hasMore?: boolean;
+    filterValue?: string;
+  }
+
+  const setupMocks = ({
+    filteredTasks = [createMockTask()],
+    items = filteredTasks,
+    isLoading = false,
+    hasMore = false,
+    filterValue = '',
+  }: MockSetup = {}) => {
+    const mockSetFilterValue = vi.fn();
+    const mockHandleLoadMore = vi.fn();
+    const mockHandleCreate = vi.fn();
+
     mockUseProjectFilter.mockReturnValue({
-      filteredTasks: tasks,
-      filteredCount: tasks.length,
-      filterValue: '',
-      setFilterValue: vi.fn(),
+      filteredTasks,
+      filteredCount: filteredTasks.length,
+      filterValue,
+      setFilterValue: mockSetFilterValue,
     });
 
     mockUseLoadMore.mockReturnValue({
-      items: tasks,
-      isLoading: false,
-      hasMore: false,
-      handleLoadMore: vi.fn(),
+      items,
+      isLoading,
+      hasMore,
+      handleLoadMore: mockHandleLoadMore,
       getItemClassName: () => '',
       getItemStyle: () => ({}),
     });
 
     mockUseTaskMutation.mockReturnValue({
-      handleCreate: vi.fn(),
+      handleCreate: mockHandleCreate,
     });
+
+    return { mockSetFilterValue, mockHandleLoadMore, mockHandleCreate };
+  };
+
+  const renderWithData = (tasks: Task[] = [createMockTask()], mockSetup: MockSetup = {}) => {
+    const mockData = createMockProjectsWithTasksLoaderData(tasks);
+    mockedUseLoaderData.mockReturnValue(mockData);
+    const mocks = setupMocks({ filteredTasks: tasks, ...mockSetup });
+    render(<TodayPage />);
+    return mocks;
   };
 
   beforeEach(() => {
     vi.clearAllMocks();
   });
 
-  describe('basic rendering', () => {
-    it('should render page title and structure', () => {
-      const mockData = createMockProjectsWithTasksLoaderData();
-      mockedUseLoaderData.mockReturnValue(mockData);
-      setupDefaultMocks();
-
-      render(<TodayPage />);
+  describe('rendering', () => {
+    it('should render page title and list structure', () => {
+      renderWithData();
 
       expect(screen.getByRole('heading', { name: 'Today' })).toBeInTheDocument();
       expect(screen.getByRole('list', { name: "Today's tasks" })).toBeInTheDocument();
     });
 
-    it('should set document title', () => {
-      const mockData = createMockProjectsWithTasksLoaderData();
-      mockedUseLoaderData.mockReturnValue(mockData);
-      setupDefaultMocks();
-
-      render(<TodayPage />);
+    it('should set document title to "Tasky AI | Today"', () => {
+      renderWithData();
 
       expect(document.title).toBe('Tasky AI | Today');
     });
 
-    it('should render top app bar with correct props', () => {
+    it('should render top app bar with title and task count', () => {
       const tasks = [createMockTask(), createMockTask({ $id: MOCK_TASK_ID_2 })];
-      const mockData = createMockProjectsWithTasksLoaderData(tasks);
-      mockedUseLoaderData.mockReturnValue(mockData);
-      setupDefaultMocks(tasks);
 
-      render(<TodayPage />);
+      renderWithData(tasks);
 
       const topAppBar = screen.getByTestId('top-app-bar');
       expect(topAppBar).toHaveTextContent('Today');
       expect(topAppBar).toHaveTextContent('2');
     });
+
+    it('should render add task button with correct aria-label', () => {
+      renderWithData();
+
+      expect(screen.getByLabelText('Add new task for today')).toBeInTheDocument();
+    });
   });
 
-  describe('task rendering', () => {
-    it('should render all tasks', () => {
+  describe('task display', () => {
+    it('should render all task cards with correct content', () => {
       const tasks = [
         createMockTask({ $id: MOCK_TASK_ID_1, content: 'Task 1' }),
         createMockTask({ $id: MOCK_TASK_ID_2, content: 'Task 2' }),
       ];
-      const mockData = createMockProjectsWithTasksLoaderData(tasks);
-      mockedUseLoaderData.mockReturnValue(mockData);
-      setupDefaultMocks(tasks);
 
-      render(<TodayPage />);
+      renderWithData(tasks);
 
       expect(screen.getByTestId(`task-card-${MOCK_TASK_ID_1}`)).toHaveTextContent('Task 1');
       expect(screen.getByTestId(`task-card-${MOCK_TASK_ID_2}`)).toHaveTextContent('Task 2');
     });
 
     it('should show total counter when tasks exist', () => {
-      const mockData = createMockProjectsWithTasksLoaderData([createMockTask()]);
-      mockedUseLoaderData.mockReturnValue(mockData);
-      setupDefaultMocks([createMockTask()]);
-
-      render(<TodayPage />);
+      renderWithData([createMockTask()]);
 
       expect(screen.getByTestId('total-counter')).toHaveTextContent('1');
     });
 
-    it('should not show total counter when no tasks', () => {
-      const mockData = createMockProjectsWithTasksLoaderData([]);
-      mockedUseLoaderData.mockReturnValue(mockData);
-      setupDefaultMocks([]);
-
-      render(<TodayPage />);
+    it('should not show total counter when no tasks exist', () => {
+      renderWithData([]);
 
       expect(screen.queryByTestId('total-counter')).not.toBeInTheDocument();
     });
   });
 
-  describe('add task functionality', () => {
-    it('should show add task button by default', () => {
-      const mockData = createMockProjectsWithTasksLoaderData();
-      mockedUseLoaderData.mockReturnValue(mockData);
-      setupDefaultMocks();
-
-      render(<TodayPage />);
+  describe('Add Task', () => {
+    it('should show add task button initially', () => {
+      renderWithData();
 
       expect(screen.getByTestId('add-task-button')).toBeInTheDocument();
     });
 
-    it('should open task form when add button is clicked', async () => {
+    it('should show task form when add button is clicked', async () => {
       const user = userEvent.setup();
-      const mockData = createMockProjectsWithTasksLoaderData();
-      mockedUseLoaderData.mockReturnValue(mockData);
-      setupDefaultMocks();
+      renderWithData();
 
-      render(<TodayPage />);
-      const addButton = screen.getByTestId('add-task-button');
-      await user.click(addButton);
+      await user.click(screen.getByTestId('add-task-button'));
 
       expect(screen.getByTestId('task-form')).toBeInTheDocument();
       expect(screen.queryByTestId('add-task-button')).not.toBeInTheDocument();
     });
 
-    it('should close form when cancel is clicked', async () => {
+    it('should hide form when cancel button is clicked', async () => {
       const user = userEvent.setup();
-      const mockData = createMockProjectsWithTasksLoaderData();
-      mockedUseLoaderData.mockReturnValue(mockData);
-      setupDefaultMocks();
+      renderWithData();
 
-      render(<TodayPage />);
       await user.click(screen.getByTestId('add-task-button'));
-      const cancelButton = screen.getByTestId('cancel-button');
-      await user.click(cancelButton);
+      await user.click(screen.getByTestId('cancel-button'));
 
       expect(screen.queryByTestId('task-form')).not.toBeInTheDocument();
       expect(screen.getByTestId('add-task-button')).toBeInTheDocument();
     });
 
-    it('should call handleCreateTask when form is submitted', async () => {
+    it('should call handleCreate when form is submitted', async () => {
       const user = userEvent.setup();
-      const mockData = createMockProjectsWithTasksLoaderData();
-      const mockHandleCreate = vi.fn();
-      mockedUseLoaderData.mockReturnValue(mockData);
+      const { mockHandleCreate } = renderWithData();
 
-      mockUseProjectFilter.mockReturnValue({
-        filteredTasks: [createMockTask()],
-        filteredCount: 1,
-        filterValue: '',
-        setFilterValue: vi.fn(),
-      });
-
-      mockUseLoadMore.mockReturnValue({
-        items: [createMockTask()],
-        isLoading: false,
-        hasMore: false,
-        handleLoadMore: vi.fn(),
-        getItemClassName: () => '',
-        getItemStyle: () => ({}),
-      });
-
-      mockUseTaskMutation.mockReturnValue({
-        handleCreate: mockHandleCreate,
-      });
-
-      render(<TodayPage />);
       await user.click(screen.getByTestId('add-task-button'));
-      const submitButton = screen.getByTestId('submit-button');
-      await user.click(submitButton);
+      await user.click(screen.getByTestId('submit-button'));
 
       expect(mockHandleCreate).toHaveBeenCalledWith({ content: 'New task' });
     });
 
     it('should hide empty state when form is open', async () => {
       const user = userEvent.setup();
-      const mockData = createMockProjectsWithTasksLoaderData([]);
-      mockedUseLoaderData.mockReturnValue(mockData);
+      renderWithData([], { filteredTasks: [] });
 
-      mockUseProjectFilter.mockReturnValue({
-        filteredTasks: [],
-        filteredCount: 0,
-        filterValue: '',
-        setFilterValue: vi.fn(),
-      });
-
-      mockUseLoadMore.mockReturnValue({
-        items: [],
-        isLoading: false,
-        hasMore: false,
-        handleLoadMore: vi.fn(),
-        getItemClassName: () => '',
-        getItemStyle: () => ({}),
-      });
-
-      mockUseTaskMutation.mockReturnValue({
-        handleCreate: vi.fn(),
-      });
-
-      render(<TodayPage />);
       expect(screen.getByTestId('empty-state')).toBeInTheDocument();
-
       await user.click(screen.getByTestId('add-task-button'));
 
       expect(screen.queryByTestId('empty-state')).not.toBeInTheDocument();
@@ -338,245 +291,72 @@ describe('TodayPage', () => {
 
   describe('filtering', () => {
     it('should render filter select', () => {
-      const mockData = createMockProjectsWithTasksLoaderData();
-      mockedUseLoaderData.mockReturnValue(mockData);
-      setupDefaultMocks();
-
-      render(<TodayPage />);
+      renderWithData();
 
       expect(screen.getByTestId('filter-select')).toBeInTheDocument();
     });
 
-    it('should pass filtered tasks to load more hook', () => {
+    it('should pass filtered tasks to useLoadMore hook', () => {
       const allTasks = [createMockTask(), createMockTask({ $id: MOCK_TASK_ID_2 })];
       const filteredTasks = [createMockTask()];
-      const mockData = createMockProjectsWithTasksLoaderData(allTasks);
-      mockedUseLoaderData.mockReturnValue(mockData);
 
-      mockUseProjectFilter.mockReturnValue({
-        filteredTasks,
-        filteredCount: filteredTasks.length,
-        filterValue: MOCK_PROJECT_ID,
-        setFilterValue: vi.fn(),
-      });
-
-      mockUseLoadMore.mockReturnValue({
-        items: filteredTasks,
-        isLoading: false,
-        hasMore: false,
-        handleLoadMore: vi.fn(),
-        getItemClassName: () => '',
-        getItemStyle: () => ({}),
-      });
-
-      mockUseTaskMutation.mockReturnValue({
-        handleCreate: vi.fn(),
-      });
-
-      render(<TodayPage />);
+      renderWithData(allTasks, { filteredTasks });
 
       expect(mockUseLoadMore).toHaveBeenCalledWith(filteredTasks);
     });
 
-    it('should handle filter value changes', async () => {
+    it('should call setFilterValue when filter value changes', async () => {
       const user = userEvent.setup();
-      const mockData = createMockProjectsWithTasksLoaderData();
-      const mockSetValue = vi.fn();
-      mockedUseLoaderData.mockReturnValue(mockData);
+      const { mockSetFilterValue } = renderWithData();
 
-      mockUseProjectFilter.mockReturnValue({
-        filteredTasks: [createMockTask()],
-        filteredCount: 1,
-        filterValue: '',
-        setFilterValue: mockSetValue,
-      });
+      await user.selectOptions(screen.getByTestId('filter-select'), MOCK_PROJECT_ID);
 
-      mockUseLoadMore.mockReturnValue({
-        items: [createMockTask()],
-        isLoading: false,
-        hasMore: false,
-        handleLoadMore: vi.fn(),
-        getItemClassName: () => '',
-        getItemStyle: () => ({}),
-      });
-
-      mockUseTaskMutation.mockReturnValue({
-        handleCreate: vi.fn(),
-      });
-
-      render(<TodayPage />);
-      const filterSelect = screen.getByTestId('filter-select');
-      await user.selectOptions(filterSelect, MOCK_PROJECT_ID);
-
-      expect(mockSetValue).toHaveBeenCalledWith(MOCK_PROJECT_ID);
+      expect(mockSetFilterValue).toHaveBeenCalledWith(MOCK_PROJECT_ID);
     });
   });
 
-  describe('empty state', () => {
-    it('should show empty state when no filtered tasks and form is closed', () => {
-      const mockData = createMockProjectsWithTasksLoaderData([createMockTask()]);
-      mockedUseLoaderData.mockReturnValue(mockData);
-
-      mockUseProjectFilter.mockReturnValue({
-        filteredTasks: [],
-        filteredCount: 0,
-        filterValue: '',
-        setFilterValue: vi.fn(),
-      });
-
-      mockUseLoadMore.mockReturnValue({
-        items: [],
-        isLoading: false,
-        hasMore: false,
-        handleLoadMore: vi.fn(),
-        getItemClassName: () => '',
-        getItemStyle: () => ({}),
-      });
-
-      mockUseTaskMutation.mockReturnValue({
-        handleCreate: vi.fn(),
-      });
-
-      render(<TodayPage />);
+  describe('Empty State', () => {
+    it('should show empty state when no filtered tasks and form closed', () => {
+      renderWithData([createMockTask()], { filteredTasks: [] });
 
       expect(screen.getByTestId('empty-state')).toBeInTheDocument();
     });
 
     it('should not show empty state when tasks exist', () => {
-      const mockData = createMockProjectsWithTasksLoaderData();
-      mockedUseLoaderData.mockReturnValue(mockData);
-      setupDefaultMocks();
-
-      render(<TodayPage />);
+      renderWithData();
 
       expect(screen.queryByTestId('empty-state')).not.toBeInTheDocument();
     });
   });
 
-  describe('load more functionality', () => {
+  describe('load more', () => {
     it('should show load more button when hasMore is true', () => {
-      const mockData = createMockProjectsWithTasksLoaderData();
-      mockedUseLoaderData.mockReturnValue(mockData);
-
-      mockUseProjectFilter.mockReturnValue({
-        filteredTasks: [createMockTask()],
-        filteredCount: 1,
-        filterValue: '',
-        setFilterValue: vi.fn(),
-      });
-
-      mockUseLoadMore.mockReturnValue({
-        items: [createMockTask()],
-        isLoading: false,
-        hasMore: true,
-        handleLoadMore: vi.fn(),
-        getItemClassName: () => '',
-        getItemStyle: () => ({}),
-      });
-
-      mockUseTaskMutation.mockReturnValue({
-        handleCreate: vi.fn(),
-      });
-
-      render(<TodayPage />);
+      renderWithData([createMockTask()], { hasMore: true });
 
       expect(screen.getByTestId('load-more-button')).toBeInTheDocument();
     });
 
     it('should not show load more button when hasMore is false', () => {
-      const mockData = createMockProjectsWithTasksLoaderData();
-      mockedUseLoaderData.mockReturnValue(mockData);
-      setupDefaultMocks();
-
-      render(<TodayPage />);
+      renderWithData();
 
       expect(screen.queryByTestId('load-more-button')).not.toBeInTheDocument();
     });
 
-    it('should call handleLoadMore when button is clicked', async () => {
+    it('should call handleLoadMore when load more button is clicked', async () => {
       const user = userEvent.setup();
-      const mockData = createMockProjectsWithTasksLoaderData();
-      const mockHandleLoadMore = vi.fn();
-      mockedUseLoaderData.mockReturnValue(mockData);
+      const { mockHandleLoadMore } = renderWithData([createMockTask()], { hasMore: true });
 
-      mockUseProjectFilter.mockReturnValue({
-        filteredTasks: [createMockTask()],
-        filteredCount: 1,
-        filterValue: '',
-        setFilterValue: vi.fn(),
-      });
+      await user.click(screen.getByTestId('load-more-button'));
 
-      mockUseLoadMore.mockReturnValue({
-        items: [createMockTask()],
-        isLoading: false,
-        hasMore: true,
-        handleLoadMore: mockHandleLoadMore,
-        getItemClassName: () => '',
-        getItemStyle: () => ({}),
-      });
-
-      mockUseTaskMutation.mockReturnValue({
-        handleCreate: vi.fn(),
-      });
-
-      render(<TodayPage />);
-      const loadMoreButton = screen.getByTestId('load-more-button');
-      await user.click(loadMoreButton);
-
-      expect(mockHandleLoadMore).toHaveBeenCalled();
+      expect(mockHandleLoadMore).toHaveBeenCalledTimes(1);
     });
 
-    it('should disable load more button when loading', () => {
-      const mockData = createMockProjectsWithTasksLoaderData();
-      mockedUseLoaderData.mockReturnValue(mockData);
-
-      mockUseProjectFilter.mockReturnValue({
-        filteredTasks: [createMockTask()],
-        filteredCount: 1,
-        filterValue: '',
-        setFilterValue: vi.fn(),
-      });
-
-      mockUseLoadMore.mockReturnValue({
-        items: [createMockTask()],
-        isLoading: true,
-        hasMore: true,
-        handleLoadMore: vi.fn(),
-        getItemClassName: () => '',
-        getItemStyle: () => ({}),
-      });
-
-      mockUseTaskMutation.mockReturnValue({
-        handleCreate: vi.fn(),
-      });
-
-      render(<TodayPage />);
+    it('should disable load more button and show loading text when loading', () => {
+      renderWithData([createMockTask()], { hasMore: true, isLoading: true });
 
       const loadMoreButton = screen.getByTestId('load-more-button');
       expect(loadMoreButton).toBeDisabled();
       expect(loadMoreButton).toHaveTextContent('Loading...');
-    });
-  });
-
-  describe('accessibility', () => {
-    it('should have proper ARIA labels', () => {
-      const mockData = createMockProjectsWithTasksLoaderData();
-      mockedUseLoaderData.mockReturnValue(mockData);
-      setupDefaultMocks();
-
-      render(<TodayPage />);
-
-      expect(screen.getByRole('list', { name: "Today's tasks" })).toBeInTheDocument();
-    });
-
-    it('should have accessible add task button', () => {
-      const mockData = createMockProjectsWithTasksLoaderData();
-      mockedUseLoaderData.mockReturnValue(mockData);
-      setupDefaultMocks();
-
-      render(<TodayPage />);
-
-      expect(screen.getByLabelText('Add new task for today')).toBeInTheDocument();
     });
   });
 });

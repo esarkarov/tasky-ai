@@ -1,9 +1,9 @@
+import { HomePage } from '@/pages/HomePage/HomePage';
 import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import type { ReactNode } from 'react';
 import { BrowserRouter } from 'react-router';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
-import { HomePage } from './HomePage';
 
 const mockUseAuth = vi.fn();
 vi.mock('@clerk/clerk-react', () => ({
@@ -31,197 +31,121 @@ vi.mock('@/shared/constants', () => ({
   },
 }));
 
-const renderComponent = () => {
-  return render(
-    <BrowserRouter>
-      <HomePage />
-    </BrowserRouter>
-  );
-};
-
 describe('HomePage', () => {
+  const renderHomePage = (isSignedIn: boolean = false) => {
+    mockUseAuth.mockReturnValue({ isSignedIn });
+    return render(
+      <BrowserRouter>
+        <HomePage />
+      </BrowserRouter>
+    );
+  };
+
   beforeEach(() => {
     vi.clearAllMocks();
   });
 
-  describe('basic rendering', () => {
-    it('should render page with main content', () => {
-      mockUseAuth.mockReturnValue({ isSignedIn: false });
+  describe('common elements', () => {
+    it('should render main container with correct aria-labelledby', () => {
+      renderHomePage();
 
-      renderComponent();
-
-      expect(screen.getByRole('main')).toBeInTheDocument();
-      expect(screen.getByRole('heading', { level: 1 })).toBeInTheDocument();
+      const main = screen.getByRole('main');
+      expect(main).toBeInTheDocument();
+      expect(main).toHaveAttribute('aria-labelledby', 'homepage-heading');
     });
 
-    it('should set document title', () => {
-      mockUseAuth.mockReturnValue({ isSignedIn: false });
-
-      renderComponent();
+    it('should set document title to "Tasky AI | AI-Powered Task Management App"', () => {
+      renderHomePage();
 
       expect(document.title).toBe('Tasky AI | AI-Powered Task Management App');
     });
 
     it('should render page title with AI-Powered highlight', () => {
-      mockUseAuth.mockReturnValue({ isSignedIn: false });
+      renderHomePage();
 
-      renderComponent();
-
+      const heading = screen.getByRole('heading', { level: 1 });
+      expect(heading).toHaveAttribute('id', 'homepage-heading');
       expect(screen.getByText(/Simplify Your Work and Life with/i)).toBeInTheDocument();
       expect(screen.getByText('AI-Powered')).toBeInTheDocument();
       expect(screen.getByText(/Task Management/i)).toBeInTheDocument();
     });
 
-    it('should render description text', () => {
-      mockUseAuth.mockReturnValue({ isSignedIn: false });
+    it('should render description with correct aria-label', () => {
+      renderHomePage();
 
-      renderComponent();
-
-      expect(
-        screen.getByText(/Simplify life for both you and your team with the AI powered task manager/i)
-      ).toBeInTheDocument();
+      const description = screen.getByLabelText('App description');
+      expect(description).toBeInTheDocument();
+      expect(description.tagName).toBe('P');
+      expect(description).toHaveTextContent(
+        /Simplify life for both you and your team with the AI powered task manager/i
+      );
     });
 
-    it('should render hero images', () => {
-      mockUseAuth.mockReturnValue({ isSignedIn: false });
-
-      renderComponent();
+    it('should render hero images with correct attributes', () => {
+      renderHomePage();
 
       const mobileImage = screen.getByAltText('Illustration of Tasky AI app interface on mobile');
       const desktopImage = screen.getByAltText('Illustration of Tasky AI app interface on desktop');
-
       expect(mobileImage).toHaveAttribute('src', '/banner/hero-banner-sm.png');
       expect(desktopImage).toHaveAttribute('src', '/banner/hero-banner-lg.png');
     });
+
+    it('should render action buttons group with aria-label', () => {
+      renderHomePage();
+
+      expect(screen.getByRole('group', { name: 'Primary actions' })).toBeInTheDocument();
+    });
   });
 
-  describe('user not signed in', () => {
-    it('should show "Get Started" button', () => {
-      mockUseAuth.mockReturnValue({ isSignedIn: false });
-
-      renderComponent();
+  describe('signed out user', () => {
+    it('should show Get Started button with correct href', () => {
+      renderHomePage(false);
 
       const getStartedLink = screen.getByRole('link', { name: 'Create your Tasky AI account' });
       expect(getStartedLink).toBeInTheDocument();
       expect(getStartedLink).toHaveAttribute('href', '/register');
     });
 
-    it('should not show "Go to Dashboard" button', () => {
-      mockUseAuth.mockReturnValue({ isSignedIn: false });
-
-      renderComponent();
+    it('should not show Go to Dashboard button', () => {
+      renderHomePage(false);
 
       expect(screen.queryByRole('link', { name: 'Go to your dashboard' })).not.toBeInTheDocument();
     });
 
-    it('should navigate to register page when Get Started is clicked', async () => {
+    it('should maintain href after clicking Get Started button', async () => {
       const user = userEvent.setup();
-      mockUseAuth.mockReturnValue({ isSignedIn: false });
-
-      renderComponent();
-
+      renderHomePage(false);
       const getStartedLink = screen.getByRole('link', { name: 'Create your Tasky AI account' });
+
       await user.click(getStartedLink);
 
       expect(getStartedLink).toHaveAttribute('href', '/register');
     });
-
-    it('should render complete page for signed out user', () => {
-      mockUseAuth.mockReturnValue({ isSignedIn: false });
-
-      renderComponent();
-
-      expect(screen.getByRole('main')).toBeInTheDocument();
-      expect(screen.getByRole('heading', { level: 1 })).toBeInTheDocument();
-      expect(screen.getByLabelText('App description')).toBeInTheDocument();
-      expect(screen.getByRole('link', { name: 'Create your Tasky AI account' })).toBeInTheDocument();
-      expect(screen.getByAltText(/Tasky AI app interface on mobile/i)).toBeInTheDocument();
-      expect(screen.getByAltText(/Tasky AI app interface on desktop/i)).toBeInTheDocument();
-    });
   });
 
-  describe('user signed in', () => {
-    it('should show "Go to Dashboard" button', () => {
-      mockUseAuth.mockReturnValue({ isSignedIn: true });
-
-      renderComponent();
+  describe('signed in user', () => {
+    it('should show Go to Dashboard button with correct href', () => {
+      renderHomePage(true);
 
       const dashboardLink = screen.getByRole('link', { name: 'Go to your dashboard' });
       expect(dashboardLink).toBeInTheDocument();
       expect(dashboardLink).toHaveAttribute('href', '/today');
     });
 
-    it('should not show "Get Started" button', () => {
-      mockUseAuth.mockReturnValue({ isSignedIn: true });
-
-      renderComponent();
+    it('should not show Get Started button', () => {
+      renderHomePage(true);
 
       expect(screen.queryByRole('link', { name: 'Create your Tasky AI account' })).not.toBeInTheDocument();
     });
 
-    it('should navigate to dashboard when Go to Dashboard is clicked', async () => {
+    it('should maintain href after clicking Go to Dashboard button', async () => {
       const user = userEvent.setup();
-      mockUseAuth.mockReturnValue({ isSignedIn: true });
-
-      renderComponent();
-
+      renderHomePage(true);
       const dashboardLink = screen.getByRole('link', { name: 'Go to your dashboard' });
+
       await user.click(dashboardLink);
 
       expect(dashboardLink).toHaveAttribute('href', '/today');
-    });
-
-    it('should render complete page for signed in user', () => {
-      mockUseAuth.mockReturnValue({ isSignedIn: true });
-
-      renderComponent();
-
-      expect(screen.getByRole('main')).toBeInTheDocument();
-      expect(screen.getByRole('heading', { level: 1 })).toBeInTheDocument();
-      expect(screen.getByLabelText('App description')).toBeInTheDocument();
-      expect(screen.getByRole('link', { name: 'Go to your dashboard' })).toBeInTheDocument();
-      expect(screen.getByAltText(/Tasky AI app interface on mobile/i)).toBeInTheDocument();
-      expect(screen.getByAltText(/Tasky AI app interface on desktop/i)).toBeInTheDocument();
-    });
-  });
-
-  describe('accessibility', () => {
-    it('should have correct aria-labelledby on main section', () => {
-      mockUseAuth.mockReturnValue({ isSignedIn: false });
-
-      renderComponent();
-
-      const main = screen.getByRole('main');
-      expect(main).toHaveAttribute('aria-labelledby', 'homepage-heading');
-    });
-
-    it('should have aria-label on description paragraph', () => {
-      mockUseAuth.mockReturnValue({ isSignedIn: false });
-
-      renderComponent();
-
-      const description = screen.getByLabelText('App description');
-      expect(description).toBeInTheDocument();
-      expect(description.tagName).toBe('P');
-    });
-
-    it('should have aria-label on action buttons group', () => {
-      mockUseAuth.mockReturnValue({ isSignedIn: false });
-
-      renderComponent();
-
-      const actionsGroup = screen.getByRole('group', { name: 'Primary actions' });
-      expect(actionsGroup).toBeInTheDocument();
-    });
-
-    it('should have correct heading hierarchy', () => {
-      mockUseAuth.mockReturnValue({ isSignedIn: false });
-
-      renderComponent();
-
-      const heading = screen.getByRole('heading', { level: 1 });
-      expect(heading).toHaveAttribute('id', 'homepage-heading');
-      expect(heading).toBeInTheDocument();
     });
   });
 });

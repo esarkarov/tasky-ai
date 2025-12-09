@@ -1,10 +1,10 @@
 import { createMockTask, createMockTasksLoaderData } from '@/core/test-setup/factories';
 import { Task } from '@/features/tasks/types';
+import { InboxPage } from '@/pages/InboxPage/InboxPage';
 import { render, screen } from '@testing-library/react';
 import { userEvent } from '@testing-library/user-event';
 import { useLoaderData } from 'react-router';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
-import { InboxPage } from './InboxPage';
 
 vi.mock('react-router', () => ({
   useLoaderData: vi.fn(),
@@ -109,56 +109,64 @@ describe('InboxPage', () => {
   const MOCK_TASK_ID_2 = 'task-2';
   const MOCK_TASK_ID_3 = 'task-3';
 
-  const setupDefaultMocks = (tasks: Task[] = [createMockTask()]) => {
+  interface MockSetup {
+    tasks?: Task[];
+    isLoading?: boolean;
+    hasMore?: boolean;
+  }
+
+  const setupMocks = ({ tasks = [createMockTask()], isLoading = false, hasMore = false }: MockSetup = {}) => {
+    const mockHandleCreate = vi.fn();
+    const mockHandleLoadMore = vi.fn();
+
     mockUseTaskMutation.mockReturnValue({
-      handleCreate: vi.fn(),
+      handleCreate: mockHandleCreate,
       handleUpdate: vi.fn(),
       handleDelete: vi.fn(),
     });
 
     mockUseLoadMore.mockReturnValue({
       items: tasks,
-      isLoading: false,
-      hasMore: false,
-      handleLoadMore: vi.fn(),
+      isLoading,
+      hasMore,
+      handleLoadMore: mockHandleLoadMore,
       getItemClassName: () => '',
       getItemStyle: () => ({}),
     });
+
+    return { mockHandleCreate, mockHandleLoadMore };
+  };
+
+  const renderWithData = (tasks: Task[] = [createMockTask()], mockSetup: MockSetup = {}) => {
+    const mockData = createMockTasksLoaderData(tasks);
+    mockedUseLoaderData.mockReturnValue(mockData);
+    const mocks = setupMocks({ tasks, ...mockSetup });
+    render(<InboxPage />);
+    return mocks;
   };
 
   beforeEach(() => {
     vi.clearAllMocks();
   });
 
-  describe('basic rendering', () => {
-    it('should render page title and structure', () => {
-      const mockData = createMockTasksLoaderData();
-      mockedUseLoaderData.mockReturnValue(mockData);
-      setupDefaultMocks();
-
-      render(<InboxPage />);
+  describe('rendering', () => {
+    it('should render page title and list structure', () => {
+      renderWithData();
 
       expect(screen.getByRole('heading', { name: 'Inbox' })).toBeInTheDocument();
       expect(screen.getByRole('list', { name: 'Inbox tasks' })).toBeInTheDocument();
     });
 
-    it('should set document title', () => {
-      const mockData = createMockTasksLoaderData();
-      mockedUseLoaderData.mockReturnValue(mockData);
-      setupDefaultMocks();
-
-      render(<InboxPage />);
+    it('should set document title to "Tasky AI | Inbox"', () => {
+      renderWithData();
 
       expect(document.title).toBe('Tasky AI | Inbox');
     });
 
-    it('should render top app bar with correct props', () => {
+    it('should render top app bar with title and count', () => {
       const tasks = [createMockTask({ $id: MOCK_TASK_ID_1 }), createMockTask({ $id: MOCK_TASK_ID_2 })];
-      const mockData = createMockTasksLoaderData(tasks);
-      mockedUseLoaderData.mockReturnValue(mockData);
-      setupDefaultMocks(tasks);
 
-      render(<InboxPage />);
+      renderWithData(tasks);
 
       const topAppBar = screen.getByTestId('top-app-bar');
       expect(topAppBar).toHaveTextContent('Inbox');
@@ -166,18 +174,15 @@ describe('InboxPage', () => {
     });
   });
 
-  describe('task rendering', () => {
-    it('should render all tasks', () => {
+  describe('task display', () => {
+    it('should render all task cards with correct content', () => {
       const tasks = [
         createMockTask({ $id: MOCK_TASK_ID_1, content: 'Task 1' }),
         createMockTask({ $id: MOCK_TASK_ID_2, content: 'Task 2' }),
         createMockTask({ $id: MOCK_TASK_ID_3, content: 'Task 3' }),
       ];
-      const mockData = createMockTasksLoaderData(tasks);
-      mockedUseLoaderData.mockReturnValue(mockData);
-      setupDefaultMocks(tasks);
 
-      render(<InboxPage />);
+      renderWithData(tasks);
 
       expect(screen.getByTestId(`task-card-${MOCK_TASK_ID_1}`)).toHaveTextContent('Task 1');
       expect(screen.getByTestId(`task-card-${MOCK_TASK_ID_2}`)).toHaveTextContent('Task 2');
@@ -185,152 +190,83 @@ describe('InboxPage', () => {
     });
 
     it('should show total counter when tasks exist', () => {
-      const tasks = [createMockTask()];
-      const mockData = createMockTasksLoaderData(tasks);
-      mockedUseLoaderData.mockReturnValue(mockData);
-      setupDefaultMocks(tasks);
-
-      render(<InboxPage />);
+      renderWithData([createMockTask()]);
 
       expect(screen.getByTestId('total-counter')).toHaveTextContent('1');
     });
 
-    it('should not show total counter when no tasks', () => {
-      const mockData = createMockTasksLoaderData([]);
-      mockedUseLoaderData.mockReturnValue(mockData);
-      setupDefaultMocks([]);
-
-      render(<InboxPage />);
+    it('should not show total counter when no tasks exist', () => {
+      renderWithData([]);
 
       expect(screen.queryByTestId('total-counter')).not.toBeInTheDocument();
     });
 
-    it('should pass taskDocs to useLoadMore hook', () => {
+    it('should pass tasks to useLoadMore hook', () => {
       const tasks = [createMockTask({ $id: MOCK_TASK_ID_1 }), createMockTask({ $id: MOCK_TASK_ID_2 })];
-      const mockData = createMockTasksLoaderData(tasks);
-      mockedUseLoaderData.mockReturnValue(mockData);
-      setupDefaultMocks(tasks);
 
-      render(<InboxPage />);
+      renderWithData(tasks);
 
       expect(mockUseLoadMore).toHaveBeenCalledWith(tasks);
     });
   });
 
-  describe('add task functionality', () => {
-    it('should show add task button when form is not open', () => {
-      const mockData = createMockTasksLoaderData([]);
-      mockedUseLoaderData.mockReturnValue(mockData);
-      setupDefaultMocks([]);
+  describe('add task', () => {
+    it('should show add task button initially', () => {
+      renderWithData([]);
 
-      render(<InboxPage />);
-
-      expect(screen.getByTestId('add-task-button')).toBeInTheDocument();
+      expect(screen.getByRole('button', { name: 'Add Task' })).toBeInTheDocument();
     });
 
     it('should show task form when add task button is clicked', async () => {
       const user = userEvent.setup();
-      const mockData = createMockTasksLoaderData([]);
-      mockedUseLoaderData.mockReturnValue(mockData);
-      setupDefaultMocks([]);
+      renderWithData([]);
 
-      render(<InboxPage />);
-
-      const addButton = screen.getByTestId('add-task-button');
-      await user.click(addButton);
+      await user.click(screen.getByTestId('add-task-button'));
 
       expect(screen.getByTestId('task-form')).toBeInTheDocument();
-    });
-
-    it('should hide add task button when form is open', async () => {
-      const user = userEvent.setup();
-      const mockData = createMockTasksLoaderData([]);
-      mockedUseLoaderData.mockReturnValue(mockData);
-      setupDefaultMocks([]);
-
-      render(<InboxPage />);
-
-      const addButton = screen.getByTestId('add-task-button');
-      await user.click(addButton);
-
       expect(screen.queryByTestId('add-task-button')).not.toBeInTheDocument();
     });
 
     it('should hide form when cancel button is clicked', async () => {
       const user = userEvent.setup();
-      const mockData = createMockTasksLoaderData([]);
-      mockedUseLoaderData.mockReturnValue(mockData);
-      setupDefaultMocks([]);
-
-      render(<InboxPage />);
+      renderWithData([]);
 
       await user.click(screen.getByTestId('add-task-button'));
-      expect(screen.getByTestId('task-form')).toBeInTheDocument();
-
       await user.click(screen.getByTestId('cancel-button'));
+
       expect(screen.queryByTestId('task-form')).not.toBeInTheDocument();
+      expect(screen.getByTestId('add-task-button')).toBeInTheDocument();
     });
 
-    it('should call handleCreateTask when form is submitted', async () => {
+    it('should call handleCreate when form is submitted', async () => {
       const user = userEvent.setup();
-      const mockHandleCreate = vi.fn();
-      const mockData = createMockTasksLoaderData([]);
-      mockedUseLoaderData.mockReturnValue(mockData);
-
-      mockUseTaskMutation.mockReturnValue({
-        handleCreate: mockHandleCreate,
-        handleUpdate: vi.fn(),
-        handleDelete: vi.fn(),
-      });
-
-      mockUseLoadMore.mockReturnValue({
-        items: [],
-        isLoading: false,
-        hasMore: false,
-        handleLoadMore: vi.fn(),
-        getItemClassName: () => '',
-        getItemStyle: () => ({}),
-      });
-
-      render(<InboxPage />);
+      const { mockHandleCreate } = renderWithData([]);
 
       await user.click(screen.getByTestId('add-task-button'));
       await user.click(screen.getByTestId('submit-button'));
 
-      expect(mockHandleCreate).toHaveBeenCalled();
+      expect(mockHandleCreate).toHaveBeenCalledTimes(1);
     });
   });
 
   describe('empty state', () => {
-    it('should show empty state when no tasks and form is not open', () => {
-      const mockData = createMockTasksLoaderData([]);
-      mockedUseLoaderData.mockReturnValue(mockData);
-      setupDefaultMocks([]);
+    it('should show empty state with inbox variant when no tasks and form closed', () => {
+      renderWithData([]);
 
-      render(<InboxPage />);
-
-      expect(screen.getByTestId('empty-state')).toBeInTheDocument();
-      expect(screen.getByTestId('empty-state')).toHaveAttribute('data-variant', 'inbox');
+      const emptyState = screen.getByTestId('empty-state');
+      expect(emptyState).toBeInTheDocument();
+      expect(emptyState).toHaveAttribute('data-variant', 'inbox');
     });
 
     it('should not show empty state when tasks exist', () => {
-      const tasks = [createMockTask()];
-      const mockData = createMockTasksLoaderData(tasks);
-      mockedUseLoaderData.mockReturnValue(mockData);
-      setupDefaultMocks(tasks);
-
-      render(<InboxPage />);
+      renderWithData([createMockTask()]);
 
       expect(screen.queryByTestId('empty-state')).not.toBeInTheDocument();
     });
 
     it('should not show empty state when form is open', async () => {
       const user = userEvent.setup();
-      const mockData = createMockTasksLoaderData([]);
-      mockedUseLoaderData.mockReturnValue(mockData);
-      setupDefaultMocks([]);
-
-      render(<InboxPage />);
+      renderWithData([]);
 
       await user.click(screen.getByTestId('add-task-button'));
 
@@ -338,111 +274,34 @@ describe('InboxPage', () => {
     });
   });
 
-  describe('load more functionality', () => {
+  describe('load more', () => {
     it('should show load more button when hasMore is true', () => {
-      const tasks = [createMockTask()];
-      const mockData = createMockTasksLoaderData(tasks);
-      mockedUseLoaderData.mockReturnValue(mockData);
-
-      mockUseTaskMutation.mockReturnValue({
-        handleCreate: vi.fn(),
-        handleUpdate: vi.fn(),
-        handleDelete: vi.fn(),
-      });
-
-      mockUseLoadMore.mockReturnValue({
-        items: tasks,
-        isLoading: false,
-        hasMore: true,
-        handleLoadMore: vi.fn(),
-        getItemClassName: () => '',
-        getItemStyle: () => ({}),
-      });
-
-      render(<InboxPage />);
+      renderWithData([createMockTask()], { hasMore: true });
 
       expect(screen.getByTestId('load-more-button')).toBeInTheDocument();
     });
 
     it('should not show load more button when hasMore is false', () => {
-      const tasks = [createMockTask()];
-      const mockData = createMockTasksLoaderData(tasks);
-      mockedUseLoaderData.mockReturnValue(mockData);
-      setupDefaultMocks(tasks);
-
-      render(<InboxPage />);
+      renderWithData([createMockTask()]);
 
       expect(screen.queryByTestId('load-more-button')).not.toBeInTheDocument();
     });
 
-    it('should call handleLoadMore when button is clicked', async () => {
+    it('should call handleLoadMore when load more button is clicked', async () => {
       const user = userEvent.setup();
-      const tasks = [createMockTask()];
-      const mockHandleLoadMore = vi.fn();
-      const mockData = createMockTasksLoaderData(tasks);
-      mockedUseLoaderData.mockReturnValue(mockData);
+      const { mockHandleLoadMore } = renderWithData([createMockTask()], { hasMore: true });
 
-      mockUseTaskMutation.mockReturnValue({
-        handleCreate: vi.fn(),
-        handleUpdate: vi.fn(),
-        handleDelete: vi.fn(),
-      });
+      await user.click(screen.getByTestId('load-more-button'));
 
-      mockUseLoadMore.mockReturnValue({
-        items: tasks,
-        isLoading: false,
-        hasMore: true,
-        handleLoadMore: mockHandleLoadMore,
-        getItemClassName: () => '',
-        getItemStyle: () => ({}),
-      });
-
-      render(<InboxPage />);
-
-      const loadMoreButton = screen.getByTestId('load-more-button');
-      await user.click(loadMoreButton);
-
-      expect(mockHandleLoadMore).toHaveBeenCalled();
+      expect(mockHandleLoadMore).toHaveBeenCalledTimes(1);
     });
 
-    it('should disable load more button when loading', () => {
-      const tasks = [createMockTask()];
-      const mockData = createMockTasksLoaderData(tasks);
-      mockedUseLoaderData.mockReturnValue(mockData);
-
-      mockUseTaskMutation.mockReturnValue({
-        handleCreate: vi.fn(),
-        handleUpdate: vi.fn(),
-        handleDelete: vi.fn(),
-      });
-
-      mockUseLoadMore.mockReturnValue({
-        items: tasks,
-        isLoading: true,
-        hasMore: true,
-        handleLoadMore: vi.fn(),
-        getItemClassName: () => '',
-        getItemStyle: () => ({}),
-      });
-
-      render(<InboxPage />);
+    it('should disable load more button and show loading text when loading', () => {
+      renderWithData([createMockTask()], { hasMore: true, isLoading: true });
 
       const loadMoreButton = screen.getByTestId('load-more-button');
       expect(loadMoreButton).toBeDisabled();
       expect(loadMoreButton).toHaveTextContent('Loading...');
-    });
-  });
-
-  describe('accessibility', () => {
-    it('should have proper ARIA labels', () => {
-      const mockData = createMockTasksLoaderData([]);
-      mockedUseLoaderData.mockReturnValue(mockData);
-      setupDefaultMocks([]);
-
-      render(<InboxPage />);
-
-      expect(screen.getByRole('list', { name: 'Inbox tasks' })).toBeInTheDocument();
-      expect(screen.getByRole('button', { name: 'Add Task' })).toBeInTheDocument();
     });
   });
 });

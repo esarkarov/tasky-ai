@@ -1,6 +1,6 @@
+import { LoginPage } from '@/pages/LoginPage/LoginPage';
 import { render, screen } from '@testing-library/react';
-import { describe, it, expect, vi, beforeEach } from 'vitest';
-import { LoginPage } from './LoginPage';
+import { beforeEach, describe, expect, it, vi } from 'vitest';
 
 vi.mock('@/shared/components/atoms/Head/Head', () => ({
   Head: ({ title }: { title: string }) => <title data-testid="meta-title">{title}</title>,
@@ -27,45 +27,41 @@ describe('LoginPage', () => {
     render(<LoginPage />);
   });
 
-  describe('basic rendering', () => {
-    it('should render without crashing', () => {
-      expect(screen.getByRole('main')).toBeInTheDocument();
+  describe('Rendering', () => {
+    it('should render main container with correct aria-labelledby', () => {
+      const main = screen.getByRole('main');
+      expect(main).toBeInTheDocument();
+      expect(main).toHaveAttribute('aria-labelledby', 'login-page-title');
     });
 
-    it('should render the page title in Head component', () => {
+    it('should set document title to "Tasky AI | Log In"', () => {
       const title = document.head.querySelector('[data-testid="meta-title"]');
-      expect(title!.textContent).toBe('Tasky AI | Log In');
+      expect(title?.textContent).toBe('Tasky AI | Log In');
     });
 
-    it('should render the SignIn component', () => {
-      expect(screen.getByTestId('clerk-signin')).toBeInTheDocument();
-    });
-
-    it('should render screen reader only heading', () => {
+    it('should render screen reader only heading with correct id', () => {
       const heading = screen.getByText('Log in to Tasky AI');
-      expect(heading).toBeInTheDocument();
+      expect(heading.tagName).toBe('H1');
+      expect(heading).toHaveAttribute('id', 'login-page-title');
       expect(heading).toHaveClass('sr-only');
+    });
+
+    it('should render SignIn component', () => {
+      expect(screen.getByTestId('clerk-signin')).toBeInTheDocument();
     });
   });
 
-  describe('component configuration', () => {
-    it('should pass correct fallbackRedirectUrl prop to SignIn', () => {
+  describe('SignIn Configuration', () => {
+    it('should pass correct redirect URLs to SignIn component', () => {
       expect(mockSignIn).toHaveBeenCalledWith(
         expect.objectContaining({
           fallbackRedirectUrl: '/app/today',
-        })
-      );
-    });
-
-    it('should pass correct signUpUrl prop to SignIn', () => {
-      expect(mockSignIn).toHaveBeenCalledWith(
-        expect.objectContaining({
           signUpUrl: '/register',
         })
       );
     });
 
-    it('should pass appearance configuration to SignIn', () => {
+    it('should pass appearance configuration to SignIn component', () => {
       expect(mockSignIn).toHaveBeenCalledWith(
         expect.objectContaining({
           appearance: expect.objectContaining({
@@ -76,59 +72,6 @@ describe('LoginPage', () => {
           }),
         })
       );
-    });
-
-    it('should pass all required props to SignIn component', () => {
-      const signInProps = mockSignIn.mock.calls[0][0];
-      expect(signInProps).toHaveProperty('signUpUrl');
-      expect(signInProps).toHaveProperty('fallbackRedirectUrl');
-      expect(signInProps).toHaveProperty('appearance');
-    });
-  });
-
-  describe('accessibility', () => {
-    it('should have main landmark with correct role', () => {
-      const main = screen.getByRole('main');
-      expect(main).toBeInTheDocument();
-      expect(main).toHaveAttribute('role', 'main');
-    });
-
-    it('should have aria-labelledby pointing to heading id', () => {
-      const main = screen.getByRole('main');
-      expect(main).toHaveAttribute('aria-labelledby', 'login-page-title');
-    });
-
-    it('should have heading with correct id for aria-labelledby', () => {
-      const heading = screen.getByText('Log in to Tasky AI');
-      expect(heading).toHaveAttribute('id', 'login-page-title');
-    });
-
-    it('should have screen reader only class on heading', () => {
-      const heading = screen.getByText('Log in to Tasky AI');
-      expect(heading.tagName).toBe('H1');
-      expect(heading).toHaveClass('sr-only');
-    });
-  });
-
-  describe('component structure', () => {
-    it('should render main element containing SignIn component', () => {
-      const main = screen.getByRole('main');
-      const signIn = screen.getByTestId('clerk-signin');
-      expect(main).toContainElement(signIn);
-    });
-
-    it('should render heading inside main element', () => {
-      const main = screen.getByRole('main');
-      const heading = screen.getByText('Log in to Tasky AI');
-      expect(main).toContainElement(heading);
-    });
-  });
-
-  describe('routes integration', () => {
-    it('should use ROUTES constants for path configuration', () => {
-      const signInProps = mockSignIn.mock.calls[0][0];
-      expect(signInProps.signUpUrl).toBe('/register');
-      expect(signInProps.fallbackRedirectUrl).toBe('/app/today');
     });
   });
 });
