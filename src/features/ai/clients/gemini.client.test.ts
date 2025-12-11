@@ -100,8 +100,10 @@ describe('geminiClient', () => {
 
   describe('error handling', () => {
     it('should propagate API errors', async () => {
+      const contents = 'Test content';
       mockGenerateContent.mockRejectedValue(new Error('API rate limit exceeded'));
 
+      await expect(geminiClient.generateContent(contents)).rejects.toThrow('API rate limit exceeded');
       expect(mockGenerateContent).toHaveBeenCalledOnce();
     });
 

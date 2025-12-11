@@ -117,13 +117,13 @@ describe('AITaskGenerator', () => {
 
     it('should call onCheckedChange with correct value when toggled', async () => {
       const user = userEvent.setup();
-      renderComponent();
+      const { rerender } = renderComponent();
 
       await user.click(screen.getByRole('switch'));
 
       expect(mockOnCheckedChange).toHaveBeenCalledWith(true);
 
-      render(
+      rerender(
         <AITaskGenerator
           checked={true}
           value=""

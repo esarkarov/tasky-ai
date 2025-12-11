@@ -1,31 +1,36 @@
+import { ProjectNameInput } from '@/features/projects/components/molecules/ProjectNameInput/ProjectNameInput';
 import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
-import { describe, it, expect, vi, beforeEach } from 'vitest';
-import { ProjectNameInput } from './ProjectNameInput';
 import { useState } from 'react';
+import { beforeEach, describe, expect, it, vi } from 'vitest';
 
 vi.mock('@/shared/constants', () => ({
   MAX_NAME_LENGTH: 50,
 }));
 
 vi.mock('@/shared/components/ui/input', () => ({
-  Input: ({ onChange, ...props }: React.InputHTMLAttributes<HTMLInputElement>) => (
-    <input
-      onChange={onChange}
-      {...props}
-    />
-  ),
+  Input: (props: React.InputHTMLAttributes<HTMLInputElement>) => <input {...props} />,
 }));
+
+interface LabelProps {
+  children: React.ReactNode;
+  htmlFor: string;
+}
 
 vi.mock('@/shared/components/ui/label', () => ({
-  Label: ({ children, htmlFor }: { children: React.ReactNode; htmlFor: string }) => (
-    <label htmlFor={htmlFor}>{children}</label>
-  ),
+  Label: ({ children, htmlFor }: LabelProps) => <label htmlFor={htmlFor}>{children}</label>,
 }));
 
+interface InputValueCountProps {
+  valueLength: number;
+  maxLength: number;
+}
+
 vi.mock('@/shared/components/atoms/InputValueCount/InputValueCount', () => ({
-  InputValueCount: ({ valueLength, maxLength }: { valueLength: number; maxLength: number }) => (
-    <div data-testid="input-value-count">
+  InputValueCount: ({ valueLength, maxLength }: InputValueCountProps) => (
+    <div
+      data-testid="input-value-count"
+      id="project-name-count">
       {valueLength}/{maxLength}
     </div>
   ),
@@ -33,19 +38,30 @@ vi.mock('@/shared/components/atoms/InputValueCount/InputValueCount', () => ({
 
 describe('ProjectNameInput', () => {
   const mockOnChange = vi.fn();
-  const defaultProps = {
-    value: '',
-    onChange: mockOnChange,
-    disabled: false,
+
+  interface RenderOptions {
+    value?: string;
+    disabled?: boolean;
+    onChange?: (value: string) => void;
+  }
+
+  const renderComponent = ({ value = '', disabled = false, onChange = mockOnChange }: RenderOptions = {}) => {
+    render(
+      <ProjectNameInput
+        value={value}
+        onChange={onChange}
+        disabled={disabled}
+      />
+    );
   };
 
-  function renderControlledInput() {
-    const Wrapper = () => {
+  const renderControlledInput = () => {
+    const ControlledWrapper = () => {
       const [value, setValue] = useState('');
       return (
         <ProjectNameInput
-          {...defaultProps}
           value={value}
+          disabled={false}
           onChange={(val) => {
             mockOnChange(val);
             setValue(val);
@@ -54,309 +70,199 @@ describe('ProjectNameInput', () => {
       );
     };
 
-    render(<Wrapper />);
-    return mockOnChange;
-  }
+    render(<ControlledWrapper />);
+  };
+
+  const getInput = () => screen.getByRole('textbox');
+  const getLabel = () => screen.getByText('Project name');
+  const getCharacterCount = () => screen.getByTestId('input-value-count');
 
   beforeEach(() => {
     vi.clearAllMocks();
   });
 
-  describe('basic rendering', () => {
-    it('should render label with correct text', () => {
-      render(<ProjectNameInput {...defaultProps} />);
+  describe('rendering', () => {
+    it('should render input with label, placeholder, and character count', () => {
+      renderComponent();
 
-      expect(screen.getByLabelText('Project name')).toBeInTheDocument();
-    });
-
-    it('should render input with correct placeholder', () => {
-      render(<ProjectNameInput {...defaultProps} />);
-
-      const input = screen.getByPlaceholderText('Enter project name (e.g. Performance Tracker)');
-      expect(input).toBeInTheDocument();
-    });
-
-    it('should render input with correct id', () => {
-      render(<ProjectNameInput {...defaultProps} />);
-
-      const input = screen.getByRole('textbox');
-      expect(input).toHaveAttribute('id', 'project_name');
+      expect(getLabel()).toBeInTheDocument();
+      expect(getLabel()).toHaveAttribute('for', 'project_name');
+      expect(getInput()).toHaveAttribute('id', 'project_name');
+      expect(getInput()).toHaveAttribute('placeholder', 'Enter project name (e.g. Performance Tracker)');
+      expect(getCharacterCount()).toBeInTheDocument();
     });
 
     it('should display current value in input', () => {
-      const testValue = 'My Project';
+      renderComponent({ value: 'My Project' });
 
-      render(
-        <ProjectNameInput
-          {...defaultProps}
-          value={testValue}
-        />
-      );
-
-      const input = screen.getByRole('textbox');
-      expect(input).toHaveValue(testValue);
+      expect(getInput()).toHaveValue('My Project');
+      expect(screen.getByText('10/50')).toBeInTheDocument();
     });
 
-    it('should render InputValueCount component', () => {
-      render(
-        <ProjectNameInput
-          {...defaultProps}
-          value="Test"
-        />
-      );
+    it('should render with empty value by default', () => {
+      renderComponent({ value: '' });
 
-      expect(screen.getByTestId('input-value-count')).toBeInTheDocument();
-      expect(screen.getByText('4/50')).toBeInTheDocument();
+      expect(getInput()).toHaveValue('');
+      expect(screen.getByText('0/50')).toBeInTheDocument();
     });
   });
 
   describe('user interactions', () => {
-    it('should call onChange when user types in input', async () => {
+    it('should call onChange when user types text', async () => {
       const user = userEvent.setup();
-      const onChange = renderControlledInput();
-      const input = screen.getByRole('textbox');
+      renderControlledInput();
 
-      await user.type(input, 'New Project');
+      await user.type(getInput(), 'New Project');
 
-      expect(onChange).toHaveBeenCalledTimes(11);
-      expect(onChange).toHaveBeenLastCalledWith('New Project');
+      expect(mockOnChange).toHaveBeenCalledTimes(11);
+      expect(mockOnChange).toHaveBeenLastCalledWith('New Project');
     });
 
-    it('should call onChange with single character', async () => {
+    it('should call onChange for each character typed', async () => {
       const user = userEvent.setup();
-      render(<ProjectNameInput {...defaultProps} />);
+      renderControlledInput();
 
-      const input = screen.getByRole('textbox');
-      await user.type(input, 'A');
+      await user.type(getInput(), 'ABC');
 
-      expect(mockOnChange).toHaveBeenCalledTimes(1);
-      expect(mockOnChange).toHaveBeenCalledWith('A');
+      expect(mockOnChange).toHaveBeenCalledTimes(3);
+      expect(mockOnChange).toHaveBeenNthCalledWith(1, 'A');
+      expect(mockOnChange).toHaveBeenNthCalledWith(2, 'AB');
+      expect(mockOnChange).toHaveBeenNthCalledWith(3, 'ABC');
     });
 
-    it('should call onChange when clearing input', async () => {
+    it('should call onChange when input is cleared', async () => {
       const user = userEvent.setup();
-      render(
-        <ProjectNameInput
-          {...defaultProps}
-          value="Test"
-        />
-      );
+      renderComponent({ value: 'Test' });
 
-      const input = screen.getByRole('textbox');
-      await user.clear(input);
+      await user.clear(getInput());
 
       expect(mockOnChange).toHaveBeenCalledWith('');
     });
 
-    it('should call onChange for each keystroke', async () => {
+    it('should handle special characters', async () => {
       const user = userEvent.setup();
-      const onChange = renderControlledInput();
-      const input = screen.getByRole('textbox');
+      renderControlledInput();
 
-      await user.type(input, 'ABC');
+      await user.type(getInput(), '!@#$%');
 
-      expect(onChange).toHaveBeenCalledTimes(3);
-      expect(onChange).toHaveBeenNthCalledWith(1, 'A');
-      expect(onChange).toHaveBeenNthCalledWith(2, 'AB');
-      expect(onChange).toHaveBeenNthCalledWith(3, 'ABC');
+      expect(mockOnChange).toHaveBeenLastCalledWith('!@#$%');
+    });
+
+    it('should handle numeric characters', async () => {
+      const user = userEvent.setup();
+      renderControlledInput();
+
+      await user.type(getInput(), '12345');
+
+      expect(mockOnChange).toHaveBeenLastCalledWith('12345');
+    });
+
+    it('should handle spaces in value', async () => {
+      const user = userEvent.setup();
+      renderControlledInput();
+
+      await user.type(getInput(), 'My Project');
+
+      expect(mockOnChange).toHaveBeenLastCalledWith('My Project');
     });
   });
 
   describe('disabled state', () => {
     it('should disable input when disabled prop is true', () => {
-      render(
-        <ProjectNameInput
-          {...defaultProps}
-          disabled={true}
-        />
-      );
+      renderComponent({ disabled: true });
 
-      const input = screen.getByRole('textbox');
-      expect(input).toBeDisabled();
+      expect(getInput()).toBeDisabled();
     });
 
     it('should enable input when disabled prop is false', () => {
-      render(
-        <ProjectNameInput
-          {...defaultProps}
-          disabled={false}
-        />
-      );
+      renderComponent({ disabled: false });
 
-      const input = screen.getByRole('textbox');
-      expect(input).not.toBeDisabled();
+      expect(getInput()).not.toBeDisabled();
     });
 
     it('should not call onChange when typing in disabled input', async () => {
       const user = userEvent.setup();
-      render(
-        <ProjectNameInput
-          {...defaultProps}
-          disabled={true}
-        />
-      );
+      renderComponent({ disabled: true });
 
-      const input = screen.getByRole('textbox');
-      await user.type(input, 'Test');
+      await user.type(getInput(), 'Test');
 
       expect(mockOnChange).not.toHaveBeenCalled();
     });
   });
 
   describe('validation', () => {
-    it('should set maxLength attribute to MAX_NAME_LENGTH', () => {
-      render(<ProjectNameInput {...defaultProps} />);
+    it('should set maxLength attribute to 50', () => {
+      renderComponent();
 
-      const input = screen.getByRole('textbox');
-      expect(input).toHaveAttribute('maxLength', '50');
+      expect(getInput()).toHaveAttribute('maxLength', '50');
     });
 
     it('should set aria-invalid to false when value is within limit', () => {
-      const validValue = 'A'.repeat(50);
+      renderComponent({ value: 'A'.repeat(50) });
 
-      render(
-        <ProjectNameInput
-          {...defaultProps}
-          value={validValue}
-        />
-      );
-
-      const input = screen.getByRole('textbox');
-      expect(input).toHaveAttribute('aria-invalid', 'false');
+      expect(getInput()).toHaveAttribute('aria-invalid', 'false');
     });
 
     it('should set aria-invalid to true when value exceeds limit', () => {
-      const invalidValue = 'A'.repeat(51);
+      renderComponent({ value: 'A'.repeat(51) });
 
-      render(
-        <ProjectNameInput
-          {...defaultProps}
-          value={invalidValue}
-        />
-      );
-
-      const input = screen.getByRole('textbox');
-      expect(input).toHaveAttribute('aria-invalid', 'true');
+      expect(getInput()).toHaveAttribute('aria-invalid', 'true');
     });
 
-    it('should update InputValueCount with current value length', () => {
-      const value = 'Project Name';
-
-      render(
-        <ProjectNameInput
-          {...defaultProps}
-          value={value}
-        />
-      );
-
-      expect(screen.getByText('12/50')).toBeInTheDocument();
-    });
-
-    it('should update InputValueCount when value changes', () => {
+    it('should display correct character count as value changes', () => {
       const { rerender } = render(
         <ProjectNameInput
-          {...defaultProps}
           value="Test"
+          onChange={mockOnChange}
+          disabled={false}
         />
       );
+
       expect(screen.getByText('4/50')).toBeInTheDocument();
 
       rerender(
         <ProjectNameInput
-          {...defaultProps}
           value="Test Project"
+          onChange={mockOnChange}
+          disabled={false}
         />
       );
 
       expect(screen.getByText('12/50')).toBeInTheDocument();
     });
-  });
-
-  describe('accessibility', () => {
-    it('should have aria-describedby pointing to character count', () => {
-      render(<ProjectNameInput {...defaultProps} />);
-
-      const input = screen.getByRole('textbox');
-      expect(input).toHaveAttribute('aria-describedby', 'project-name-count');
-    });
-
-    it('should associate label with input using htmlFor', () => {
-      render(<ProjectNameInput {...defaultProps} />);
-
-      const label = screen.getByText('Project name');
-      expect(label).toHaveAttribute('for', 'project_name');
-    });
-
-    it('should be accessible via label click', async () => {
-      const user = userEvent.setup();
-      render(<ProjectNameInput {...defaultProps} />);
-
-      const label = screen.getByText('Project name');
-      await user.click(label);
-
-      const input = screen.getByRole('textbox');
-      expect(input).toHaveFocus();
-    });
-  });
-
-  describe('edge cases', () => {
-    it('should handle empty string value', () => {
-      render(
-        <ProjectNameInput
-          {...defaultProps}
-          value=""
-        />
-      );
-
-      const input = screen.getByRole('textbox');
-      expect(input).toHaveValue('');
-      expect(screen.getByText('0/50')).toBeInTheDocument();
-    });
-
-    it('should handle special characters in value', async () => {
-      const user = userEvent.setup();
-      const onChange = renderControlledInput();
-      const input = screen.getByRole('textbox');
-
-      await user.type(input, '!@#$%');
-
-      expect(onChange).toHaveBeenLastCalledWith('!@#$%');
-    });
-
-    it('should handle numeric characters in value', async () => {
-      const user = userEvent.setup();
-      const onChange = renderControlledInput();
-      const input = screen.getByRole('textbox');
-
-      await user.type(input, '12345');
-
-      expect(onChange).toHaveBeenLastCalledWith('12345');
-    });
-
-    it('should handle spaces in value', async () => {
-      const user = userEvent.setup();
-      const onChange = renderControlledInput();
-      const input = screen.getByRole('textbox');
-
-      await user.type(input, 'My Project');
-
-      expect(onChange).toHaveBeenLastCalledWith('My Project');
-    });
 
     it('should handle value at exactly max length', () => {
       const maxLengthValue = 'A'.repeat(50);
+      renderComponent({ value: maxLengthValue });
 
-      render(
-        <ProjectNameInput
-          {...defaultProps}
-          value={maxLengthValue}
-        />
-      );
-
-      const input = screen.getByRole('textbox');
-      expect(input).toHaveValue(maxLengthValue);
+      expect(getInput()).toHaveValue(maxLengthValue);
       expect(screen.getByText('50/50')).toBeInTheDocument();
-      expect(input).toHaveAttribute('aria-invalid', 'false');
+      expect(getInput()).toHaveAttribute('aria-invalid', 'false');
+    });
+  });
+
+  describe('accessibility', () => {
+    it('should associate input with label using id', () => {
+      renderComponent();
+
+      expect(getLabel()).toHaveAttribute('for', 'project_name');
+      expect(getInput()).toHaveAttribute('id', 'project_name');
+      expect(screen.getByLabelText('Project name')).toBe(getInput());
+    });
+
+    it('should have aria-describedby pointing to character count', () => {
+      renderComponent();
+
+      expect(getInput()).toHaveAttribute('aria-describedby', 'project-name-count');
+    });
+
+    it('should focus input when label is clicked', async () => {
+      const user = userEvent.setup();
+      renderComponent();
+
+      await user.click(getLabel());
+
+      expect(getInput()).toHaveFocus();
     });
   });
 });

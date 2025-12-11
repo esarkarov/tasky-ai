@@ -1,21 +1,38 @@
-import { ProjectListItem } from '@/features/projects/types';
+import { createMockProjectListItem } from '@/core/test-setup/factories';
+import { ProjectSidebarNavItem } from '@/features/projects/components/molecules/ProjectSidebarNavItem/ProjectSidebarNavItem';
+import type { ProjectListItem } from '@/features/projects/types';
 import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
-import { ProjectSidebarNavItem } from './ProjectSidebarNavItem';
+
+interface ProjectSidebarNavLinkProps {
+  id: string;
+  colorHex: string;
+  name: string;
+  onClick: () => void;
+}
+interface RenderOptions {
+  project?: ProjectListItem;
+}
+interface ProjectActionMenuProps {
+  children: React.ReactNode;
+  defaultValues: {
+    id: string;
+    name: string;
+    color_name: string;
+    color_hex: string;
+  };
+  side?: string;
+  align?: string;
+}
+interface SidebarMenuActionProps {
+  children: React.ReactNode;
+  onClick?: () => void;
+  showOnHover?: boolean;
+}
 
 vi.mock('@/features/projects/components/molecules/ProjectSidebarNavLink/ProjectSidebarNavLink', () => ({
-  ProjectSidebarNavLink: ({
-    id,
-    colorHex,
-    name,
-    onClick,
-  }: {
-    id: string;
-    colorHex: string;
-    name: string;
-    onClick: () => void;
-  }) => (
+  ProjectSidebarNavLink: ({ id, colorHex, name, onClick }: ProjectSidebarNavLinkProps) => (
     <a
       href={`/project/${id}`}
       data-testid="project-nav-link"
@@ -27,15 +44,7 @@ vi.mock('@/features/projects/components/molecules/ProjectSidebarNavLink/ProjectS
 }));
 
 vi.mock('@/features/projects/components/organisms/ProjectActionMenu/ProjectActionMenu', () => ({
-  ProjectActionMenu: ({
-    children,
-    defaultValues,
-  }: {
-    children: React.ReactNode;
-    defaultValues: { id: string; name: string; color_name: string; color_hex: string };
-    side?: string;
-    align?: string;
-  }) => (
+  ProjectActionMenu: ({ children, defaultValues }: ProjectActionMenuProps) => (
     <div
       data-testid="project-action-menu"
       data-project-id={defaultValues.id}
@@ -49,16 +58,7 @@ vi.mock('@/features/projects/components/organisms/ProjectActionMenu/ProjectActio
 
 vi.mock('@/shared/components/ui/sidebar', () => ({
   SidebarMenuItem: ({ children }: { children: React.ReactNode }) => <li>{children}</li>,
-  SidebarMenuAction: ({
-    children,
-    onClick,
-    showOnHover,
-    ...props
-  }: {
-    children: React.ReactNode;
-    onClick?: () => void;
-    showOnHover?: boolean;
-  }) => (
+  SidebarMenuAction: ({ children, onClick, showOnHover, ...props }: SidebarMenuActionProps) => (
     <button
       onClick={onClick}
       data-show-on-hover={showOnHover}
@@ -71,168 +71,116 @@ vi.mock('@/shared/components/ui/sidebar', () => ({
 describe('ProjectSidebarNavItem', () => {
   const mockHandleMobileNavigation = vi.fn();
 
-  const mockProject: ProjectListItem = {
+  const mockProject: ProjectListItem = createMockProjectListItem({
     $id: '1',
     name: 'Test Project',
     color_hex: '#FF0000',
     color_name: 'red',
-    $createdAt: '2024-01-01',
-    $collectionId: 'col1',
-    $databaseId: 'db1',
-    $permissions: [],
-    $updatedAt: '2024-01-01',
+  });
+
+  const renderComponent = ({ project = mockProject }: RenderOptions = {}) => {
+    return render(
+      <ProjectSidebarNavItem
+        project={project}
+        handleMobileNavigation={mockHandleMobileNavigation}
+      />
+    );
   };
 
-  const defaultProps = {
-    project: mockProject,
-    handleMobileNavigation: mockHandleMobileNavigation,
-  };
+  const getNavLink = () => screen.getByTestId('project-nav-link');
+  const getActionMenu = () => screen.getByTestId('project-action-menu');
+  const getActionButton = () => screen.getByLabelText(/more actions for project/i);
 
   beforeEach(() => {
     vi.clearAllMocks();
   });
 
-  describe('Rendering', () => {
-    it('should render project navigation link with name', () => {
-      render(<ProjectSidebarNavItem {...defaultProps} />);
+  describe('rendering', () => {
+    it('should render project navigation link with correct name and attributes', () => {
+      renderComponent();
 
+      const navLink = getNavLink();
       expect(screen.getByText('Test Project')).toBeInTheDocument();
-    });
-
-    it('should render project action menu', () => {
-      render(<ProjectSidebarNavItem {...defaultProps} />);
-
-      expect(screen.getByTestId('project-action-menu')).toBeInTheDocument();
-    });
-
-    it('should render more actions button with aria-label', () => {
-      render(<ProjectSidebarNavItem {...defaultProps} />);
-
-      expect(screen.getByLabelText('More actions for project Test Project')).toBeInTheDocument();
-    });
-
-    it('should hide MoreHorizontal icon from screen readers', () => {
-      const { container } = render(<ProjectSidebarNavItem {...defaultProps} />);
-
-      const icon = container.querySelector('[aria-hidden="true"]');
-      expect(icon).toBeInTheDocument();
-    });
-  });
-
-  describe('ProjectSidebarNavLink props', () => {
-    it('should pass correct props to ProjectSidebarNavLink', () => {
-      render(<ProjectSidebarNavItem {...defaultProps} />);
-
-      const navLink = screen.getByTestId('project-nav-link');
       expect(navLink).toHaveAttribute('href', '/project/1');
       expect(navLink).toHaveAttribute('data-color', '#FF0000');
-      expect(navLink).toHaveTextContent('Test Project');
     });
 
-    it('should pass handleMobileNavigation to onClick', async () => {
-      const user = userEvent.setup();
-      render(<ProjectSidebarNavItem {...defaultProps} />);
+    it('should render action menu with correct project data', () => {
+      renderComponent();
 
-      const navLink = screen.getByTestId('project-nav-link');
-      await user.click(navLink);
-
-      expect(mockHandleMobileNavigation).toHaveBeenCalledTimes(1);
-    });
-  });
-
-  describe('ProjectActionMenu props', () => {
-    it('should pass correct defaultValues to ProjectActionMenu', () => {
-      render(<ProjectSidebarNavItem {...defaultProps} />);
-
-      const actionMenu = screen.getByTestId('project-action-menu');
+      const actionMenu = getActionMenu();
+      expect(actionMenu).toBeInTheDocument();
       expect(actionMenu).toHaveAttribute('data-project-id', '1');
       expect(actionMenu).toHaveAttribute('data-project-name', 'Test Project');
       expect(actionMenu).toHaveAttribute('data-color-name', 'red');
       expect(actionMenu).toHaveAttribute('data-color-hex', '#FF0000');
+    });
+
+    it('should render action button with descriptive aria-label and showOnHover', () => {
+      renderComponent();
+
+      const button = getActionButton();
+      expect(button).toHaveAttribute('aria-label', 'More actions for project Test Project');
+      expect(button).toHaveAttribute('data-show-on-hover', 'true');
     });
   });
 
   describe('user interactions', () => {
     it('should call handleMobileNavigation when nav link is clicked', async () => {
       const user = userEvent.setup();
-      render(<ProjectSidebarNavItem {...defaultProps} />);
+      renderComponent();
 
-      const navLink = screen.getByTestId('project-nav-link');
-      await user.click(navLink);
+      await user.click(getNavLink());
 
       expect(mockHandleMobileNavigation).toHaveBeenCalledTimes(1);
     });
 
     it('should not call handleMobileNavigation when action button is clicked', async () => {
       const user = userEvent.setup();
-      render(<ProjectSidebarNavItem {...defaultProps} />);
+      renderComponent();
 
-      const actionButton = screen.getByLabelText('More actions for project Test Project');
-      await user.click(actionButton);
+      await user.click(getActionButton());
 
       expect(mockHandleMobileNavigation).not.toHaveBeenCalled();
     });
   });
 
-  describe('Accessibility', () => {
-    it('should have descriptive aria-label on action button', () => {
-      render(<ProjectSidebarNavItem {...defaultProps} />);
-
-      const button = screen.getByLabelText('More actions for project Test Project');
-      expect(button).toHaveAttribute('aria-label', 'More actions for project Test Project');
-    });
-
-    it('should have showOnHover prop on action button', () => {
-      render(<ProjectSidebarNavItem {...defaultProps} />);
-
-      const button = screen.getByLabelText('More actions for project Test Project');
-      expect(button).toHaveAttribute('data-show-on-hover', 'true');
-    });
-  });
-
   describe('different project data', () => {
     it('should render with different project values', () => {
-      const differentProject: ProjectListItem = {
-        ...mockProject,
+      const differentProject = createMockProjectListItem({
         $id: '2',
         name: 'Another Project',
         color_hex: '#00FF00',
         color_name: 'green',
-      };
+      });
 
-      render(
-        <ProjectSidebarNavItem
-          {...defaultProps}
-          project={differentProject}
-        />
-      );
+      renderComponent({ project: differentProject });
 
       expect(screen.getByText('Another Project')).toBeInTheDocument();
-
-      const navLink = screen.getByTestId('project-nav-link');
-      expect(navLink).toHaveAttribute('data-color', '#00FF00');
-
-      const actionMenu = screen.getByTestId('project-action-menu');
-      expect(actionMenu).toHaveAttribute('data-project-id', '2');
-      expect(actionMenu).toHaveAttribute('data-color-hex', '#00FF00');
-      expect(actionMenu).toHaveAttribute('data-color-name', 'green');
+      expect(getNavLink()).toHaveAttribute('data-color', '#00FF00');
+      expect(getActionMenu()).toHaveAttribute('data-project-id', '2');
+      expect(getActionMenu()).toHaveAttribute('data-color-hex', '#00FF00');
+      expect(getActionMenu()).toHaveAttribute('data-color-name', 'green');
     });
 
     it('should handle special characters in project name', () => {
-      const specialProject: ProjectListItem = {
-        ...mockProject,
+      const specialProject = createMockProjectListItem({
         name: 'Project #1 & More!',
-      };
+      });
 
-      render(
-        <ProjectSidebarNavItem
-          {...defaultProps}
-          project={specialProject}
-        />
-      );
+      renderComponent({ project: specialProject });
 
       expect(screen.getByText('Project #1 & More!')).toBeInTheDocument();
       expect(screen.getByLabelText('More actions for project Project #1 & More!')).toBeInTheDocument();
+    });
+  });
+
+  describe('accessibility', () => {
+    it('should hide decorative icon from screen readers', () => {
+      const { container } = renderComponent();
+
+      const icon = container.querySelector('[aria-hidden="true"]');
+      expect(icon).toBeInTheDocument();
     });
   });
 });

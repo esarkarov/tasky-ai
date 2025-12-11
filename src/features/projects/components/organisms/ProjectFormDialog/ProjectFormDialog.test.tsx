@@ -1,21 +1,23 @@
+import { ProjectFormDialog } from '@/features/projects/components/organisms/ProjectFormDialog/ProjectFormDialog';
 import type { ProjectInput } from '@/features/projects/types';
 import type { HttpMethod } from '@/shared/types';
 import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
-import { ProjectFormDialog } from './ProjectFormDialog';
 
 const mockHandleSave = vi.fn();
-const mockCancelForm = vi.fn();
+const mockClose = vi.fn();
 const mockSetIsOpen = vi.fn();
 
-let mockDisclosureState = {
-  isOpen: false,
+const createMockDisclosureState = (isOpen = false) => ({
+  isOpen,
   setIsOpen: mockSetIsOpen,
-  close: mockCancelForm,
+  close: mockClose,
   open: vi.fn(),
   toggle: vi.fn(),
-};
+});
+
+let mockDisclosureState = createMockDisclosureState();
 
 vi.mock('@/shared/hooks/use-disclosure/use-disclosure', () => ({
   useDisclosure: () => mockDisclosureState,
@@ -29,20 +31,16 @@ vi.mock('@/features/projects/hooks/use-project-modal/use-project-modal', () => (
   }),
 }));
 
+interface ProjectFormProps {
+  mode: string;
+  defaultValues?: ProjectInput;
+  handleCancel: () => void;
+  onSubmit: (data: ProjectInput) => void;
+  isSubmitting: boolean;
+}
+
 vi.mock('@/features/projects/components/organisms/ProjectForm/ProjectForm', () => ({
-  ProjectForm: ({
-    mode,
-    defaultValues,
-    handleCancel,
-    onSubmit,
-    isSubmitting,
-  }: {
-    mode: string;
-    defaultValues?: ProjectInput;
-    handleCancel: () => void;
-    onSubmit: (data: ProjectInput) => void;
-    isSubmitting: boolean;
-  }) => (
+  ProjectForm: ({ mode, defaultValues, handleCancel, onSubmit, isSubmitting }: ProjectFormProps) => (
     <div data-testid="project-form">
       <div data-testid="form-mode">{mode}</div>
       {defaultValues && <div data-testid="default-values">{defaultValues.name}</div>}
@@ -53,16 +51,20 @@ vi.mock('@/features/projects/components/organisms/ProjectForm/ProjectForm', () =
   ),
 }));
 
+interface DialogProps {
+  children: React.ReactNode;
+  open: boolean;
+  onOpenChange: (open: boolean) => void;
+}
+
+interface DialogContentProps {
+  children: React.ReactNode;
+  className?: string;
+  'aria-label'?: string;
+}
+
 vi.mock('@/shared/components/ui/dialog', () => ({
-  Dialog: ({
-    children,
-    open,
-    onOpenChange,
-  }: {
-    children: React.ReactNode;
-    open: boolean;
-    onOpenChange: (open: boolean) => void;
-  }) => (
+  Dialog: ({ children, open, onOpenChange }: DialogProps) => (
     <div
       data-testid="dialog"
       data-open={open}>
@@ -73,18 +75,8 @@ vi.mock('@/shared/components/ui/dialog', () => ({
       {children}
     </div>
   ),
-  DialogTrigger: ({ children }: { children: React.ReactNode; asChild?: boolean }) => (
-    <div data-testid="dialog-trigger">{children}</div>
-  ),
-  DialogContent: ({
-    children,
-    className,
-    'aria-label': ariaLabel,
-  }: {
-    children: React.ReactNode;
-    className?: string;
-    'aria-label'?: string;
-  }) => (
+  DialogTrigger: ({ children }: { children: React.ReactNode }) => <div data-testid="dialog-trigger">{children}</div>,
+  DialogContent: ({ children, className, 'aria-label': ariaLabel }: DialogContentProps) => (
     <div
       data-testid="dialog-content"
       className={className}
@@ -95,60 +87,56 @@ vi.mock('@/shared/components/ui/dialog', () => ({
 }));
 
 describe('ProjectFormDialog', () => {
+  interface RenderOptions {
+    method?: HttpMethod;
+    defaultValues?: ProjectInput;
+    isOpen?: boolean;
+  }
+
+  const renderComponent = ({ method = 'POST', defaultValues, isOpen = false }: RenderOptions = {}) => {
+    mockDisclosureState = createMockDisclosureState(isOpen);
+    return render(
+      <ProjectFormDialog
+        method={method}
+        defaultValues={defaultValues}>
+        <button>Trigger</button>
+      </ProjectFormDialog>
+    );
+  };
+
+  const getDialog = () => screen.getByTestId('dialog');
+  const getDialogContent = () => screen.getByTestId('dialog-content');
+
   beforeEach(() => {
     vi.clearAllMocks();
-
-    mockDisclosureState = {
-      isOpen: false,
-      setIsOpen: mockSetIsOpen,
-      close: mockCancelForm,
-      open: vi.fn(),
-      toggle: vi.fn(),
-    };
+    mockDisclosureState = createMockDisclosureState();
   });
 
   describe('rendering', () => {
     it('should render dialog with trigger button', () => {
-      render(
-        <ProjectFormDialog method="POST">
-          <button>Create Project</button>
-        </ProjectFormDialog>
-      );
+      renderComponent();
 
-      expect(screen.getByTestId('dialog')).toBeInTheDocument();
+      expect(getDialog()).toBeInTheDocument();
       expect(screen.getByTestId('dialog-trigger')).toBeInTheDocument();
-      expect(screen.getByText('Create Project')).toBeInTheDocument();
+      expect(screen.getByText('Trigger')).toBeInTheDocument();
     });
 
-    it('should render create form when method is POST', () => {
-      mockDisclosureState.isOpen = true;
-
-      render(
-        <ProjectFormDialog method="POST">
-          <button>Create</button>
-        </ProjectFormDialog>
-      );
+    it('should render create form with correct mode and aria-label when method is POST', () => {
+      renderComponent({ method: 'POST', isOpen: true });
 
       expect(screen.getByTestId('form-mode')).toHaveTextContent('create');
-      expect(screen.getByLabelText('Create project form')).toBeInTheDocument();
+      expect(getDialogContent()).toHaveAttribute('aria-label', 'Create project form');
+      expect(getDialogContent()).toHaveClass('p-0 border-0 !rounded-xl');
     });
 
-    it('should render update form when method is PUT', () => {
-      mockDisclosureState.isOpen = true;
-
-      render(
-        <ProjectFormDialog method="PUT">
-          <button>Edit</button>
-        </ProjectFormDialog>
-      );
+    it('should render update form with correct mode and aria-label when method is PUT', () => {
+      renderComponent({ method: 'PUT', isOpen: true });
 
       expect(screen.getByTestId('form-mode')).toHaveTextContent('update');
-      expect(screen.getByLabelText('Edit project form')).toBeInTheDocument();
+      expect(getDialogContent()).toHaveAttribute('aria-label', 'Edit project form');
     });
 
     it('should pass default values to form', () => {
-      mockDisclosureState.isOpen = true;
-
       const defaultValues: ProjectInput = {
         id: 'project-123',
         name: 'Test Project',
@@ -156,146 +144,78 @@ describe('ProjectFormDialog', () => {
         color_hex: '#FF0000',
       };
 
-      render(
-        <ProjectFormDialog
-          method="PUT"
-          defaultValues={defaultValues}>
-          <button>Edit</button>
-        </ProjectFormDialog>
-      );
+      renderComponent({ method: 'PUT', defaultValues, isOpen: true });
 
       expect(screen.getByTestId('default-values')).toHaveTextContent('Test Project');
-    });
-
-    it('should apply custom styling to dialog content', () => {
-      mockDisclosureState.isOpen = true;
-
-      render(
-        <ProjectFormDialog method="POST">
-          <button>Create</button>
-        </ProjectFormDialog>
-      );
-
-      const dialogContent = screen.getByTestId('dialog-content');
-      expect(dialogContent).toHaveClass('p-0 border-0 !rounded-xl');
     });
   });
 
   describe('dialog state', () => {
-    it('should control dialog open state', () => {
-      render(
-        <ProjectFormDialog method="POST">
-          <button>Create</button>
-        </ProjectFormDialog>
-      );
+    it('should be closed by default', () => {
+      renderComponent();
 
-      const dialog = screen.getByTestId('dialog');
-      expect(dialog).toHaveAttribute('data-open', 'false');
+      expect(getDialog()).toHaveAttribute('data-open', 'false');
     });
 
-    it('should show dialog when open', () => {
-      mockDisclosureState.isOpen = true;
+    it('should be open when isOpen is true', () => {
+      renderComponent({ isOpen: true });
 
-      render(
-        <ProjectFormDialog method="POST">
-          <button>Create</button>
-        </ProjectFormDialog>
-      );
-
-      const dialog = screen.getByTestId('dialog');
-      expect(dialog).toHaveAttribute('data-open', 'true');
+      expect(getDialog()).toHaveAttribute('data-open', 'true');
     });
 
-    it('should call setIsOpen when dialog open state changes', async () => {
+    it('should call setIsOpen when dialog is toggled', async () => {
       const user = userEvent.setup();
+      renderComponent();
 
-      render(
-        <ProjectFormDialog method="POST">
-          <button>Create</button>
-        </ProjectFormDialog>
-      );
-
-      const dialogToggle = screen.getByTestId('dialog-toggle');
-      await user.click(dialogToggle);
+      await user.click(screen.getByTestId('dialog-toggle'));
 
       expect(mockSetIsOpen).toHaveBeenCalledWith(true);
+      expect(mockSetIsOpen).toHaveBeenCalledTimes(1);
     });
   });
 
   describe('form interactions', () => {
     it('should call handleSave when form is submitted', async () => {
-      mockDisclosureState.isOpen = true;
       const user = userEvent.setup();
+      renderComponent({ isOpen: true });
 
-      render(
-        <ProjectFormDialog method="POST">
-          <button>Create</button>
-        </ProjectFormDialog>
-      );
-
-      const submitButton = screen.getByText('Submit');
-      await user.click(submitButton);
+      await user.click(screen.getByText('Submit'));
 
       expect(mockHandleSave).toHaveBeenCalledWith({
         name: 'Test',
         color_name: 'blue',
         color_hex: '#0000FF',
       });
+      expect(mockHandleSave).toHaveBeenCalledTimes(1);
     });
 
-    it('should call cancelForm when cancel is clicked', async () => {
-      mockDisclosureState.isOpen = true;
+    it('should call close when cancel is clicked', async () => {
       const user = userEvent.setup();
+      renderComponent({ isOpen: true });
 
-      render(
-        <ProjectFormDialog method="POST">
-          <button>Create</button>
-        </ProjectFormDialog>
-      );
+      await user.click(screen.getByText('Cancel'));
 
-      const cancelButton = screen.getByText('Cancel');
-      await user.click(cancelButton);
-
-      expect(mockCancelForm).toHaveBeenCalled();
+      expect(mockClose).toHaveBeenCalledTimes(1);
     });
   });
 
-  // TODO: Fix this test case
-  // describe('loading state', () => {
-  //   it('should pass loading state to form', async () => {
-  //     mockDisclosureState.isOpen = true;
-  //     mockUseProjectModal.mockReturnValue({
-  //       isLoading: true,
-  //       handleSave: mockHandleSave,
-  //       handleDelete: vi.fn(),
-  //     });
-  //     render(
-  //       <ProjectFormDialog method="POST">
-  //         <button>Create</button>
-  //       </ProjectFormDialog>
-  //     );
-  //     expect(screen.getByTestId('submitting')).toBeInTheDocument();
-  //   });
-  // });
-
   describe('method handling', () => {
-    const cases: Array<[HttpMethod, string]> = [
-      ['POST', 'create'],
-      ['PUT', 'update'],
-      ['DELETE', 'update'],
-      ['GET', 'update'],
-    ];
+    it('should use create mode for POST method', () => {
+      renderComponent({ method: 'POST', isOpen: true });
 
-    it.each(cases)('should set mode to %s for method %s', (method, expectedMode) => {
-      mockDisclosureState.isOpen = true;
+      expect(screen.getByTestId('form-mode')).toHaveTextContent('create');
+    });
 
-      render(
-        <ProjectFormDialog method={method as HttpMethod}>
-          <button>Button</button>
-        </ProjectFormDialog>
-      );
+    it('should use update mode for PUT method', () => {
+      renderComponent({ method: 'PUT', isOpen: true });
 
-      expect(screen.getByTestId('form-mode')).toHaveTextContent(expectedMode);
+      expect(screen.getByTestId('form-mode')).toHaveTextContent('update');
+    });
+
+    it('should use update mode for non-POST methods', () => {
+      renderComponent({ method: 'DELETE', isOpen: true });
+
+      expect(screen.getByTestId('form-mode')).toHaveTextContent('update');
     });
   });
 });

@@ -1,5 +1,5 @@
 import { AIGeneratedTask } from '@/features/ai/types';
-import { Project, ProjectsListResponse } from '@/features/projects/types';
+import { Project, ProjectListItem, ProjectsListResponse } from '@/features/projects/types';
 import { Task, TaskCounts, TasksResponse } from '@/features/tasks/types';
 import { HttpMethod, ProjectsWithTasksLoaderData, TasksLoaderData } from '@/shared/types';
 import { GenerateContentResponse } from '@google/genai';
@@ -36,6 +36,19 @@ export const createMockProject = (overrides?: Partial<Project>): Project => ({
   color_name: 'blue',
   color_hex: '#0000FF',
   tasks: [],
+  $createdAt: new Date().toISOString(),
+  $updatedAt: new Date().toISOString(),
+  $collectionId: 'projects',
+  $databaseId: 'projects-db',
+  $permissions: [],
+  ...overrides,
+});
+
+export const createMockProjectListItem = (overrides?: Partial<ProjectListItem>): ProjectListItem => ({
+  $id: 'project-1',
+  name: 'Test Project name',
+  color_name: 'blue',
+  color_hex: '#0000FF',
   $createdAt: new Date().toISOString(),
   $updatedAt: new Date().toISOString(),
   $collectionId: 'projects',

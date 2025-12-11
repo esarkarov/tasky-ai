@@ -3,17 +3,14 @@ import userEvent from '@testing-library/user-event';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { CancelProjectButton } from './CancelProjectButton';
 
+interface ButtonProps {
+  children: React.ReactNode;
+  onClick: () => void;
+  variant: string;
+}
+
 vi.mock('@/shared/components/ui/button', () => ({
-  Button: ({
-    children,
-    onClick,
-    variant,
-    ...props
-  }: {
-    children: React.ReactNode;
-    onClick: () => void;
-    variant: string;
-  }) => (
+  Button: ({ children, onClick, variant, ...props }: ButtonProps) => (
     <button
       type="button"
       data-variant={variant}
@@ -26,87 +23,78 @@ vi.mock('@/shared/components/ui/button', () => ({
 }));
 
 describe('CancelProjectButton', () => {
-  const setup = async (overrides = {}) => {
-    const user = userEvent.setup();
-    const onClick = vi.fn();
-    render(
-      <CancelProjectButton
-        onClick={onClick}
-        {...overrides}
-      />
-    );
-    const button = screen.getByRole('button', { name: /cancel project form/i });
-    return { button, user, onClick };
+  const mockOnClick = vi.fn();
+
+  const renderComponent = () => {
+    render(<CancelProjectButton onClick={mockOnClick} />);
   };
+
+  const getButton = () => screen.getByRole('button', { name: /cancel project form/i });
 
   beforeEach(() => {
     vi.clearAllMocks();
   });
 
   describe('rendering', () => {
-    it('renders cancel button with correct text', async () => {
-      const { button } = await setup();
+    it('should render button with correct text and attributes', () => {
+      renderComponent();
 
+      const button = getButton();
       expect(button).toBeInTheDocument();
       expect(screen.getByText('Cancel')).toBeInTheDocument();
-    });
-
-    it('renders with type="button"', async () => {
-      const { button } = await setup();
-
       expect(button).toHaveAttribute('type', 'button');
+      expect(button).toHaveAttribute('data-variant', 'secondary');
     });
 
-    it('renders with secondary variant', async () => {
-      const { button } = await setup();
+    it('should have accessible name', () => {
+      renderComponent();
 
-      expect(button).toHaveAttribute('data-variant', 'secondary');
+      expect(getButton()).toHaveAccessibleName('Cancel project form');
     });
   });
 
   describe('user interactions', () => {
-    it('calls onClick once when clicked', async () => {
-      const { button, user, onClick } = await setup();
+    it('should call onClick when button is clicked', async () => {
+      const user = userEvent.setup();
+      renderComponent();
 
-      await user.click(button);
+      await user.click(getButton());
 
-      expect(onClick).toHaveBeenCalledTimes(1);
+      expect(mockOnClick).toHaveBeenCalledTimes(1);
     });
 
-    it('calls onClick multiple times when clicked repeatedly', async () => {
-      const { button, user, onClick } = await setup();
+    it('should call onClick multiple times on repeated clicks', async () => {
+      const user = userEvent.setup();
+      renderComponent();
 
+      const button = getButton();
       await user.click(button);
       await user.click(button);
       await user.click(button);
 
-      expect(onClick).toHaveBeenCalledTimes(3);
-    });
-  });
-
-  describe('accessibility', () => {
-    it('has correct aria-label', async () => {
-      const { button } = await setup();
-
-      expect(button).toHaveAccessibleName('Cancel project form');
+      expect(mockOnClick).toHaveBeenCalledTimes(3);
     });
 
-    it('is keyboard accessible via Enter key', async () => {
-      const { button, user, onClick } = await setup();
+    it('should be keyboard accessible with Enter key', async () => {
+      const user = userEvent.setup();
+      renderComponent();
 
+      const button = getButton();
       button.focus();
       await user.keyboard('{Enter}');
 
-      expect(onClick).toHaveBeenCalledTimes(1);
+      expect(mockOnClick).toHaveBeenCalledTimes(1);
     });
 
-    it('is keyboard accessible via Space key', async () => {
-      const { button, user, onClick } = await setup();
+    it('should be keyboard accessible with Space key', async () => {
+      const user = userEvent.setup();
+      renderComponent();
 
+      const button = getButton();
       button.focus();
       await user.keyboard(' ');
 
-      expect(onClick).toHaveBeenCalledTimes(1);
+      expect(mockOnClick).toHaveBeenCalledTimes(1);
     });
   });
 });

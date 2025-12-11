@@ -1,18 +1,23 @@
 import { createMockProject } from '@/core/test-setup/factories';
+import { ProjectCard } from '@/features/projects/components/organisms/ProjectCard/ProjectCard';
+import type { Project } from '@/features/projects/types';
 import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { MemoryRouter } from 'react-router';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
-import { ProjectCard } from './ProjectCard';
+
+interface ProjectActionMenuProps {
+  children: React.ReactNode;
+  defaultValues: {
+    id: string;
+    name: string;
+    color_name: string;
+    color_hex: string;
+  };
+}
 
 vi.mock('@/features/projects/components/organisms/ProjectActionMenu/ProjectActionMenu', () => ({
-  ProjectActionMenu: ({
-    children,
-    defaultValues,
-  }: {
-    children: React.ReactNode;
-    defaultValues: Record<string, string>;
-  }) => (
+  ProjectActionMenu: ({ children, defaultValues }: ProjectActionMenuProps) => (
     <div
       data-testid="project-action-menu"
       data-project-id={defaultValues.id}>
@@ -25,127 +30,131 @@ vi.mock('@/shared/components/ui/button', () => ({
   Button: ({ children, ...props }: React.ComponentProps<'button'>) => <button {...props}>{children}</button>,
 }));
 
-const renderWithRouter = (component: React.ReactElement) => {
-  return render(<MemoryRouter>{component}</MemoryRouter>);
-};
+interface IconProps {
+  size?: number;
+  style?: React.CSSProperties;
+  className?: string;
+}
+
+vi.mock('lucide-react', () => ({
+  Hash: ({ size, style, className, ...props }: IconProps) => (
+    <svg
+      data-testid="hash-icon"
+      data-size={size}
+      style={style}
+      className={className}
+      aria-hidden="true"
+      {...props}
+    />
+  ),
+  MoreHorizontal: (props: IconProps) => (
+    <svg
+      data-testid="more-horizontal-icon"
+      aria-hidden="true"
+      focusable="false"
+      {...props}
+    />
+  ),
+}));
 
 describe('ProjectCard', () => {
+  interface RenderOptions {
+    project?: Project;
+  }
+
+  const renderComponent = ({ project = createMockProject() }: RenderOptions = {}) => {
+    return render(
+      <MemoryRouter>
+        <ProjectCard project={project} />
+      </MemoryRouter>
+    );
+  };
+
+  const getCard = () => screen.getByRole('article');
+  const getLink = () => screen.getByRole('link');
+  const getActionsButton = () => screen.getByRole('button');
+
   beforeEach(() => {
     vi.clearAllMocks();
   });
 
   describe('rendering', () => {
-    it('should render project name', () => {
+    it('should render project card with name and correct aria-label', () => {
       const project = createMockProject({ name: 'My Awesome Project' });
-      renderWithRouter(<ProjectCard project={project} />);
+      renderComponent({ project });
 
       expect(screen.getByText('My Awesome Project')).toBeInTheDocument();
+      expect(getCard()).toHaveAttribute('aria-label', 'Project: My Awesome Project');
     });
 
-    it('should render project with correct aria-label', () => {
-      const project = createMockProject({ name: 'Test Project' });
-      renderWithRouter(<ProjectCard project={project} />);
-
-      expect(screen.getByRole('article')).toHaveAttribute('aria-label', 'Project: Test Project');
-    });
-
-    it('should render hash icon with project color', () => {
+    it('should render Hash icon with project color', () => {
       const project = createMockProject({ color_hex: '#FF0000' });
-      const { container } = renderWithRouter(<ProjectCard project={project} />);
+      renderComponent({ project });
 
-      const hashIcon = container.querySelector('svg');
-      expect(hashIcon).toHaveStyle({ color: project.color_hex });
+      const hashIcon = screen.getByTestId('hash-icon');
+      expect(hashIcon).toHaveStyle({ color: '#FF0000' });
+      expect(hashIcon).toHaveAttribute('data-size', '16');
+      expect(hashIcon).toHaveAttribute('aria-hidden', 'true');
     });
 
-    it('should render more actions button', () => {
-      const project = createMockProject({ name: 'Test Project' });
-      renderWithRouter(<ProjectCard project={project} />);
+    it('should render link to project detail page', () => {
+      const project = createMockProject({ $id: 'project-789', name: 'My Project' });
+      renderComponent({ project });
 
-      const actionsButton = screen.getByLabelText('More actions for project Test Project');
-      expect(actionsButton).toBeInTheDocument();
+      const link = getLink();
+      expect(link).toHaveAttribute('href', '/app/projects/project-789');
+      expect(link).toHaveAttribute('aria-label', 'Open project My Project');
+      expect(link).toHaveClass('absolute inset-0 z-10');
     });
 
-    it('should render project action menu with correct default values', () => {
-      const project = createMockProject({
-        $id: 'project-456',
-        name: 'Demo Project',
-        color_name: 'red',
-        color_hex: '#FF0000',
-      });
-      renderWithRouter(<ProjectCard project={project} />);
+    it('should render actions button with ProjectActionMenu', () => {
+      const project = createMockProject({ $id: 'project-456', name: 'Test Project' });
+      renderComponent({ project });
+
+      const actionsButton = getActionsButton();
+      expect(actionsButton).toHaveAttribute('aria-label', 'More actions for project Test Project');
+      expect(actionsButton).toHaveClass('opacity-0 group-hover/card:opacity-100');
 
       const actionMenu = screen.getByTestId('project-action-menu');
       expect(actionMenu).toHaveAttribute('data-project-id', 'project-456');
     });
   });
 
-  describe('navigation', () => {
-    it('should render link to project detail page', () => {
-      const project = createMockProject({ $id: 'project-789', name: 'My Project' });
-      renderWithRouter(<ProjectCard project={project} />);
-
-      const link = screen.getByLabelText('Open project My Project');
-      expect(link).toHaveAttribute('href', '/app/projects/project-789');
-    });
-
-    it('should have correct link structure for accessibility', () => {
-      const project = createMockProject({ name: 'Accessible Project' });
-      renderWithRouter(<ProjectCard project={project} />);
-
-      const link = screen.getByLabelText('Open project Accessible Project');
-      expect(link.tagName).toBe('A');
-      expect(link).toHaveClass('absolute inset-0 z-10');
-    });
-  });
-
   describe('user interactions', () => {
-    it('should be hoverable', () => {
-      const project = createMockProject();
-      const { container } = renderWithRouter(<ProjectCard project={project} />);
+    it('should have hover styles on card', () => {
+      renderComponent();
 
-      const article = container.querySelector('article');
-      expect(article).toHaveClass('hover:bg-secondary');
+      expect(getCard()).toHaveClass('hover:bg-secondary');
     });
 
-    it('should show actions button on hover', () => {
-      const project = createMockProject();
-      renderWithRouter(<ProjectCard project={project} />);
-
-      const actionsButton = screen.getByRole('button');
-      expect(actionsButton).toHaveClass('opacity-0 group-hover/card:opacity-100');
-    });
-
-    it('should allow clicking more actions button', async () => {
+    it('should be clickable via actions button', async () => {
       const user = userEvent.setup();
       const project = createMockProject({ name: 'Test Project' });
-      renderWithRouter(<ProjectCard project={project} />);
+      renderComponent({ project });
 
-      const actionsButton = screen.getByLabelText('More actions for project Test Project');
+      await user.click(getActionsButton());
 
-      await user.click(actionsButton);
-
-      expect(actionsButton).toBeInTheDocument();
+      expect(getActionsButton()).toBeInTheDocument();
     });
   });
 
   describe('accessibility', () => {
     it('should have proper ARIA labels for all interactive elements', () => {
       const project = createMockProject({ name: 'Accessible Project' });
-      renderWithRouter(<ProjectCard project={project} />);
+      renderComponent({ project });
 
-      expect(screen.getByRole('article')).toHaveAttribute('aria-label', 'Project: Accessible Project');
-      expect(screen.getByRole('link')).toHaveAttribute('aria-label', 'Open project Accessible Project');
-      expect(screen.getByRole('button')).toHaveAttribute('aria-label', 'More actions for project Accessible Project');
+      expect(getCard()).toHaveAttribute('aria-label', 'Project: Accessible Project');
+      expect(getLink()).toHaveAttribute('aria-label', 'Open project Accessible Project');
+      expect(getActionsButton()).toHaveAttribute('aria-label', 'More actions for project Accessible Project');
     });
 
-    it('should mark decorative icons as aria-hidden', () => {
-      const project = createMockProject();
-      const { container } = renderWithRouter(<ProjectCard project={project} />);
+    it('should hide decorative icons from screen readers', () => {
+      renderComponent();
 
-      const hashIcon = container.querySelector('svg');
+      const hashIcon = screen.getByTestId('hash-icon');
       expect(hashIcon).toHaveAttribute('aria-hidden', 'true');
 
-      const moreIcon = container.querySelectorAll('svg')[1];
+      const moreIcon = screen.getByTestId('more-horizontal-icon');
       expect(moreIcon).toHaveAttribute('aria-hidden', 'true');
       expect(moreIcon).toHaveAttribute('focusable', 'false');
     });
@@ -158,26 +167,26 @@ describe('ProjectCard', () => {
   });
 
   describe('edge cases', () => {
-    it('should handle projects with special characters in name', () => {
+    it('should handle special characters in project name', () => {
       const project = createMockProject({ name: 'Project & Task #1 <Test>' });
-      renderWithRouter(<ProjectCard project={project} />);
+      renderComponent({ project });
 
       expect(screen.getByText('Project & Task #1 <Test>')).toBeInTheDocument();
     });
 
-    it('should handle projects with empty name gracefully', () => {
+    it('should handle empty project name', () => {
       const project = createMockProject({ name: '' });
-      renderWithRouter(<ProjectCard project={project} />);
+      renderComponent({ project });
 
-      expect(screen.getByRole('article')).toBeInTheDocument();
+      expect(getCard()).toBeInTheDocument();
     });
 
-    it('should handle different color hex formats', () => {
+    it('should handle short hex color format', () => {
       const project = createMockProject({ color_hex: '#ABC' });
-      const { container } = renderWithRouter(<ProjectCard project={project} />);
+      renderComponent({ project });
 
-      const hashIcon = container.querySelector('svg');
-      expect(hashIcon).toHaveStyle({ color: project.color_hex });
+      const hashIcon = screen.getByTestId('hash-icon');
+      expect(hashIcon).toHaveStyle({ color: '#ABC' });
     });
   });
 });

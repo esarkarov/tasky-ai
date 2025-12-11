@@ -1,12 +1,13 @@
 import { createMockProject } from '@/core/test-setup/factories';
+import { ProjectsSidebarList } from '@/features/projects/components/organisms/ProjectsSidebarList/ProjectsSidebarList';
 import type { ProjectListItem } from '@/features/projects/types';
 import type { ProjectsLoaderData } from '@/shared/types';
 import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
-import { ProjectsSidebarList } from './ProjectsSidebarList';
 
 const mockUseLoaderData = vi.fn();
+
 vi.mock('react-router', () => ({
   useLoaderData: () => mockUseLoaderData(),
 }));
@@ -21,14 +22,13 @@ vi.mock('@/features/projects/components/atoms/AllProjectsButton/AllProjectsButto
   ),
 }));
 
+interface ProjectSidebarNavItemProps {
+  project: ProjectListItem;
+  handleMobileNavigation: () => void;
+}
+
 vi.mock('@/features/projects/components/molecules/ProjectSidebarNavItem/ProjectSidebarNavItem', () => ({
-  ProjectSidebarNavItem: ({
-    project,
-    handleMobileNavigation,
-  }: {
-    project: ProjectListItem;
-    handleMobileNavigation: () => void;
-  }) => (
+  ProjectSidebarNavItem: ({ project, handleMobileNavigation }: ProjectSidebarNavItemProps) => (
     <button
       onClick={handleMobileNavigation}
       data-testid={`project-item-${project.$id}`}>
@@ -68,201 +68,104 @@ vi.mock('@/shared/components/ui/sidebar', () => ({
 describe('ProjectsSidebarList', () => {
   const mockHandleMobileNavigation = vi.fn();
 
+  interface RenderOptions {
+    projectCount?: number;
+    total?: number;
+  }
+
+  const renderComponent = ({ projectCount = 0, total }: RenderOptions = {}) => {
+    const mockProjects: ProjectListItem[] = Array.from({ length: projectCount }, (_, i) =>
+      createMockProject({ $id: `${i + 1}`, name: `Project ${i + 1}` })
+    );
+
+    mockUseLoaderData.mockReturnValue({
+      projects: { documents: mockProjects, total: total ?? projectCount },
+    } as ProjectsLoaderData);
+
+    return render(<ProjectsSidebarList handleMobileNavigation={mockHandleMobileNavigation} />);
+  };
+
+  const getProjectItem = (id: string) => screen.queryByTestId(`project-item-${id}`);
+  const getAllProjectsButton = () => screen.queryByTestId('all-projects-button');
+
   beforeEach(() => {
     vi.clearAllMocks();
   });
 
   describe('rendering', () => {
-    it('renders list of projects', () => {
-      const mockProjects: ProjectListItem[] = [
-        createMockProject({ $id: '1', name: 'Project 1' }),
-        createMockProject({ $id: '2', name: 'Project 2' }),
-        createMockProject({ $id: '3', name: 'Project 3' }),
-      ];
+    it('should render list of projects with correct structure', () => {
+      renderComponent({ projectCount: 3 });
 
-      mockUseLoaderData.mockReturnValue({
-        projects: { documents: mockProjects, total: 3 },
-      } as ProjectsLoaderData);
-
-      render(<ProjectsSidebarList handleMobileNavigation={mockHandleMobileNavigation} />);
-
-      expect(screen.getByTestId('project-item-1')).toHaveTextContent('Project 1');
-      expect(screen.getByTestId('project-item-2')).toHaveTextContent('Project 2');
-      expect(screen.getByTestId('project-item-3')).toHaveTextContent('Project 3');
+      expect(screen.getByTestId('collapsible-content')).toHaveAttribute('id', 'projects-list');
+      expect(screen.getByTestId('sidebar-group-content')).toBeInTheDocument();
+      expect(screen.getByTestId('sidebar-menu')).toBeInTheDocument();
+      expect(getProjectItem('1')).toHaveTextContent('Project 1');
+      expect(getProjectItem('2')).toHaveTextContent('Project 2');
+      expect(getProjectItem('3')).toHaveTextContent('Project 3');
     });
 
-    it('limits display to 9 projects', () => {
-      const mockProjects: ProjectListItem[] = Array.from({ length: 12 }, (_, i) =>
-        createMockProject({ $id: `${i + 1}`, name: `Project ${i + 1}` })
-      );
-
-      mockUseLoaderData.mockReturnValue({
-        projects: { documents: mockProjects, total: 12 },
-      } as ProjectsLoaderData);
-
-      render(<ProjectsSidebarList handleMobileNavigation={mockHandleMobileNavigation} />);
-
-      expect(screen.getByTestId('project-item-1')).toBeInTheDocument();
-      expect(screen.getByTestId('project-item-9')).toBeInTheDocument();
-      expect(screen.queryByTestId('project-item-10')).not.toBeInTheDocument();
-    });
-
-    it('renders each project with correct index', () => {
-      const mockProjects: ProjectListItem[] = [
-        createMockProject({ $id: '1', name: 'Project 1' }),
-        createMockProject({ $id: '2', name: 'Project 2' }),
-      ];
-
-      mockUseLoaderData.mockReturnValue({
-        projects: { documents: mockProjects, total: 2 },
-      } as ProjectsLoaderData);
-
-      render(<ProjectsSidebarList handleMobileNavigation={mockHandleMobileNavigation} />);
+    it('should render projects with correct indices', () => {
+      renderComponent({ projectCount: 2 });
 
       const navLists = screen.getAllByTestId('nav-list');
       expect(navLists[0]).toHaveAttribute('data-index', '0');
       expect(navLists[1]).toHaveAttribute('data-index', '1');
     });
+
+    it('should limit display to 9 projects', () => {
+      renderComponent({ projectCount: 12 });
+
+      expect(getProjectItem('1')).toBeInTheDocument();
+      expect(getProjectItem('9')).toBeInTheDocument();
+      expect(getProjectItem('10')).not.toBeInTheDocument();
+    });
   });
 
   describe('All Projects button', () => {
-    it('shows All Projects button when total exceeds limit', () => {
-      const mockProjects: ProjectListItem[] = Array.from({ length: 10 }, (_, i) =>
-        createMockProject({ $id: `${i + 1}`, name: `Project ${i + 1}` })
-      );
+    it('should show when total exceeds 9 projects', () => {
+      renderComponent({ projectCount: 10 });
 
-      mockUseLoaderData.mockReturnValue({
-        projects: { documents: mockProjects, total: 10 },
-      } as ProjectsLoaderData);
-
-      render(<ProjectsSidebarList handleMobileNavigation={mockHandleMobileNavigation} />);
-
-      expect(screen.getByTestId('all-projects-button')).toBeInTheDocument();
+      expect(getAllProjectsButton()).toBeInTheDocument();
     });
 
-    it('does not show All Projects button when total is at limit', () => {
-      const mockProjects: ProjectListItem[] = Array.from({ length: 9 }, (_, i) =>
-        createMockProject({ $id: `${i + 1}`, name: `Project ${i + 1}` })
-      );
+    it('should not show when total is 9 or fewer projects', () => {
+      renderComponent({ projectCount: 9 });
 
-      mockUseLoaderData.mockReturnValue({
-        projects: { documents: mockProjects, total: 9 },
-      } as ProjectsLoaderData);
-
-      render(<ProjectsSidebarList handleMobileNavigation={mockHandleMobileNavigation} />);
-
-      expect(screen.queryByTestId('all-projects-button')).not.toBeInTheDocument();
+      expect(getAllProjectsButton()).not.toBeInTheDocument();
     });
 
-    it('does not show All Projects button when total is below limit', () => {
-      const mockProjects: ProjectListItem[] = [createMockProject({ $id: '1', name: 'Project 1' })];
-
-      mockUseLoaderData.mockReturnValue({
-        projects: { documents: mockProjects, total: 1 },
-      } as ProjectsLoaderData);
-
-      render(<ProjectsSidebarList handleMobileNavigation={mockHandleMobileNavigation} />);
-
-      expect(screen.queryByTestId('all-projects-button')).not.toBeInTheDocument();
-    });
-
-    it('calls handleMobileNavigation when All Projects button is clicked', async () => {
+    it('should call handleMobileNavigation when clicked', async () => {
       const user = userEvent.setup();
-      const mockProjects: ProjectListItem[] = Array.from({ length: 10 }, (_, i) =>
-        createMockProject({ $id: `${i + 1}`, name: `Project ${i + 1}` })
-      );
+      renderComponent({ projectCount: 10 });
 
-      mockUseLoaderData.mockReturnValue({
-        projects: { documents: mockProjects, total: 10 },
-      } as ProjectsLoaderData);
-
-      render(<ProjectsSidebarList handleMobileNavigation={mockHandleMobileNavigation} />);
-
-      await user.click(screen.getByTestId('all-projects-button'));
+      await user.click(getAllProjectsButton()!);
 
       expect(mockHandleMobileNavigation).toHaveBeenCalledTimes(1);
     });
   });
 
   describe('empty state', () => {
-    it('shows empty message when no projects exist', () => {
-      mockUseLoaderData.mockReturnValue({
-        projects: { documents: [], total: 0 },
-      } as ProjectsLoaderData);
-
-      render(<ProjectsSidebarList handleMobileNavigation={mockHandleMobileNavigation} />);
+    it('should show empty message when no projects exist', () => {
+      renderComponent({ projectCount: 0 });
 
       expect(screen.getByText('Click + to add some projects')).toBeInTheDocument();
     });
 
-    it('does not show empty message when projects exist', () => {
-      const mockProjects: ProjectListItem[] = [createMockProject({ $id: '1', name: 'Project 1' })];
-
-      mockUseLoaderData.mockReturnValue({
-        projects: { documents: mockProjects, total: 1 },
-      } as ProjectsLoaderData);
-
-      render(<ProjectsSidebarList handleMobileNavigation={mockHandleMobileNavigation} />);
+    it('should not show empty message when projects exist', () => {
+      renderComponent({ projectCount: 1 });
 
       expect(screen.queryByText('Click + to add some projects')).not.toBeInTheDocument();
     });
   });
 
   describe('mobile navigation', () => {
-    it('calls handleMobileNavigation when project item is clicked', async () => {
+    it('should call handleMobileNavigation when project item is clicked', async () => {
       const user = userEvent.setup();
-      const mockProjects: ProjectListItem[] = [createMockProject({ $id: '1', name: 'Project 1' })];
+      renderComponent({ projectCount: 1 });
 
-      mockUseLoaderData.mockReturnValue({
-        projects: { documents: mockProjects, total: 1 },
-      } as ProjectsLoaderData);
-
-      render(<ProjectsSidebarList handleMobileNavigation={mockHandleMobileNavigation} />);
-
-      await user.click(screen.getByTestId('project-item-1'));
+      await user.click(getProjectItem('1')!);
 
       expect(mockHandleMobileNavigation).toHaveBeenCalledTimes(1);
-    });
-
-    it('passes handleMobileNavigation to each project item', () => {
-      const mockProjects: ProjectListItem[] = [
-        createMockProject({ $id: '1', name: 'Project 1' }),
-        createMockProject({ $id: '2', name: 'Project 2' }),
-      ];
-
-      mockUseLoaderData.mockReturnValue({
-        projects: { documents: mockProjects, total: 2 },
-      } as ProjectsLoaderData);
-
-      render(<ProjectsSidebarList handleMobileNavigation={mockHandleMobileNavigation} />);
-
-      expect(screen.getByTestId('project-item-1')).toBeInTheDocument();
-      expect(screen.getByTestId('project-item-2')).toBeInTheDocument();
-    });
-  });
-
-  describe('structure', () => {
-    it('renders within CollapsibleContent with correct id', () => {
-      mockUseLoaderData.mockReturnValue({
-        projects: { documents: [], total: 0 },
-      } as ProjectsLoaderData);
-
-      render(<ProjectsSidebarList handleMobileNavigation={mockHandleMobileNavigation} />);
-
-      const collapsibleContent = screen.getByTestId('collapsible-content');
-      expect(collapsibleContent).toHaveAttribute('id', 'projects-list');
-    });
-
-    it('renders with correct component hierarchy', () => {
-      mockUseLoaderData.mockReturnValue({
-        projects: { documents: [], total: 0 },
-      } as ProjectsLoaderData);
-
-      render(<ProjectsSidebarList handleMobileNavigation={mockHandleMobileNavigation} />);
-
-      expect(screen.getByTestId('collapsible-content')).toBeInTheDocument();
-      expect(screen.getByTestId('sidebar-group-content')).toBeInTheDocument();
-      expect(screen.getByTestId('sidebar-menu')).toBeInTheDocument();
     });
   });
 });

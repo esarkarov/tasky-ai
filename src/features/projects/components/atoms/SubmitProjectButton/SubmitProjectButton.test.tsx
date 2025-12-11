@@ -1,172 +1,198 @@
-import { render, screen, waitFor } from '@testing-library/react';
+import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { SubmitProjectButton } from './SubmitProjectButton';
+import type { CrudMode } from '@/shared/types';
+
+interface ButtonProps {
+  children: React.ReactNode;
+  onClick: () => void;
+  disabled: boolean;
+  'aria-label': string;
+}
+interface RenderOptions {
+  mode?: CrudMode;
+  disabled?: boolean;
+  onClick?: () => Promise<void>;
+}
 
 vi.mock('@/shared/components/ui/button', () => ({
-  Button: ({
-    children,
-    onClick,
-    disabled,
-    'aria-label': ariaLabel,
-  }: {
-    children: React.ReactNode;
-    onClick: () => void;
-    disabled: boolean;
-    'aria-label': string;
-  }) => (
+  Button: ({ children, onClick, disabled, 'aria-label': ariaLabel, ...props }: ButtonProps) => (
     <button
       type="submit"
       disabled={disabled}
       aria-label={ariaLabel}
-      onClick={onClick}>
+      onClick={onClick}
+      {...props}>
       {children}
     </button>
   ),
 }));
 
 describe('SubmitProjectButton', () => {
-  let mockOnClick: ReturnType<typeof vi.fn>;
-  const setup = (props?: Partial<React.ComponentProps<typeof SubmitProjectButton>>) => {
-    const user = userEvent.setup();
-    mockOnClick = vi.fn().mockResolvedValue(undefined);
-    const defaultProps = {
-      mode: 'create' as const,
-      disabled: true,
-      onClick: mockOnClick,
-      ...props,
-    };
-    render(<SubmitProjectButton {...defaultProps} />);
-    const button = screen.getByRole('button');
-    return { user, button, ...defaultProps };
+  const mockOnClick = vi.fn().mockResolvedValue(undefined);
+
+  const renderComponent = ({ mode = 'create', disabled = true, onClick = mockOnClick }: RenderOptions = {}) => {
+    render(
+      <SubmitProjectButton
+        mode={mode}
+        disabled={disabled}
+        onClick={onClick}
+      />
+    );
   };
+
+  const getButton = () => screen.getByRole('button');
 
   beforeEach(() => {
     vi.clearAllMocks();
   });
 
   describe('rendering', () => {
-    it('renders "Add" text and "Add project" label in create mode', () => {
-      setup({ mode: 'create' });
-      expect(screen.getByRole('button')).toHaveTextContent('Add');
-      expect(screen.getByLabelText('Add project')).toBeInTheDocument();
-    });
+    it('should render "Add" text with correct label in create mode', () => {
+      renderComponent({ mode: 'create' });
 
-    it('renders "Save" text and "Save project" label in update mode', () => {
-      setup({ mode: 'update' });
-      expect(screen.getByRole('button')).toHaveTextContent('Save');
-      expect(screen.getByLabelText('Save project')).toBeInTheDocument();
-    });
-  });
-
-  describe('button attributes', () => {
-    it('has submit type', () => {
-      const { button } = setup();
+      const button = getButton();
+      expect(button).toHaveTextContent('Add');
+      expect(button).toHaveAccessibleName('Add project');
       expect(button).toHaveAttribute('type', 'submit');
     });
 
-    it('is disabled when disabled prop is false', () => {
-      const { button } = setup({ disabled: false });
-      expect(button).toBeDisabled();
+    it('should render "Save" text with correct label in update mode', () => {
+      renderComponent({ mode: 'update' });
+
+      const button = getButton();
+      expect(button).toHaveTextContent('Save');
+      expect(button).toHaveAccessibleName('Save project');
+      expect(button).toHaveAttribute('type', 'submit');
+    });
+  });
+
+  describe('disabled state', () => {
+    it('should be disabled when disabled prop is false', () => {
+      renderComponent({ disabled: false });
+
+      expect(getButton()).toBeDisabled();
     });
 
-    it('is enabled when disabled prop is true', () => {
-      const { button } = setup({ disabled: true });
-      expect(button).not.toBeDisabled();
+    it('should be enabled when disabled prop is true', () => {
+      renderComponent({ disabled: true });
+
+      expect(getButton()).not.toBeDisabled();
     });
   });
 
   describe('user interactions', () => {
-    it('does not call onClick when disabled', async () => {
-      const { user, button } = setup({ disabled: false });
-      await user.click(button);
+    it('should not call onClick when button is disabled', async () => {
+      const user = userEvent.setup();
+      renderComponent({ disabled: false });
+
+      await user.click(getButton());
+
       expect(mockOnClick).not.toHaveBeenCalled();
     });
 
-    it('calls onClick when enabled', async () => {
-      const { user, button } = setup({ disabled: true });
-      await user.click(button);
-      await waitFor(() => expect(mockOnClick).toHaveBeenCalledTimes(1));
+    it('should call onClick when button is enabled', async () => {
+      const user = userEvent.setup();
+      renderComponent({ disabled: true });
+
+      await user.click(getButton());
+
+      expect(mockOnClick).toHaveBeenCalledTimes(1);
     });
 
-    it('handles async onClick without errors', async () => {
+    it('should handle async onClick that resolves', async () => {
+      const user = userEvent.setup();
       const asyncClick = vi.fn().mockResolvedValue(undefined);
-      const { user, button } = setup({ onClick: asyncClick });
-      await user.click(button);
-      await waitFor(() => expect(asyncClick).toHaveBeenCalledTimes(1));
+      renderComponent({ onClick: asyncClick });
+
+      await user.click(getButton());
+
+      expect(asyncClick).toHaveBeenCalledTimes(1);
     });
 
-    it('handles rejected onClick gracefully', async () => {
+    it('should handle async onClick that rejects', async () => {
+      const user = userEvent.setup();
       const errorClick = vi.fn().mockRejectedValue(new Error('Submit failed'));
-      const { user, button } = setup({ onClick: errorClick });
-      await user.click(button);
-      await waitFor(() => expect(errorClick).toHaveBeenCalledTimes(1));
+      renderComponent({ onClick: errorClick });
+
+      await user.click(getButton());
+
+      expect(errorClick).toHaveBeenCalledTimes(1);
     });
   });
 
-  describe('accessibility', () => {
-    it('triggers onClick via Enter key when enabled', async () => {
-      const { user, button } = setup({ disabled: true });
+  describe('keyboard accessibility', () => {
+    it('should call onClick when Enter key is pressed on enabled button', async () => {
+      const user = userEvent.setup();
+      renderComponent({ disabled: true });
+
+      const button = getButton();
       button.focus();
       await user.keyboard('{Enter}');
-      await waitFor(() => expect(mockOnClick).toHaveBeenCalledTimes(1));
+
+      expect(mockOnClick).toHaveBeenCalledTimes(1);
     });
 
-    it('triggers onClick via Space key when enabled', async () => {
-      const { user, button } = setup({ disabled: true });
+    it('should call onClick when Space key is pressed on enabled button', async () => {
+      const user = userEvent.setup();
+      renderComponent({ disabled: true });
+
+      const button = getButton();
       button.focus();
       await user.keyboard(' ');
-      await waitFor(() => expect(mockOnClick).toHaveBeenCalledTimes(1));
+
+      expect(mockOnClick).toHaveBeenCalledTimes(1);
     });
   });
 
   describe('mode transitions', () => {
-    it('updates from create → update', () => {
+    it('should update content when mode changes from create to update', () => {
       const { rerender } = render(
         <SubmitProjectButton
           mode="create"
           disabled={true}
-          onClick={vi.fn()}
+          onClick={mockOnClick}
         />
       );
 
-      expect(screen.getByRole('button')).toHaveTextContent('Add');
-      expect(screen.getByLabelText('Add project')).toBeInTheDocument();
+      expect(getButton()).toHaveTextContent('Add');
+      expect(getButton()).toHaveAccessibleName('Add project');
 
       rerender(
         <SubmitProjectButton
           mode="update"
           disabled={true}
-          onClick={vi.fn()}
+          onClick={mockOnClick}
         />
       );
 
-      expect(screen.getByRole('button')).toHaveTextContent('Save');
-      expect(screen.getByLabelText('Save project')).toBeInTheDocument();
+      expect(getButton()).toHaveTextContent('Save');
+      expect(getButton()).toHaveAccessibleName('Save project');
     });
 
-    it('updates from update → create', () => {
+    it('should update content when mode changes from update to create', () => {
       const { rerender } = render(
         <SubmitProjectButton
           mode="update"
           disabled={true}
-          onClick={vi.fn()}
+          onClick={mockOnClick}
         />
       );
 
-      expect(screen.getByRole('button')).toHaveTextContent('Save');
-      expect(screen.getByLabelText('Save project')).toBeInTheDocument();
+      expect(getButton()).toHaveTextContent('Save');
+      expect(getButton()).toHaveAccessibleName('Save project');
 
       rerender(
         <SubmitProjectButton
           mode="create"
           disabled={true}
-          onClick={vi.fn()}
+          onClick={mockOnClick}
         />
       );
 
-      expect(screen.getByRole('button')).toHaveTextContent('Add');
-      expect(screen.getByLabelText('Add project')).toBeInTheDocument();
+      expect(getButton()).toHaveTextContent('Add');
+      expect(getButton()).toHaveAccessibleName('Add project');
     });
   });
 });

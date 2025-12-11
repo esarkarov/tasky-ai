@@ -1,6 +1,6 @@
+import { ProjectsSidebarSection } from '@/features/projects/components/organisms/ProjectsSidebarSection/ProjectsSidebarSection';
 import { render, screen } from '@testing-library/react';
-import { describe, it, expect, vi } from 'vitest';
-import { ProjectsSidebarSection } from './ProjectsSidebarSection';
+import { beforeEach, describe, expect, it, vi } from 'vitest';
 
 vi.mock('@/features/projects/components/atoms/AddProjectButton/AddProjectButton', () => ({
   AddProjectButton: () => <button data-testid="add-project-button">Add Project</button>,
@@ -10,24 +10,26 @@ vi.mock('@/features/projects/components/molecules/ProjectsSidebarLabel/ProjectsS
   ProjectsSidebarLabel: () => <div data-testid="projects-sidebar-label">Projects</div>,
 }));
 
+interface ProjectsSidebarListProps {
+  handleMobileNavigation: () => void;
+}
+
 vi.mock('@/features/projects/components/organisms/ProjectsSidebarList/ProjectsSidebarList', () => ({
-  ProjectsSidebarList: ({ handleMobileNavigation }: { handleMobileNavigation: () => void }) => (
+  ProjectsSidebarList: ({ handleMobileNavigation }: ProjectsSidebarListProps) => (
     <div data-testid="projects-sidebar-list">
       <button onClick={handleMobileNavigation}>Project Item</button>
     </div>
   ),
 }));
 
+interface CollapsibleProps {
+  children: React.ReactNode;
+  defaultOpen?: boolean;
+  className?: string;
+}
+
 vi.mock('@/shared/components/ui/collapsible', () => ({
-  Collapsible: ({
-    children,
-    defaultOpen,
-    className,
-  }: {
-    children: React.ReactNode;
-    defaultOpen?: boolean;
-    className?: string;
-  }) => (
+  Collapsible: ({ children, defaultOpen, className }: CollapsibleProps) => (
     <div
       data-testid="collapsible"
       data-default-open={defaultOpen}
@@ -44,47 +46,40 @@ vi.mock('@/shared/components/ui/sidebar', () => ({
 describe('ProjectsSidebarSection', () => {
   const mockHandleMobileNavigation = vi.fn();
 
-  it('renders all child components', () => {
-    render(<ProjectsSidebarSection handleMobileNavigation={mockHandleMobileNavigation} />);
+  const renderComponent = () => {
+    return render(<ProjectsSidebarSection handleMobileNavigation={mockHandleMobileNavigation} />);
+  };
 
-    expect(screen.getByTestId('projects-sidebar-label')).toBeInTheDocument();
-    expect(screen.getByTestId('add-project-button')).toBeInTheDocument();
-    expect(screen.getByTestId('projects-sidebar-list')).toBeInTheDocument();
+  beforeEach(() => {
+    vi.clearAllMocks();
   });
 
-  it('wraps content in Collapsible component with defaultOpen', () => {
-    render(<ProjectsSidebarSection handleMobileNavigation={mockHandleMobileNavigation} />);
+  describe('rendering', () => {
+    it('should render all components with correct structure and order', () => {
+      renderComponent();
 
-    const collapsible = screen.getByTestId('collapsible');
+      const collapsible = screen.getByTestId('collapsible');
+      expect(collapsible).toHaveAttribute('data-default-open', 'true');
+      expect(collapsible).toHaveClass('group/collapsible');
 
-    expect(collapsible).toBeInTheDocument();
-    expect(collapsible).toHaveAttribute('data-default-open', 'true');
-    expect(collapsible).toHaveClass('group/collapsible');
+      const sidebarGroup = screen.getByTestId('sidebar-group');
+      expect(sidebarGroup).toBeInTheDocument();
+
+      const children = Array.from(sidebarGroup.children);
+      expect(children[0]).toHaveAttribute('data-testid', 'projects-sidebar-label');
+      expect(children[1]).toHaveAttribute('data-testid', 'add-project-button');
+      expect(children[2]).toHaveAttribute('data-testid', 'projects-sidebar-list');
+    });
   });
 
-  it('wraps content in SidebarGroup', () => {
-    render(<ProjectsSidebarSection handleMobileNavigation={mockHandleMobileNavigation} />);
+  describe('prop passing', () => {
+    it('should pass handleMobileNavigation to ProjectsSidebarList', () => {
+      renderComponent();
 
-    expect(screen.getByTestId('sidebar-group')).toBeInTheDocument();
-  });
+      const projectItem = screen.getByRole('button', { name: /project item/i });
+      projectItem.click();
 
-  it('passes handleMobileNavigation prop to ProjectsSidebarList', () => {
-    render(<ProjectsSidebarSection handleMobileNavigation={mockHandleMobileNavigation} />);
-
-    const projectItem = screen.getByRole('button', { name: /project item/i });
-    projectItem.click();
-
-    expect(mockHandleMobileNavigation).toHaveBeenCalledTimes(1);
-  });
-
-  it('renders components in correct order', () => {
-    render(<ProjectsSidebarSection handleMobileNavigation={mockHandleMobileNavigation} />);
-
-    const sidebarGroup = screen.getByTestId('sidebar-group');
-    const children = Array.from(sidebarGroup.children);
-
-    expect(children[0]).toHaveAttribute('data-testid', 'projects-sidebar-label');
-    expect(children[1]).toHaveAttribute('data-testid', 'add-project-button');
-    expect(children[2]).toHaveAttribute('data-testid', 'projects-sidebar-list');
+      expect(mockHandleMobileNavigation).toHaveBeenCalledTimes(1);
+    });
   });
 });
