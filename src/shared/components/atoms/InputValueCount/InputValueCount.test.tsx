@@ -1,133 +1,108 @@
+import { InputValueCount } from '@/shared/components/atoms/InputValueCount/InputValueCount';
 import { render, screen } from '@testing-library/react';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
-import { InputValueCount, InputValueCountProps } from './InputValueCount';
 
 vi.mock('@/shared/constants', () => ({
   INPUT_WARN_THRESHOLD: 10,
 }));
 
 describe('InputValueCount', () => {
-  const setup = (props?: Partial<InputValueCountProps>) => {
-    const defaultProps = {
-      valueLength: 5,
-      maxLength: 100,
-      ...props,
-    };
-    render(<InputValueCount {...defaultProps} />);
-    const display = screen.getByText(`${defaultProps.valueLength}/${defaultProps.maxLength}`);
-    return { display };
+  interface RenderOptions {
+    valueLength?: number;
+    maxLength?: number;
+    warnAtLength?: number;
+  }
+
+  const renderComponent = ({ valueLength = 5, maxLength = 100, warnAtLength }: RenderOptions = {}) => {
+    return render(
+      <InputValueCount
+        valueLength={valueLength}
+        maxLength={maxLength}
+        warnAtLength={warnAtLength}
+      />
+    );
   };
+
+  const getDisplay = (valueLength: number, maxLength: number) => screen.getByText(`${valueLength}/${maxLength}`);
 
   beforeEach(() => {
     vi.clearAllMocks();
   });
 
   describe('rendering', () => {
-    it('renders count correctly', () => {
-      const { display } = setup({ valueLength: 5, maxLength: 100 });
+    it('should render count with correct id and aria-live attribute', () => {
+      renderComponent({ valueLength: 5, maxLength: 100 });
+
+      const display = getDisplay(5, 100);
       expect(display).toBeInTheDocument();
-      expect(display).toHaveTextContent('5/100');
-    });
-
-    it('renders with correct id', () => {
-      const { display } = setup();
       expect(display).toHaveAttribute('id', 'input-value-count');
+      expect(display).toHaveAttribute('aria-live', 'polite');
     });
 
-    it('renders zero value', () => {
-      const { display } = setup({ valueLength: 0 });
-      expect(display).toHaveTextContent('0/100');
-    });
+    it('should render different count values correctly', () => {
+      renderComponent({ valueLength: 0, maxLength: 100 });
+      expect(getDisplay(0, 100)).toBeInTheDocument();
 
-    it('renders full count', () => {
-      const { display } = setup({ valueLength: 100 });
-      expect(display).toHaveTextContent('100/100');
+      renderComponent({ valueLength: 100, maxLength: 100 });
+      expect(getDisplay(100, 100)).toBeInTheDocument();
+
+      renderComponent({ valueLength: 450, maxLength: 500 });
+      expect(getDisplay(450, 500)).toBeInTheDocument();
     });
   });
 
-  describe('styling', () => {
-    it('uses normal style when below threshold', () => {
-      const { display } = setup({ valueLength: 50 });
+  describe('warning styles', () => {
+    it('should use normal style when below warning threshold', () => {
+      renderComponent({ valueLength: 50, maxLength: 100 });
+
+      const display = getDisplay(50, 100);
       expect(display).toHaveClass('text-muted-foreground');
       expect(display).not.toHaveClass('text-destructive');
     });
 
-    it('uses warning style when near max', () => {
-      const { display } = setup({ valueLength: 90 });
-      expect(display).toHaveClass('text-destructive');
+    it('should use warning style when at or above default threshold', () => {
+      renderComponent({ valueLength: 90, maxLength: 100 });
+      expect(getDisplay(90, 100)).toHaveClass('text-destructive');
+
+      renderComponent({ valueLength: 95, maxLength: 100 });
+      expect(getDisplay(95, 100)).toHaveClass('text-destructive');
+
+      renderComponent({ valueLength: 100, maxLength: 100 });
+      expect(getDisplay(100, 100)).toHaveClass('text-destructive');
     });
 
-    it('uses warning style when above threshold', () => {
-      const { display } = setup({ valueLength: 95 });
-      expect(display).toHaveClass('text-destructive');
+    it('should use warning style when at or above custom threshold', () => {
+      renderComponent({ valueLength: 75, maxLength: 100, warnAtLength: 75 });
+      expect(getDisplay(75, 100)).toHaveClass('text-destructive');
+
+      renderComponent({ valueLength: 80, maxLength: 100, warnAtLength: 80 });
+      expect(getDisplay(80, 100)).toHaveClass('text-destructive');
     });
 
-    it('uses warning style at max length', () => {
-      const { display } = setup({ valueLength: 100 });
-      expect(display).toHaveClass('text-destructive');
-    });
-  });
+    it('should not show warning when below custom threshold', () => {
+      renderComponent({ valueLength: 74, maxLength: 100, warnAtLength: 75 });
 
-  describe('custom threshold', () => {
-    it('uses custom warnAtLength', () => {
-      const { display } = setup({ valueLength: 75, warnAtLength: 75 });
-      expect(display).toHaveClass('text-destructive');
+      expect(getDisplay(74, 100)).not.toHaveClass('text-destructive');
     });
 
-    it('no warning before custom threshold', () => {
-      const { display } = setup({ valueLength: 74, warnAtLength: 75 });
-      expect(display).not.toHaveClass('text-destructive');
-    });
+    it('should apply warning for small maxLength near limit', () => {
+      renderComponent({ valueLength: 10, maxLength: 20 });
 
-    it('applies warning at custom threshold', () => {
-      const { display } = setup({ valueLength: 80, warnAtLength: 80 });
-      expect(display).toHaveClass('text-destructive');
-    });
-  });
-
-  describe('different max lengths', () => {
-    it('renders small maxLength', () => {
-      const { display } = setup({ valueLength: 15, maxLength: 20 });
-      expect(display).toHaveTextContent('15/20');
-    });
-
-    it('renders large maxLength', () => {
-      const { display } = setup({ valueLength: 450, maxLength: 500 });
-      expect(display).toHaveTextContent('450/500');
-    });
-
-    it('uses warning for small limits', () => {
-      const { display } = setup({ valueLength: 10, maxLength: 20 });
-      expect(display).toHaveClass('text-destructive');
-    });
-  });
-
-  describe('accessibility', () => {
-    it('has aria-live="polite"', () => {
-      const { display } = setup();
-      expect(display).toHaveAttribute('aria-live', 'polite');
-    });
-
-    it('keeps aria-live after rerender', () => {
-      const { display } = setup({ valueLength: 5 });
-      expect(display).toHaveAttribute('aria-live', 'polite');
+      expect(getDisplay(10, 20)).toHaveClass('text-destructive');
     });
   });
 
   describe('edge cases', () => {
-    it('handles equal valueLength and maxLength', () => {
-      const { display } = setup({ valueLength: 100 });
-      expect(display).toHaveTextContent('100/100');
+    it('should handle minimal valueLength of 1', () => {
+      renderComponent({ valueLength: 1, maxLength: 100 });
+
+      expect(getDisplay(1, 100)).toBeInTheDocument();
     });
 
-    it('handles minimal valueLength of 1', () => {
-      const { display } = setup({ valueLength: 1 });
-      expect(display).toHaveTextContent('1/100');
-    });
+    it('should apply warning when warnAtLength is 0', () => {
+      renderComponent({ valueLength: 0, maxLength: 100, warnAtLength: 0 });
 
-    it('applies warning when warnAtLength = 0', () => {
-      const { display } = setup({ valueLength: 0, warnAtLength: 0 });
-      expect(display).toHaveClass('text-destructive');
+      expect(getDisplay(0, 100)).toHaveClass('text-destructive');
     });
   });
 });

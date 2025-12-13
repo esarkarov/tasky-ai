@@ -1,7 +1,7 @@
+import { ColorPicker } from '@/shared/components/molecules/ColorPicker/ColorPicker';
 import { render, screen, within } from '@testing-library/react';
 import { userEvent } from '@testing-library/user-event';
-import { beforeEach, describe, expect, it, vi } from 'vitest';
-import { ColorPicker } from './ColorPicker';
+import { beforeEach, describe, expect, it, vi, type Mock } from 'vitest';
 
 vi.mock('lucide-react', () => ({
   ChevronDown: (props: Record<string, unknown>) => (
@@ -32,22 +32,17 @@ vi.mock('@/features/projects/constants', () => ({
   ],
 }));
 
+interface SelectableCommandItemProps {
+  id: string;
+  value: string;
+  selected: boolean;
+  onSelect: () => void;
+  icon: React.ReactNode;
+  label: string;
+}
+
 vi.mock('@/shared/components/atoms/SelectableCommandItem/SelectableCommandItem', () => ({
-  SelectableCommandItem: ({
-    id,
-    value,
-    selected,
-    onSelect,
-    icon,
-    label,
-  }: {
-    id: string;
-    value: string;
-    selected: boolean;
-    onSelect: () => void;
-    icon: React.ReactNode;
-    label: string;
-  }) => (
+  SelectableCommandItem: ({ id, value, selected, onSelect, icon, label }: SelectableCommandItemProps) => (
     <div
       role="option"
       data-testid={`selectable-command-item-${id}`}
@@ -61,8 +56,23 @@ vi.mock('@/shared/components/atoms/SelectableCommandItem/SelectableCommandItem',
   ),
 }));
 
+interface PopoverProps {
+  children: React.ReactNode;
+  open?: boolean;
+  modal?: boolean;
+  onOpenChange?: (open: boolean) => void;
+}
+
+interface PopoverContentProps {
+  children: React.ReactNode;
+  role?: string;
+  align?: string;
+  className?: string;
+  'aria-label'?: string;
+}
+
 vi.mock('@/shared/components/ui/popover', () => ({
-  Popover: ({ children, open }: { children: React.ReactNode; open: boolean }) => (
+  Popover: ({ children, open }: PopoverProps) => (
     <div
       data-testid="popover"
       data-open={open}>
@@ -70,7 +80,7 @@ vi.mock('@/shared/components/ui/popover', () => ({
     </div>
   ),
   PopoverTrigger: ({ children }: { children: React.ReactNode }) => <div data-testid="popover-trigger">{children}</div>,
-  PopoverContent: ({ children, role }: { children: React.ReactNode; role?: string }) => (
+  PopoverContent: ({ children, role }: PopoverContentProps) => (
     <div
       data-testid="popover-content"
       role={role}>
@@ -79,14 +89,20 @@ vi.mock('@/shared/components/ui/popover', () => ({
   ),
 }));
 
+interface CommandInputProps {
+  placeholder: string;
+  disabled?: boolean;
+  'aria-label'?: string;
+}
+
 vi.mock('@/shared/components/ui/command', () => ({
   Command: ({ children }: { children: React.ReactNode }) => <div data-testid="command">{children}</div>,
-  CommandInput: ({ placeholder, disabled }: { placeholder: string; disabled?: boolean }) => (
+  CommandInput: ({ placeholder, disabled, 'aria-label': ariaLabel }: CommandInputProps) => (
     <input
       data-testid="command-input"
       placeholder={placeholder}
       disabled={disabled}
-      aria-label="Search color"
+      aria-label={ariaLabel}
     />
   ),
   CommandList: ({ children }: { children: React.ReactNode }) => <div data-testid="command-list">{children}</div>,
@@ -98,118 +114,55 @@ vi.mock('@/shared/components/ui/scroll-area', () => ({
   ScrollArea: ({ children }: { children: React.ReactNode }) => <div data-testid="scroll-area">{children}</div>,
 }));
 
-describe('ColorPicker', () => {
-  const mockOnOpenChange = vi.fn();
-  const mockHandleColorSelect = vi.fn();
-  const mockValue = { name: 'Red', hex: '#FF0000' };
+interface ColorPickerProps {
+  open: boolean;
+  disabled: boolean;
+  value: { name: string; hex: string };
+  onOpenChange: Mock;
+  handleColorSelect: Mock;
+}
 
+const defaultProps: ColorPickerProps = {
+  open: false,
+  disabled: false,
+  value: { name: 'Red', hex: '#FF0000' },
+  onOpenChange: vi.fn(),
+  handleColorSelect: vi.fn(),
+};
+
+const renderComponent = (props: Partial<ColorPickerProps> = {}) =>
+  render(<ColorPicker {...{ ...defaultProps, ...props }} />);
+
+describe('ColorPicker', () => {
   beforeEach(() => {
     vi.clearAllMocks();
   });
 
   describe('basic rendering', () => {
-    it('should render label', () => {
-      render(
-        <ColorPicker
-          open={false}
-          disabled={false}
-          value={mockValue}
-          onOpenChange={mockOnOpenChange}
-          handleColorSelect={mockHandleColorSelect}
-        />
-      );
+    it('should render label and trigger button with current color', () => {
+      renderComponent({ value: { name: 'Green', hex: '#00FF00' } });
 
       expect(screen.getByText('Color')).toBeInTheDocument();
-    });
-
-    it('should render trigger button with current color', () => {
-      render(
-        <ColorPicker
-          open={false}
-          disabled={false}
-          value={{ name: 'Red', hex: '#FF0000' }}
-          onOpenChange={mockOnOpenChange}
-          handleColorSelect={mockHandleColorSelect}
-        />
-      );
 
       const triggerButton = screen.getByRole('button');
-      expect(within(triggerButton).getByText('Red')).toBeInTheDocument();
-    });
-
-    it('should render ChevronDown icon', () => {
-      render(
-        <ColorPicker
-          open={false}
-          disabled={false}
-          value={mockValue}
-          onOpenChange={mockOnOpenChange}
-          handleColorSelect={mockHandleColorSelect}
-        />
-      );
-
+      expect(within(triggerButton).getByText('Green')).toBeInTheDocument();
       expect(screen.getByTestId('chevron-down-icon')).toBeInTheDocument();
-    });
-
-    it('should show selected color name in the trigger button', () => {
-      const value = { name: 'Green', hex: '#00FF00' };
-
-      render(
-        <ColorPicker
-          open={false}
-          disabled={false}
-          value={value}
-          onOpenChange={mockOnOpenChange}
-          handleColorSelect={mockHandleColorSelect}
-        />
-      );
-
-      const triggerButton = screen.getByRole('button');
-      expect(within(triggerButton).getByText(value.name)).toBeInTheDocument();
     });
   });
 
   describe('popover state', () => {
-    it('should show popover as closed when open is false', () => {
-      render(
-        <ColorPicker
-          open={false}
-          disabled={false}
-          value={mockValue}
-          onOpenChange={mockOnOpenChange}
-          handleColorSelect={mockHandleColorSelect}
-        />
-      );
+    it('should show closed popover when open is false', () => {
+      renderComponent({ open: false });
 
       const popover = screen.getByTestId('popover');
       expect(popover).toHaveAttribute('data-open', 'false');
     });
 
-    it('should show popover as open when open is true', () => {
-      render(
-        <ColorPicker
-          open={true}
-          disabled={false}
-          value={mockValue}
-          onOpenChange={mockOnOpenChange}
-          handleColorSelect={mockHandleColorSelect}
-        />
-      );
+    it('should show open popover with color options when open is true', () => {
+      renderComponent({ open: true });
 
       const popover = screen.getByTestId('popover');
       expect(popover).toHaveAttribute('data-open', 'true');
-    });
-
-    it('should render color options when open', () => {
-      render(
-        <ColorPicker
-          open={true}
-          disabled={false}
-          value={mockValue}
-          onOpenChange={mockOnOpenChange}
-          handleColorSelect={mockHandleColorSelect}
-        />
-      );
 
       expect(screen.getByTestId('selectable-command-item-Red')).toBeInTheDocument();
       expect(screen.getByTestId('selectable-command-item-Blue')).toBeInTheDocument();
@@ -218,241 +171,91 @@ describe('ColorPicker', () => {
   });
 
   describe('color selection', () => {
-    it('should call handleColorSelect when color is clicked', async () => {
+    it('should call handleColorSelect with correct value when color is clicked', async () => {
       const user = userEvent.setup();
-      render(
-        <ColorPicker
-          open={true}
-          disabled={false}
-          value={mockValue}
-          onOpenChange={mockOnOpenChange}
-          handleColorSelect={mockHandleColorSelect}
-        />
-      );
+      const handleColorSelect = vi.fn();
+
+      renderComponent({ open: true, handleColorSelect });
 
       const blueOption = screen.getByTestId('selectable-command-item-Blue');
       await user.click(blueOption);
 
-      expect(mockHandleColorSelect).toHaveBeenCalledWith('Blue=#0000FF');
+      expect(handleColorSelect).toHaveBeenCalledWith('Blue=#0000FF');
     });
 
-    it('should mark current color as selected', () => {
-      render(
-        <ColorPicker
-          open={true}
-          disabled={false}
-          value={mockValue}
-          onOpenChange={mockOnOpenChange}
-          handleColorSelect={mockHandleColorSelect}
-        />
-      );
+    it('should mark only current color as selected', () => {
+      renderComponent({ open: true, value: { name: 'Red', hex: '#FF0000' } });
 
-      const redOption = screen.getByTestId('selectable-command-item-Red');
-      expect(redOption).toHaveAttribute('data-selected', 'true');
-    });
-
-    it('should not mark other colors as selected', () => {
-      render(
-        <ColorPicker
-          open={true}
-          disabled={false}
-          value={mockValue}
-          onOpenChange={mockOnOpenChange}
-          handleColorSelect={mockHandleColorSelect}
-        />
-      );
-
-      const blueOption = screen.getByTestId('selectable-command-item-Blue');
-      const greenOption = screen.getByTestId('selectable-command-item-Green');
-
-      expect(blueOption).toHaveAttribute('data-selected', 'false');
-      expect(greenOption).toHaveAttribute('data-selected', 'false');
+      expect(screen.getByTestId('selectable-command-item-Red')).toHaveAttribute('data-selected', 'true');
+      expect(screen.getByTestId('selectable-command-item-Blue')).toHaveAttribute('data-selected', 'false');
+      expect(screen.getByTestId('selectable-command-item-Green')).toHaveAttribute('data-selected', 'false');
     });
   });
 
   describe('search functionality', () => {
-    it('should render search input when open', () => {
-      render(
-        <ColorPicker
-          open={true}
-          disabled={false}
-          value={mockValue}
-          onOpenChange={mockOnOpenChange}
-          handleColorSelect={mockHandleColorSelect}
-        />
-      );
+    it('should render search input and empty state when open', () => {
+      renderComponent({ open: true });
 
-      const searchInput = screen.getByPlaceholderText('Search color...');
-      expect(searchInput).toBeInTheDocument();
-    });
-
-    it('should render empty state message', () => {
-      render(
-        <ColorPicker
-          open={true}
-          disabled={false}
-          value={mockValue}
-          onOpenChange={mockOnOpenChange}
-          handleColorSelect={mockHandleColorSelect}
-        />
-      );
-
+      expect(screen.getByPlaceholderText('Search color...')).toBeInTheDocument();
       expect(screen.getByText('No color found.')).toBeInTheDocument();
     });
   });
 
   describe('disabled state', () => {
-    it('should disable trigger button when disabled', () => {
-      render(
-        <ColorPicker
-          open={false}
-          disabled={true}
-          value={mockValue}
-          onOpenChange={mockOnOpenChange}
-          handleColorSelect={mockHandleColorSelect}
-        />
-      );
+    it('should disable trigger button and search input when disabled', () => {
+      renderComponent({ open: true, disabled: true });
 
-      const button = screen.getByRole('button');
-      expect(button).toBeDisabled();
-    });
-
-    it('should disable search input when disabled', () => {
-      render(
-        <ColorPicker
-          open={true}
-          disabled={true}
-          value={mockValue}
-          onOpenChange={mockOnOpenChange}
-          handleColorSelect={mockHandleColorSelect}
-        />
-      );
-
-      const searchInput = screen.getByPlaceholderText('Search color...');
-      expect(searchInput).toBeDisabled();
+      expect(screen.getByRole('button')).toBeDisabled();
+      expect(screen.getByPlaceholderText('Search color...')).toBeDisabled();
     });
   });
 
   describe('accessibility', () => {
-    it('should have aria-label on trigger button', () => {
-      render(
-        <ColorPicker
-          open={false}
-          disabled={false}
-          value={mockValue}
-          onOpenChange={mockOnOpenChange}
-          handleColorSelect={mockHandleColorSelect}
-        />
-      );
-
-      const button = screen.getByRole('button');
-      expect(button).toHaveAttribute('aria-label', 'Select project color (currently Red)');
-    });
-
-    it('should update aria-label with current color', () => {
-      render(
-        <ColorPicker
-          open={false}
-          disabled={false}
-          value={{ name: 'Green', hex: '#00FF00' }}
-          onOpenChange={mockOnOpenChange}
-          handleColorSelect={mockHandleColorSelect}
-        />
-      );
+    it('should have correct aria attributes on trigger button', () => {
+      renderComponent({ value: { name: 'Green', hex: '#00FF00' } });
 
       const button = screen.getByRole('button');
       expect(button).toHaveAttribute('aria-label', 'Select project color (currently Green)');
-    });
-
-    it('should have aria-haspopup on trigger button', () => {
-      render(
-        <ColorPicker
-          open={false}
-          disabled={false}
-          value={mockValue}
-          onOpenChange={mockOnOpenChange}
-          handleColorSelect={mockHandleColorSelect}
-        />
-      );
-
-      const button = screen.getByRole('button');
       expect(button).toHaveAttribute('aria-haspopup', 'listbox');
+      expect(button).toHaveAttribute('aria-expanded', 'false');
     });
 
-    it('should have aria-expanded reflecting open state', () => {
-      const { rerender } = render(
-        <ColorPicker
-          open={false}
-          disabled={false}
-          value={mockValue}
-          onOpenChange={mockOnOpenChange}
-          handleColorSelect={mockHandleColorSelect}
-        />
-      );
+    it('should update aria-expanded when popover opens', () => {
+      const { rerender } = renderComponent({ open: false });
 
-      const button = screen.getByRole('button');
-      expect(button).toHaveAttribute('aria-expanded', 'false');
+      expect(screen.getByRole('button')).toHaveAttribute('aria-expanded', 'false');
 
       rerender(
         <ColorPicker
+          {...defaultProps}
           open={true}
-          disabled={false}
-          value={mockValue}
-          onOpenChange={mockOnOpenChange}
-          handleColorSelect={mockHandleColorSelect}
         />
       );
 
-      expect(button).toHaveAttribute('aria-expanded', 'true');
+      expect(screen.getByRole('button')).toHaveAttribute('aria-expanded', 'true');
     });
 
-    it('should have listbox role on popover content', () => {
-      render(
-        <ColorPicker
-          open={true}
-          disabled={false}
-          value={mockValue}
-          onOpenChange={mockOnOpenChange}
-          handleColorSelect={mockHandleColorSelect}
-        />
-      );
+    it('should have listbox role on popover content when open', () => {
+      renderComponent({ open: true });
 
-      const popoverContent = screen.getByTestId('popover-content');
-      expect(popoverContent).toHaveAttribute('role', 'listbox');
+      expect(screen.getByTestId('popover-content')).toHaveAttribute('role', 'listbox');
     });
 
-    it('should hide icons from screen readers', () => {
-      render(
-        <ColorPicker
-          open={false}
-          disabled={false}
-          value={mockValue}
-          onOpenChange={mockOnOpenChange}
-          handleColorSelect={mockHandleColorSelect}
-        />
-      );
+    it('should hide decorative icons from screen readers', () => {
+      renderComponent();
 
-      const icons = screen.getAllByTestId('circle-icon');
-      icons.forEach((icon) => {
+      const circleIcons = screen.getAllByTestId('circle-icon');
+      circleIcons.forEach((icon) => {
         expect(icon).toHaveAttribute('aria-hidden', 'true');
       });
 
-      const chevron = screen.getByTestId('chevron-down-icon');
-      expect(chevron).toHaveAttribute('aria-hidden', 'true');
+      expect(screen.getByTestId('chevron-down-icon')).toHaveAttribute('aria-hidden', 'true');
     });
   });
 
   describe('label association', () => {
-    it('should link label to trigger button', () => {
-      render(
-        <ColorPicker
-          open={false}
-          disabled={false}
-          value={mockValue}
-          onOpenChange={mockOnOpenChange}
-          handleColorSelect={mockHandleColorSelect}
-        />
-      );
+    it('should correctly associate label with trigger button', () => {
+      renderComponent();
 
       const label = screen.getByText('Color');
       expect(label).toHaveAttribute('for', 'color');

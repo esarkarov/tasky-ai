@@ -1,7 +1,7 @@
+import { FooterNavLink } from '@/shared/components/atoms/FooterNavLink/FooterNavLink';
 import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
-import { FooterNavLink } from './FooterNavLink';
 
 vi.mock('@/shared/components/ui/separator', () => ({
   Separator: ({ orientation, className, ...props }: Record<string, unknown>) => (
@@ -15,172 +15,103 @@ vi.mock('@/shared/components/ui/separator', () => ({
 }));
 
 describe('FooterNavLink', () => {
-  const mockLink = {
-    href: 'https://twitter.com',
-    label: 'Twitter',
-  };
+  interface RenderOptions {
+    href?: string;
+    label?: string;
+    isLast?: boolean;
+  }
 
-  const setup = (link = mockLink, isLast = false) => {
-    const user = userEvent.setup();
-    render(
+  const renderComponent = ({ href = 'https://twitter.com', label = 'Twitter', isLast = false }: RenderOptions = {}) => {
+    return render(
       <FooterNavLink
-        link={link}
+        link={{ href, label }}
         isLast={isLast}
       />
     );
-    const navLink = screen.getByRole('link', { name: link.label });
-    const separator = screen.queryByTestId('separator');
-    return { user, navLink, separator };
   };
+
+  const getNavLink = (label: string) => screen.getByRole('link', { name: label });
+  const getSeparator = () => screen.queryByTestId('separator');
 
   beforeEach(() => {
     vi.clearAllMocks();
   });
 
   describe('rendering', () => {
-    it('renders link with correct text and href', () => {
-      const { navLink } = setup();
+    it('should render link with correct text, href, and safe rel attributes', () => {
+      renderComponent();
 
+      const navLink = getNavLink('Twitter');
       expect(navLink).toBeInTheDocument();
       expect(navLink).toHaveTextContent('Twitter');
       expect(navLink).toHaveAttribute('href', 'https://twitter.com');
+      expect(navLink).toHaveAttribute('target', '_blank');
+      expect(navLink).toHaveAttribute('rel', 'noopener noreferrer');
+      expect(navLink).toHaveAttribute('aria-label', 'Twitter');
     });
 
-    it('renders link with custom data', () => {
-      const customLink = { href: 'https://github.com', label: 'GitHub' };
-      const { navLink } = setup(customLink);
+    it('should render link with custom data', () => {
+      renderComponent({ href: 'https://github.com', label: 'GitHub' });
 
+      const navLink = getNavLink('GitHub');
       expect(navLink).toHaveTextContent('GitHub');
       expect(navLink).toHaveAttribute('href', 'https://github.com');
     });
 
-    it('opens link in a new tab with safe rel attributes', () => {
-      const { navLink } = setup();
+    it('should wrap content in list item with correct classes', () => {
+      renderComponent();
 
-      expect(navLink).toHaveAttribute('target', '_blank');
-      expect(navLink).toHaveAttribute('rel', 'noopener noreferrer');
+      const navLink = getNavLink('Twitter');
+      const listItem = navLink.closest('li');
+      expect(listItem).toBeInTheDocument();
+      expect(listItem).toHaveClass('flex', 'items-center');
     });
   });
 
   describe('separator rendering', () => {
-    it('renders separator when isLast is false', () => {
-      const { separator } = setup(mockLink, false);
+    it('should render separator with accessibility attributes when isLast is false', () => {
+      renderComponent({ isLast: false });
 
+      const separator = getSeparator();
       expect(separator).toBeInTheDocument();
-    });
-
-    it('does not render separator when isLast is true', () => {
-      const { separator } = setup(mockLink, true);
-
-      expect(separator).not.toBeInTheDocument();
-    });
-
-    it('hides separator from screen readers', () => {
-      const { separator } = setup(mockLink, false);
-
       expect(separator).toHaveAttribute('aria-hidden', 'true');
       expect(separator).toHaveAttribute('role', 'presentation');
+    });
+
+    it('should not render separator when isLast is true', () => {
+      renderComponent({ isLast: true });
+
+      expect(getSeparator()).not.toBeInTheDocument();
     });
   });
 
   describe('user interactions', () => {
-    it('is clickable and has correct href', async () => {
-      const { user, navLink } = setup();
+    it('should be keyboard accessible and activatable', async () => {
+      const user = userEvent.setup();
+      renderComponent();
 
-      await user.click(navLink);
-
-      expect(navLink).toHaveAttribute('href', 'https://twitter.com');
-    });
-
-    it('is keyboard accessible via Tab', async () => {
-      const { user, navLink } = setup();
+      const navLink = getNavLink('Twitter');
 
       await user.tab();
-
       expect(navLink).toHaveFocus();
-    });
 
-    it('can be activated with Enter key', async () => {
-      const { user, navLink } = setup();
-
-      navLink.focus();
       await user.keyboard('{Enter}');
-
       expect(navLink).toHaveAttribute('href', 'https://twitter.com');
-    });
-  });
-
-  describe('accessibility', () => {
-    it('has correct aria-label', () => {
-      const { navLink } = setup();
-
-      expect(navLink).toHaveAttribute('aria-label', 'Twitter');
-    });
-
-    it('provides semantic link role', () => {
-      setup();
-
-      const link = screen.getByRole('link', { name: 'Twitter' });
-      expect(link).toBeInTheDocument();
-    });
-
-    it('announces link properly to screen readers', () => {
-      const { navLink } = setup();
-
-      expect(navLink).toHaveAccessibleName('Twitter');
-    });
-  });
-
-  describe('multiple links simulation', () => {
-    it('renders first link (not last) with separator', () => {
-      const { navLink, separator } = setup({ href: 'https://twitter.com', label: 'Twitter' }, false);
-
-      expect(navLink).toBeInTheDocument();
-      expect(separator).toBeInTheDocument();
-    });
-
-    it('renders middle link (not last) with separator', () => {
-      const { navLink, separator } = setup({ href: 'https://github.com', label: 'GitHub' }, false);
-
-      expect(navLink).toHaveTextContent('GitHub');
-      expect(separator).toBeInTheDocument();
-    });
-
-    it('renders last link without separator', () => {
-      const { navLink, separator } = setup({ href: 'https://linkedin.com', label: 'LinkedIn' }, true);
-
-      expect(navLink).toHaveTextContent('LinkedIn');
-      expect(separator).not.toBeInTheDocument();
     });
   });
 
   describe('edge cases', () => {
-    it('handles link with special characters in label', () => {
-      const specialLink = {
-        href: 'https://example.com',
-        label: 'Test & Demo',
-      };
-      const { navLink } = setup(specialLink);
+    it('should handle link with special characters in label', () => {
+      renderComponent({ label: 'Test & Demo', href: 'https://example.com' });
 
-      expect(navLink).toHaveTextContent('Test & Demo');
+      expect(getNavLink('Test & Demo')).toHaveTextContent('Test & Demo');
     });
 
-    it('handles very long URLs', () => {
-      const longLink = {
-        href: 'https://example.com/very/long/path/to/resource?param1=value1&param2=value2',
-        label: 'Long URL',
-      };
-      const { navLink } = setup(longLink);
+    it('should handle very long URLs', () => {
+      const longUrl = 'https://example.com/very/long/path/to/resource?param1=value1&param2=value2';
+      renderComponent({ href: longUrl, label: 'Long URL' });
 
-      expect(navLink).toHaveAttribute('href', longLink.href);
-    });
-
-    it('wraps content in list item', () => {
-      const { navLink } = setup();
-      const listItem = navLink.closest('li');
-
-      expect(listItem).toBeInTheDocument();
-      expect(listItem).toHaveClass('flex', 'items-center');
+      expect(getNavLink('Long URL')).toHaveAttribute('href', longUrl);
     });
   });
 });

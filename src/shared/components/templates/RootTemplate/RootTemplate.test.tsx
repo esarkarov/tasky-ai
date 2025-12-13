@@ -2,7 +2,7 @@ import { RootTemplate } from '@/shared/components/templates/RootTemplate/RootTem
 import { NavigationState } from '@/shared/types';
 import { render, screen } from '@testing-library/react';
 import { MemoryRouter } from 'react-router';
-import { beforeEach, describe, expect, it, vi } from 'vitest';
+import { beforeEach, describe, expect, it, vi, type Mock } from 'vitest';
 
 vi.mock('@/shared/components/organisms/Header/Header', () => ({
   Header: () => <header data-testid="header">Header</header>,
@@ -13,8 +13,8 @@ vi.mock('@/shared/components/organisms/Footer/Footer', () => ({
 }));
 
 const mockUseNavigation = vi.fn();
-vi.mock('react-router', async () => {
-  const actual = await vi.importActual('react-router');
+vi.mock('react-router', async (importActual) => {
+  const actual = await importActual<typeof import('react-router')>();
   return {
     ...actual,
     useNavigation: () => mockUseNavigation(),
@@ -22,8 +22,13 @@ vi.mock('react-router', async () => {
   };
 });
 
-const setupNavigation = (state: NavigationState, formData: FormData | null = null) => {
-  mockUseNavigation.mockReturnValue({ state, formData });
+interface NavigationMockState {
+  state: NavigationState;
+  formData?: FormData | null;
+}
+
+const setupNavigation = ({ state, formData = null }: NavigationMockState): void => {
+  (mockUseNavigation as Mock).mockReturnValue({ state, formData });
 };
 
 const renderComponent = () =>
@@ -36,20 +41,18 @@ const renderComponent = () =>
 describe('RootTemplate', () => {
   beforeEach(() => {
     vi.clearAllMocks();
-    setupNavigation('idle');
+    setupNavigation({ state: 'idle' });
   });
 
-  describe('rendering', () => {
-    it('renders header, footer, and outlet inside main', () => {
-      renderComponent();
+  describe('basic rendering', () => {
+    it('should render header, footer, outlet, and decorative backgrounds', () => {
+      const { container } = renderComponent();
+
       expect(screen.getByTestId('header')).toBeInTheDocument();
       expect(screen.getByTestId('footer')).toBeInTheDocument();
       expect(screen.getByTestId('outlet')).toBeInTheDocument();
       expect(screen.getByRole('main')).toBeInTheDocument();
-    });
 
-    it('renders decorative background elements', () => {
-      const { container } = renderComponent();
       const backgrounds = container.querySelectorAll('[aria-hidden="true"]');
       expect(backgrounds).toHaveLength(2);
       backgrounds.forEach((el) => {
@@ -57,88 +60,97 @@ describe('RootTemplate', () => {
       });
     });
 
-    it('has correct animation and layout classes on wrapper', () => {
+    it('should have correct layout classes on wrapper', () => {
       const { container } = renderComponent();
+
       const wrapper = container.firstChild as HTMLElement;
-      expect(wrapper).toHaveClass('relative', 'min-h-[100dvh]', 'flex', 'flex-col', 'bg-background');
+      expect(wrapper).toHaveClass(
+        'relative',
+        'isolate',
+        'min-h-[100dvh]',
+        'flex',
+        'flex-col',
+        'overflow-hidden',
+        'bg-background'
+      );
+    });
+
+    it('should have displayName', () => {
+      expect(RootTemplate.displayName).toBe('RootTemplate');
+    });
+  });
+
+  describe('loading states', () => {
+    it('should set aria-busy to false when idle', () => {
+      setupNavigation({ state: 'idle' });
+
+      renderComponent();
+
+      expect(screen.getByRole('main')).toHaveAttribute('aria-busy', 'false');
+    });
+
+    it('should set aria-busy to true when loading without formData', () => {
+      setupNavigation({ state: 'loading' });
+
+      renderComponent();
+
+      expect(screen.getByRole('main')).toHaveAttribute('aria-busy', 'true');
+    });
+
+    it('should set aria-busy to false when loading with formData', () => {
+      setupNavigation({ state: 'loading', formData: new FormData() });
+
+      renderComponent();
+
+      expect(screen.getByRole('main')).toHaveAttribute('aria-busy', 'false');
+    });
+
+    it('should set aria-busy to false when submitting', () => {
+      setupNavigation({ state: 'submitting' });
+
+      renderComponent();
+
+      expect(screen.getByRole('main')).toHaveAttribute('aria-busy', 'false');
     });
   });
 
   describe('accessibility', () => {
-    it('sets main attributes correctly', () => {
+    it('should have correct accessibility attributes on main element', () => {
       renderComponent();
+
       const main = screen.getByRole('main');
       expect(main).toHaveAttribute('id', 'main-content');
       expect(main).toHaveAttribute('tabIndex', '-1');
       expect(main).toHaveAttribute('aria-live', 'polite');
     });
 
-    it('updates aria-busy when loading', () => {
-      setupNavigation('loading');
-      renderComponent();
-      expect(screen.getByRole('main')).toHaveAttribute('aria-busy', 'true');
-    });
-
-    it('sets aria-busy to false when idle', () => {
-      setupNavigation('idle');
-      renderComponent();
-      expect(screen.getByRole('main')).toHaveAttribute('aria-busy', 'false');
-    });
-  });
-
-  describe('loading state behavior', () => {
-    it('shows loader when loading without formData', () => {
-      setupNavigation('loading');
-      renderComponent();
-      expect(screen.getByRole('main')).toHaveAttribute('aria-busy', 'true');
-    });
-
-    it('does not show loader when idle', () => {
-      setupNavigation('idle');
-      renderComponent();
-      expect(screen.getByRole('main')).toHaveAttribute('aria-busy', 'false');
-    });
-
-    it('does not show loader when submitting form', () => {
-      setupNavigation('submitting');
-      renderComponent();
-      expect(screen.getByRole('main')).toHaveAttribute('aria-busy', 'false');
-    });
-
-    it('does not show loader when formData exists', () => {
-      setupNavigation('loading', new FormData());
-      renderComponent();
-      expect(screen.getByRole('main')).toHaveAttribute('aria-busy', 'false');
-    });
-  });
-
-  describe('navigation state transitions', () => {
     it.each([
-      { state: 'idle' as NavigationState, ariaBusy: 'false' },
-      { state: 'loading' as NavigationState, ariaBusy: 'true' },
-      { state: 'submitting' as NavigationState, ariaBusy: 'false' },
-    ])('updates aria-busy for $state', ({ state, ariaBusy }) => {
-      setupNavigation(state);
-      renderComponent();
-      expect(screen.getByRole('main')).toHaveAttribute('aria-busy', ariaBusy);
-    });
+      { state: 'idle' as NavigationState, expected: 'false' },
+      { state: 'loading' as NavigationState, expected: 'true' },
+      { state: 'submitting' as NavigationState, expected: 'false' },
+    ])('should set aria-busy="$expected" when state is "$state"', ({ state, expected }) => {
+      setupNavigation({ state });
 
-    it('renders stable layout between rerenders', () => {
-      setupNavigation('idle');
+      renderComponent();
+
+      expect(screen.getByRole('main')).toHaveAttribute('aria-busy', expected);
+    });
+  });
+
+  describe('stability', () => {
+    it('should maintain stable layout on rerender', () => {
+      setupNavigation({ state: 'idle' });
+
       const { rerender } = renderComponent();
+
       rerender(
         <MemoryRouter>
           <RootTemplate />
         </MemoryRouter>
       );
+
       expect(screen.getByRole('main')).toBeInTheDocument();
       expect(screen.getByTestId('outlet')).toBeInTheDocument();
-    });
-  });
-
-  describe('component behavior', () => {
-    it('has correct displayName', () => {
-      expect(RootTemplate.displayName).toBe('RootTemplate');
     });
   });
 });

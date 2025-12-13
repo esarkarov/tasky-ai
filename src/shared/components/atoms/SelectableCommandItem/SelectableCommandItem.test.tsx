@@ -1,7 +1,7 @@
+import { SelectableCommandItem } from '@/shared/components/atoms/SelectableCommandItem/SelectableCommandItem';
 import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
-import { SelectableCommandItem } from './SelectableCommandItem';
 
 vi.mock('@/shared/components/ui/command', () => ({
   CommandItem: ({
@@ -39,202 +39,145 @@ vi.mock('lucide-react', () => ({
 }));
 
 describe('SelectableCommandItem', () => {
-  const mockProps = {
-    id: 'item-1',
-    value: 'test-value',
-    label: 'Test Item',
-    icon: <span data-testid="custom-icon">🔵</span>,
-  };
+  interface RenderOptions {
+    id?: string;
+    value?: string;
+    label?: string;
+    icon?: React.ReactNode;
+    selected?: boolean;
+    onSelect?: () => void;
+  }
 
-  const setup = (selected = false) => {
-    const user = userEvent.setup();
-    const onSelect = vi.fn();
-    render(
+  const renderComponent = ({
+    id = 'item-1',
+    value = 'test-value',
+    label = 'Test Item',
+    icon = <span data-testid="custom-icon">🔵</span>,
+    selected = false,
+    onSelect = vi.fn(),
+  }: RenderOptions = {}) => {
+    return render(
       <SelectableCommandItem
-        {...mockProps}
+        id={id}
+        value={value}
+        label={label}
+        icon={icon}
         selected={selected}
         onSelect={onSelect}
       />
     );
-    return { user, onSelect, item: screen.getByTestId('command-item') };
   };
 
-  beforeEach(() => vi.clearAllMocks());
+  const getCommandItem = () => screen.getByTestId('command-item');
+  const getCheckIcon = () => screen.queryByTestId('check-icon');
 
-  describe('Rendering', () => {
-    it('renders the label', () => {
-      setup();
+  beforeEach(() => {
+    vi.clearAllMocks();
+  });
+
+  describe('rendering', () => {
+    it('should render label, icon, and correct value with role option', () => {
+      renderComponent();
+
       expect(screen.getByText('Test Item')).toBeInTheDocument();
-    });
-
-    it('renders the icon', () => {
-      setup();
       expect(screen.getByTestId('custom-icon')).toBeInTheDocument();
-    });
 
-    it('sets correct value', () => {
-      const { item } = setup();
+      const item = getCommandItem();
       expect(item).toHaveAttribute('data-value', 'test-value');
-    });
-  });
-
-  describe('Selected state', () => {
-    it('renders check icon when selected', () => {
-      setup(true);
-      expect(screen.getByTestId('check-icon')).toBeInTheDocument();
-    });
-
-    it('does not render check icon when not selected', () => {
-      setup(false);
-      expect(screen.queryByTestId('check-icon')).not.toBeInTheDocument();
-    });
-
-    it('applies correct class to check icon', () => {
-      setup(true);
-      expect(screen.getByTestId('check-icon')).toHaveClass('ms-auto');
-    });
-
-    it('hides check icon from assistive technologies', () => {
-      setup(true);
-      expect(screen.getByTestId('check-icon')).toHaveAttribute('aria-hidden', 'true');
-    });
-  });
-
-  describe('User interactions', () => {
-    it('calls onSelect when clicked', async () => {
-      const { user, onSelect, item } = setup();
-      await user.click(item);
-      expect(onSelect).toHaveBeenCalledTimes(1);
-    });
-
-    it('calls onSelect multiple times on repeated clicks', async () => {
-      const { user, onSelect, item } = setup();
-      await user.click(item);
-      await user.click(item);
-      await user.click(item);
-      expect(onSelect).toHaveBeenCalledTimes(3);
-    });
-  });
-
-  describe('Accessibility', () => {
-    it('has role option', () => {
-      const { item } = setup();
       expect(item).toHaveAttribute('role', 'option');
     });
 
-    it('sets aria-selected to false when not selected', () => {
-      const { item } = setup(false);
-      expect(item).toHaveAttribute('aria-selected', 'false');
-    });
-
-    it('sets aria-selected to true when selected', () => {
-      const { item } = setup(true);
-      expect(item).toHaveAttribute('aria-selected', 'true');
-    });
-  });
-
-  describe('State transitions', () => {
-    it('renders check icon when changing from false to true', () => {
-      const { rerender } = render(
-        <SelectableCommandItem
-          {...mockProps}
-          selected={false}
-          onSelect={vi.fn()}
-        />
-      );
-      expect(screen.queryByTestId('check-icon')).not.toBeInTheDocument();
-      rerender(
-        <SelectableCommandItem
-          {...mockProps}
-          selected={true}
-          onSelect={vi.fn()}
-        />
-      );
-      expect(screen.getByTestId('check-icon')).toBeInTheDocument();
-    });
-
-    it('updates aria-selected when state changes', () => {
-      const { rerender } = render(
-        <SelectableCommandItem
-          {...mockProps}
-          selected={false}
-          onSelect={vi.fn()}
-        />
-      );
-      const item = screen.getByRole('option');
-      expect(item).toHaveAttribute('aria-selected', 'false');
-      rerender(
-        <SelectableCommandItem
-          {...mockProps}
-          selected={true}
-          onSelect={vi.fn()}
-        />
-      );
-      expect(item).toHaveAttribute('aria-selected', 'true');
-    });
-  });
-
-  describe('Icon variations', () => {
-    it('renders text-based icon', () => {
-      const icon = <span data-testid="text-icon">📁</span>;
-      render(
-        <SelectableCommandItem
-          {...mockProps}
-          icon={icon}
-          selected={false}
-          onSelect={vi.fn()}
-        />
-      );
+    it('should render different icon types', () => {
+      renderComponent({ icon: <span data-testid="text-icon">📁</span> });
       expect(screen.getByTestId('text-icon')).toBeInTheDocument();
-    });
 
-    it('renders SVG icon', () => {
-      const icon = (
-        <svg data-testid="svg-icon">
-          <circle
-            cx="10"
-            cy="10"
-            r="5"
-          />
-        </svg>
-      );
-      render(
-        <SelectableCommandItem
-          {...mockProps}
-          icon={icon}
-          selected={false}
-          onSelect={vi.fn()}
-        />
-      );
+      renderComponent({
+        icon: (
+          <svg data-testid="svg-icon">
+            <circle
+              cx="10"
+              cy="10"
+              r="5"
+            />
+          </svg>
+        ),
+      });
       expect(screen.getByTestId('svg-icon')).toBeInTheDocument();
     });
+
+    it('should render label variations', () => {
+      const longLabel = 'This is a very long label that might wrap to multiple lines';
+      renderComponent({ label: longLabel });
+      expect(screen.getByText(longLabel)).toBeInTheDocument();
+
+      const specialLabel = 'Project #1 (Active) & Ready!';
+      renderComponent({ label: specialLabel });
+      expect(screen.getByText(specialLabel)).toBeInTheDocument();
+    });
   });
 
-  describe('Label variations', () => {
-    it('renders long label text', () => {
-      const longLabel = 'This is a very long label that might wrap to multiple lines';
-      render(
-        <SelectableCommandItem
-          {...mockProps}
-          label={longLabel}
-          selected={false}
-          onSelect={vi.fn()}
-        />
-      );
-      expect(screen.getByText(longLabel)).toBeInTheDocument();
+  describe('selected state', () => {
+    it('should show check icon with correct styling when selected', () => {
+      renderComponent({ selected: true });
+
+      const checkIcon = getCheckIcon();
+      expect(checkIcon).toBeInTheDocument();
+      expect(checkIcon).toHaveClass('ms-auto');
+      expect(checkIcon).toHaveAttribute('aria-hidden', 'true');
+      expect(getCommandItem()).toHaveAttribute('aria-selected', 'true');
     });
 
-    it('renders label with special characters', () => {
-      const specialLabel = 'Project #1 (Active) & Ready!';
-      render(
+    it('should not show check icon when not selected', () => {
+      renderComponent({ selected: false });
+
+      expect(getCheckIcon()).not.toBeInTheDocument();
+      expect(getCommandItem()).toHaveAttribute('aria-selected', 'false');
+    });
+
+    it('should update check icon and aria-selected when selected state changes', () => {
+      const { rerender } = renderComponent({ selected: false });
+
+      expect(getCheckIcon()).not.toBeInTheDocument();
+      expect(screen.getByRole('option')).toHaveAttribute('aria-selected', 'false');
+
+      rerender(
         <SelectableCommandItem
-          {...mockProps}
-          label={specialLabel}
-          selected={false}
+          id="item-1"
+          value="test-value"
+          label="Test Item"
+          icon={<span data-testid="custom-icon">🔵</span>}
+          selected={true}
           onSelect={vi.fn()}
         />
       );
-      expect(screen.getByText(specialLabel)).toBeInTheDocument();
+
+      expect(getCheckIcon()).toBeInTheDocument();
+      expect(screen.getByRole('option')).toHaveAttribute('aria-selected', 'true');
+    });
+  });
+
+  describe('user interactions', () => {
+    it('should call onSelect when clicked', async () => {
+      const user = userEvent.setup();
+      const onSelect = vi.fn();
+      renderComponent({ onSelect });
+
+      await user.click(getCommandItem());
+
+      expect(onSelect).toHaveBeenCalledTimes(1);
+    });
+
+    it('should call onSelect on repeated clicks', async () => {
+      const user = userEvent.setup();
+      const onSelect = vi.fn();
+      renderComponent({ onSelect });
+
+      const item = getCommandItem();
+      await user.click(item);
+      await user.click(item);
+      await user.click(item);
+
+      expect(onSelect).toHaveBeenCalledTimes(3);
     });
   });
 });

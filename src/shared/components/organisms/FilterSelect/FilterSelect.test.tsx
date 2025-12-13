@@ -2,21 +2,24 @@ import { ProjectListItem } from '@/features/projects/types';
 import { FilterSelect } from '@/shared/components/organisms/FilterSelect/FilterSelect';
 import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
-import { beforeEach, describe, expect, it, vi } from 'vitest';
+import { beforeEach, describe, expect, it, vi, type Mock } from 'vitest';
 
-let mockOnValueChange: ((value: string) => void) | null = null;
+let mockOnValueChange: Mock | null = null;
+
+interface SelectProps {
+  children: React.ReactNode;
+  value: string;
+  onValueChange: (value: string) => void;
+}
+
+interface SelectItemProps {
+  children: React.ReactNode;
+  value: string;
+}
 
 vi.mock('@/shared/components/ui/select', () => ({
-  Select: ({
-    children,
-    value,
-    onValueChange,
-  }: {
-    children: React.ReactNode;
-    value: string;
-    onValueChange: (value: string) => void;
-  }) => {
-    mockOnValueChange = onValueChange;
+  Select: ({ children, value, onValueChange }: SelectProps) => {
+    mockOnValueChange = onValueChange as Mock;
     return (
       <div
         data-testid="select"
@@ -40,7 +43,7 @@ vi.mock('@/shared/components/ui/select', () => ({
       {children}
     </div>
   ),
-  SelectItem: ({ children, value }: { children: React.ReactNode; value: string }) => (
+  SelectItem: ({ children, value }: SelectItemProps) => (
     <div
       data-testid={`select-item-${value}`}
       data-value={value}
@@ -50,31 +53,23 @@ vi.mock('@/shared/components/ui/select', () => ({
   ),
 }));
 
+const createProject = (id: string, name: string): ProjectListItem => ({
+  $id: id,
+  name,
+  color_hex: '#FF0000',
+  color_name: 'red',
+  $createdAt: '2024-01-01',
+  $updatedAt: '2024-01-01',
+  $collectionId: 'col1',
+  $databaseId: 'db1',
+  $permissions: [],
+});
+
 describe('FilterSelect', () => {
   const mockHandleValueChange = vi.fn();
   const mockProjects: ProjectListItem[] = [
-    {
-      $id: 'proj-1',
-      name: 'Project Alpha',
-      color_hex: '#FF0000',
-      color_name: 'red',
-      $createdAt: '2024-01-01',
-      $updatedAt: '2024-01-01',
-      $collectionId: 'col1',
-      $databaseId: 'db1',
-      $permissions: [],
-    },
-    {
-      $id: 'proj-2',
-      name: 'Project Beta',
-      color_hex: '#00FF00',
-      color_name: 'green',
-      $createdAt: '2024-01-01',
-      $updatedAt: '2024-01-01',
-      $collectionId: 'col1',
-      $databaseId: 'db1',
-      $permissions: [],
-    },
+    createProject('proj-1', 'Project Alpha'),
+    createProject('proj-2', 'Project Beta'),
   ];
 
   const defaultProps = {
@@ -88,36 +83,17 @@ describe('FilterSelect', () => {
     mockOnValueChange = null;
   });
 
-  describe('rendering', () => {
-    it('should render select with trigger and content', () => {
+  describe('basic rendering', () => {
+    it('should render select with trigger, content, and all options', () => {
       render(<FilterSelect {...defaultProps} />);
 
       expect(screen.getByTestId('select-trigger')).toBeInTheDocument();
       expect(screen.getByTestId('select-content')).toBeInTheDocument();
-    });
-
-    it('should render placeholder', () => {
-      render(<FilterSelect {...defaultProps} />);
-
       expect(screen.getAllByText('All Projects')[0]).toBeInTheDocument();
-    });
-
-    it('should render All Projects option', () => {
-      render(<FilterSelect {...defaultProps} />);
 
       expect(screen.getByTestId('select-item-all')).toBeInTheDocument();
-      expect(screen.getAllByText('All Projects').length).toBeGreaterThan(0);
-    });
-
-    it('should render Inbox option', () => {
-      render(<FilterSelect {...defaultProps} />);
-
       expect(screen.getByTestId('select-item-inbox')).toBeInTheDocument();
       expect(screen.getByText('Inbox')).toBeInTheDocument();
-    });
-
-    it('should render all project options', () => {
-      render(<FilterSelect {...defaultProps} />);
 
       expect(screen.getByTestId('select-item-proj-1')).toBeInTheDocument();
       expect(screen.getByTestId('select-item-proj-2')).toBeInTheDocument();
@@ -140,16 +116,10 @@ describe('FilterSelect', () => {
   });
 
   describe('value handling', () => {
-    it('should display all when value is null', () => {
-      render(
-        <FilterSelect
-          {...defaultProps}
-          value={null}
-        />
-      );
+    it('should display "all" when value is null', () => {
+      render(<FilterSelect {...defaultProps} />);
 
-      const select = screen.getByTestId('select');
-      expect(select).toHaveAttribute('data-value', 'all');
+      expect(screen.getByTestId('select')).toHaveAttribute('data-value', 'all');
     });
 
     it('should display selected project value', () => {
@@ -160,8 +130,7 @@ describe('FilterSelect', () => {
         />
       );
 
-      const select = screen.getByTestId('select');
-      expect(select).toHaveAttribute('data-value', 'proj-1');
+      expect(screen.getByTestId('select')).toHaveAttribute('data-value', 'proj-1');
     });
 
     it('should display inbox value', () => {
@@ -172,50 +141,48 @@ describe('FilterSelect', () => {
         />
       );
 
-      const select = screen.getByTestId('select');
-      expect(select).toHaveAttribute('data-value', 'inbox');
+      expect(screen.getByTestId('select')).toHaveAttribute('data-value', 'inbox');
     });
   });
 
   describe('selection behavior', () => {
-    it('should call handleValueChange with null when selecting all', async () => {
+    it('should call handleValueChange with null when selecting "all"', async () => {
       const user = userEvent.setup();
       render(<FilterSelect {...defaultProps} />);
 
-      const allItem = screen.getByTestId('select-item-all');
-      await user.click(allItem);
+      await user.click(screen.getByTestId('select-item-all'));
 
       expect(mockHandleValueChange).toHaveBeenCalledWith(null);
+      expect(mockHandleValueChange).toHaveBeenCalledTimes(1);
     });
 
     it('should call handleValueChange with project id when selecting project', async () => {
       const user = userEvent.setup();
       render(<FilterSelect {...defaultProps} />);
 
-      const projectItem = screen.getByTestId('select-item-proj-1');
-      await user.click(projectItem);
+      await user.click(screen.getByTestId('select-item-proj-1'));
 
       expect(mockHandleValueChange).toHaveBeenCalledWith('proj-1');
+      expect(mockHandleValueChange).toHaveBeenCalledTimes(1);
     });
 
-    it('should call handleValueChange with inbox when selecting inbox', async () => {
+    it('should call handleValueChange with "inbox" when selecting inbox', async () => {
       const user = userEvent.setup();
       render(<FilterSelect {...defaultProps} />);
 
-      const inboxItem = screen.getByTestId('select-item-inbox');
-      await user.click(inboxItem);
+      await user.click(screen.getByTestId('select-item-inbox'));
 
       expect(mockHandleValueChange).toHaveBeenCalledWith('inbox');
+      expect(mockHandleValueChange).toHaveBeenCalledTimes(1);
     });
   });
 
   describe('edge cases', () => {
-    it('should handle single project', () => {
-      const singleProject = [mockProjects[0]];
+    it('should handle single project correctly', () => {
       render(
         <FilterSelect
           {...defaultProps}
-          projects={singleProject}
+          projects={[mockProjects[0]]}
         />
       );
 
@@ -224,18 +191,12 @@ describe('FilterSelect', () => {
     });
 
     it('should handle project with special characters in name', () => {
-      const specialProjects: ProjectListItem[] = [
-        {
-          ...mockProjects[0],
-          $id: 'proj-special',
-          name: 'Project & Test <>',
-        },
-      ];
+      const specialProject = createProject('proj-special', 'Project & Test <>');
 
       render(
         <FilterSelect
           {...defaultProps}
-          projects={specialProjects}
+          projects={[specialProject]}
         />
       );
 

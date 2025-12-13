@@ -1,7 +1,7 @@
+import { AuthActions } from '@/shared/components/molecules/AuthActions/AuthActions';
 import { render, screen } from '@testing-library/react';
 import { BrowserRouter } from 'react-router';
-import { beforeEach, describe, expect, it, vi } from 'vitest';
-import { AuthActions } from './AuthActions';
+import { beforeEach, describe, expect, it, vi, type Mock } from 'vitest';
 
 const mockUseAuth = vi.fn();
 const mockUseLocation = vi.fn();
@@ -10,8 +10,8 @@ vi.mock('@clerk/clerk-react', () => ({
   useAuth: () => mockUseAuth(),
 }));
 
-vi.mock('react-router', async () => {
-  const actual = await vi.importActual('react-router');
+vi.mock('react-router', async (importActual) => {
+  const actual = await importActual<typeof import('react-router')>();
   return {
     ...actual,
     useLocation: () => mockUseLocation(),
@@ -29,13 +29,22 @@ vi.mock('@/shared/constants', () => ({
   },
 }));
 
-const renderComponent = () => {
-  return render(
+interface MockState {
+  isSignedIn: boolean;
+  pathname: string;
+}
+
+const setupMocks = ({ isSignedIn, pathname }: MockState): void => {
+  (mockUseAuth as Mock).mockReturnValue({ isSignedIn });
+  (mockUseLocation as Mock).mockReturnValue({ pathname });
+};
+
+const renderComponent = () =>
+  render(
     <BrowserRouter>
       <AuthActions />
     </BrowserRouter>
   );
-};
 
 describe('AuthActions', () => {
   beforeEach(() => {
@@ -43,134 +52,71 @@ describe('AuthActions', () => {
   });
 
   describe('signed in user', () => {
-    it('should show UserChip when user is signed in', () => {
-      mockUseAuth.mockReturnValue({ isSignedIn: true });
-      mockUseLocation.mockReturnValue({ pathname: '/' });
+    it('should render UserChip when user is signed in', () => {
+      setupMocks({ isSignedIn: true, pathname: '/' });
 
       renderComponent();
 
       expect(screen.getByTestId('user-chip')).toBeInTheDocument();
-    });
-
-    it('should not show Log in button when signed in', () => {
-      mockUseAuth.mockReturnValue({ isSignedIn: true });
-      mockUseLocation.mockReturnValue({ pathname: '/' });
-
-      renderComponent();
-
       expect(screen.queryByRole('link', { name: 'Log in to your account' })).not.toBeInTheDocument();
-    });
-
-    it('should not show Sign Up button when signed in', () => {
-      mockUseAuth.mockReturnValue({ isSignedIn: true });
-      mockUseLocation.mockReturnValue({ pathname: '/' });
-
-      renderComponent();
-
       expect(screen.queryByRole('link', { name: 'Create a new account' })).not.toBeInTheDocument();
     });
   });
 
-  describe('signed out user on home page', () => {
-    it('should show both Log in and Sign Up buttons', () => {
-      mockUseAuth.mockReturnValue({ isSignedIn: false });
-      mockUseLocation.mockReturnValue({ pathname: '/' });
-
-      renderComponent();
-
-      expect(screen.getByRole('link', { name: 'Log in to your account' })).toBeInTheDocument();
-      expect(screen.getByRole('link', { name: 'Create a new account' })).toBeInTheDocument();
-    });
-
-    it('should have correct hrefs', () => {
-      mockUseAuth.mockReturnValue({ isSignedIn: false });
-      mockUseLocation.mockReturnValue({ pathname: '/' });
+  describe('signed out user', () => {
+    it('should render both auth buttons on home page', () => {
+      setupMocks({ isSignedIn: false, pathname: '/' });
 
       renderComponent();
 
       const loginLink = screen.getByRole('link', { name: 'Log in to your account' });
       const signUpLink = screen.getByRole('link', { name: 'Create a new account' });
 
+      expect(loginLink).toBeInTheDocument();
       expect(loginLink).toHaveAttribute('href', '/login');
-      expect(signUpLink).toHaveAttribute('href', '/register');
-    });
-  });
-
-  describe('signed out user on login page', () => {
-    it('should hide Log in button on login page', () => {
-      mockUseAuth.mockReturnValue({ isSignedIn: false });
-      mockUseLocation.mockReturnValue({ pathname: '/login' });
-
-      renderComponent();
-
-      expect(screen.queryByRole('link', { name: 'Log in to your account' })).not.toBeInTheDocument();
-    });
-
-    it('should show Sign Up button on login page', () => {
-      mockUseAuth.mockReturnValue({ isSignedIn: false });
-      mockUseLocation.mockReturnValue({ pathname: '/login' });
-
-      renderComponent();
-
-      expect(screen.getByRole('link', { name: 'Create a new account' })).toBeInTheDocument();
-    });
-  });
-
-  describe('signed out user on register page', () => {
-    it('should hide Sign Up button on register page', () => {
-      mockUseAuth.mockReturnValue({ isSignedIn: false });
-      mockUseLocation.mockReturnValue({ pathname: '/register' });
-
-      renderComponent();
-
-      expect(screen.queryByRole('link', { name: 'Create a new account' })).not.toBeInTheDocument();
-    });
-
-    it('should show Log in button on register page', () => {
-      mockUseAuth.mockReturnValue({ isSignedIn: false });
-      mockUseLocation.mockReturnValue({ pathname: '/register' });
-
-      renderComponent();
-
-      expect(screen.getByRole('link', { name: 'Log in to your account' })).toBeInTheDocument();
-    });
-  });
-
-  describe('accessibility', () => {
-    it('should have aria-labels on auth buttons', () => {
-      mockUseAuth.mockReturnValue({ isSignedIn: false });
-      mockUseLocation.mockReturnValue({ pathname: '/' });
-
-      renderComponent();
-
-      const loginLink = screen.getByRole('link', { name: 'Log in to your account' });
-      const signUpLink = screen.getByRole('link', { name: 'Create a new account' });
-
       expect(loginLink).toHaveAttribute('aria-label', 'Log in to your account');
+
+      expect(signUpLink).toBeInTheDocument();
+      expect(signUpLink).toHaveAttribute('href', '/register');
       expect(signUpLink).toHaveAttribute('aria-label', 'Create a new account');
     });
-  });
 
-  describe('edge cases', () => {
-    it('should handle other routes correctly', () => {
-      mockUseAuth.mockReturnValue({ isSignedIn: false });
-      mockUseLocation.mockReturnValue({ pathname: '/about' });
+    it('should hide Log in button on login page', () => {
+      setupMocks({ isSignedIn: false, pathname: '/login' });
+
+      renderComponent();
+
+      expect(screen.queryByRole('link', { name: 'Log in to your account' })).not.toBeInTheDocument();
+      expect(screen.getByRole('link', { name: 'Create a new account' })).toBeInTheDocument();
+    });
+
+    it('should hide Sign Up button on register page', () => {
+      setupMocks({ isSignedIn: false, pathname: '/register' });
+
+      renderComponent();
+
+      expect(screen.queryByRole('link', { name: 'Create a new account' })).not.toBeInTheDocument();
+      expect(screen.getByRole('link', { name: 'Log in to your account' })).toBeInTheDocument();
+    });
+
+    it('should render both auth buttons on other routes', () => {
+      setupMocks({ isSignedIn: false, pathname: '/about' });
 
       renderComponent();
 
       expect(screen.getByRole('link', { name: 'Log in to your account' })).toBeInTheDocument();
       expect(screen.getByRole('link', { name: 'Create a new account' })).toBeInTheDocument();
     });
+  });
 
-    it('should update when auth state changes', () => {
-      mockUseAuth.mockReturnValue({ isSignedIn: false });
-      mockUseLocation.mockReturnValue({ pathname: '/' });
-
+  describe('state transitions', () => {
+    it('should update when auth state changes from signed out to signed in', () => {
+      setupMocks({ isSignedIn: false, pathname: '/' });
       const { rerender } = renderComponent();
 
       expect(screen.getByRole('link', { name: 'Log in to your account' })).toBeInTheDocument();
 
-      mockUseAuth.mockReturnValue({ isSignedIn: true });
+      setupMocks({ isSignedIn: true, pathname: '/' });
       rerender(
         <BrowserRouter>
           <AuthActions />
@@ -181,15 +127,13 @@ describe('AuthActions', () => {
       expect(screen.queryByRole('link', { name: 'Log in to your account' })).not.toBeInTheDocument();
     });
 
-    it('should update when route changes', () => {
-      mockUseAuth.mockReturnValue({ isSignedIn: false });
-      mockUseLocation.mockReturnValue({ pathname: '/' });
-
+    it('should update when route changes from home to login page', () => {
+      setupMocks({ isSignedIn: false, pathname: '/' });
       const { rerender } = renderComponent();
 
       expect(screen.getByRole('link', { name: 'Log in to your account' })).toBeInTheDocument();
 
-      mockUseLocation.mockReturnValue({ pathname: '/login' });
+      setupMocks({ isSignedIn: false, pathname: '/login' });
       rerender(
         <BrowserRouter>
           <AuthActions />
