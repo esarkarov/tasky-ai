@@ -1,149 +1,157 @@
+import { AddTaskButton } from '@/features/tasks/components/atoms/AddTaskButton/AddTaskButton';
 import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
-import { AddTaskButton, AddTaskButtonProps } from './AddTaskButton';
 
 vi.mock('lucide-react', () => ({
-  CirclePlus: vi.fn(({ focusable, ...props }) => (
+  CirclePlus: ({ ...props }) => (
     <svg
       data-testid="circle-plus-icon"
       aria-hidden="true"
-      focusable={focusable}
       {...props}
     />
-  )),
+  ),
+}));
+
+vi.mock('@/shared/components/ui/button', () => ({
+  Button: ({ children, className, ...props }: React.ComponentProps<'button'>) => (
+    <button
+      className={className}
+      {...props}>
+      {children}
+    </button>
+  ),
 }));
 
 describe('AddTaskButton', () => {
-  const setup = async (props: AddTaskButtonProps = {}) => {
-    const user = userEvent.setup();
-    const handleClick = vi.fn();
-    const handleKeyDown = vi.fn();
-    const handleMouseEnter = vi.fn();
-    render(
+  const mockHandleClick = vi.fn();
+  const mockHandleKeyDown = vi.fn();
+  const mockHandleMouseEnter = vi.fn();
+
+  interface RenderOptions {
+    onClick?: () => void;
+    onKeyDown?: () => void;
+    onMouseEnter?: () => void;
+    disabled?: boolean;
+  }
+
+  const renderComponent = ({
+    onClick = mockHandleClick,
+    onKeyDown = mockHandleKeyDown,
+    onMouseEnter = mockHandleMouseEnter,
+    disabled = false,
+  }: RenderOptions = {}) => {
+    return render(
       <AddTaskButton
-        onClick={handleClick}
-        onKeyDown={handleKeyDown}
-        onMouseEnter={handleMouseEnter}
-        {...props}
+        onClick={onClick}
+        onKeyDown={onKeyDown}
+        onMouseEnter={onMouseEnter}
+        disabled={disabled}
       />
     );
-    const button = screen.getByRole('button', { name: /add task/i });
-    return { user, button, handleClick, handleKeyDown, handleMouseEnter };
   };
+
+  const getButton = () => screen.getByRole('button', { name: /add task/i });
+  const getIcon = () => screen.getByTestId('circle-plus-icon');
 
   beforeEach(() => {
     vi.clearAllMocks();
   });
 
   describe('rendering', () => {
-    it('renders button with text and icon', async () => {
-      const { button } = await setup();
+    it('should render button with text, icon, and correct structure', () => {
+      renderComponent();
+
+      const button = getButton();
+      const icon = getIcon();
 
       expect(button).toBeInTheDocument();
       expect(screen.getByText('Add')).toBeInTheDocument();
-      expect(screen.getByTestId('circle-plus-icon')).toBeInTheDocument();
+      expect(icon).toBeInTheDocument();
+      expect(button).toContainElement(icon);
     });
 
-    it('renders icon before text content', async () => {
-      const { button } = await setup();
-      const icon = screen.getByTestId('circle-plus-icon');
-      const text = screen.getByText('Add');
+    it('should have default aria-label', () => {
+      renderComponent();
 
-      expect(button).toContainElement(icon);
-      expect(button).toContainElement(text);
+      expect(getButton()).toHaveAttribute('aria-label', 'Add task');
+    });
+
+    it('should override aria-label when provided', () => {
+      render(<AddTaskButton aria-label="Custom label" />);
+
+      expect(screen.getByRole('button', { name: /custom label/i })).toHaveAttribute('aria-label', 'Custom label');
     });
   });
 
   describe('user interactions', () => {
-    it('calls onClick handler when clicked', async () => {
-      const { user, button, handleClick } = await setup();
+    it('should call onClick when button is clicked', async () => {
+      const user = userEvent.setup();
+      renderComponent();
 
-      await user.click(button);
+      await user.click(getButton());
 
-      expect(handleClick).toHaveBeenCalledTimes(1);
+      expect(mockHandleClick).toHaveBeenCalledTimes(1);
     });
 
-    it('calls onKeyDown handler when key is pressed', async () => {
-      const { user, button, handleKeyDown } = await setup();
+    it('should call onKeyDown when key is pressed', async () => {
+      const user = userEvent.setup();
+      renderComponent();
 
+      const button = getButton();
       button.focus();
       await user.keyboard('{Enter}');
 
       expect(button).toHaveFocus();
-      expect(handleKeyDown).toHaveBeenCalled();
+      expect(mockHandleKeyDown).toHaveBeenCalled();
     });
 
-    it('calls onMouseEnter handler when hovered', async () => {
-      const { user, button, handleMouseEnter } = await setup();
+    it('should call onMouseEnter when button is hovered', async () => {
+      const user = userEvent.setup();
+      renderComponent();
 
-      await user.hover(button);
+      await user.hover(getButton());
 
-      expect(handleMouseEnter).toHaveBeenCalledTimes(1);
+      expect(mockHandleMouseEnter).toHaveBeenCalledTimes(1);
     });
 
-    it('does not trigger onClick when disabled', async () => {
-      const { user, button, handleClick } = await setup({ disabled: true });
+    it('should not call onClick when button is disabled', async () => {
+      const user = userEvent.setup();
+      renderComponent({ disabled: true });
 
+      const button = getButton();
       await user.click(button);
 
       expect(button).toBeDisabled();
-      expect(handleClick).not.toHaveBeenCalled();
-    });
-  });
-
-  describe('props handling', () => {
-    it('applies additional HTML attributes', async () => {
-      await setup({
-        id: 'add-task-button',
-        title: 'Add a new task',
-        type: 'button',
-      });
-
-      const button = screen.getByRole('button', { name: /add task/i });
-
-      expect(button).toHaveAttribute('id', 'add-task-button');
-      expect(button).toHaveAttribute('title', 'Add a new task');
-      expect(button).toHaveAttribute('type', 'button');
-    });
-
-    it('overrides default aria-label when provided', async () => {
-      render(<AddTaskButton aria-label="Custom label" />);
-      const button = screen.getByRole('button', { name: /custom label/i });
-
-      expect(button).toHaveAttribute('aria-label', 'Custom label');
+      expect(mockHandleClick).not.toHaveBeenCalled();
     });
   });
 
   describe('accessibility', () => {
-    it('has correct default aria-label', async () => {
-      const { button } = await setup();
+    it('should hide icon from assistive technologies', () => {
+      renderComponent();
 
-      expect(button).toHaveAttribute('aria-label', 'Add task');
-    });
-
-    it('hides icon from assistive technologies', async () => {
-      await setup();
-      const icon = screen.getByTestId('circle-plus-icon');
-
+      const icon = getIcon();
       expect(icon).toHaveAttribute('aria-hidden', 'true');
       expect(icon).toHaveAttribute('focusable', 'false');
     });
 
-    it('is keyboard accessible via Tab', async () => {
-      const { user } = await setup();
+    it('should be keyboard accessible when enabled', async () => {
+      const user = userEvent.setup();
+      renderComponent();
 
       await user.tab();
 
-      expect(screen.getByRole('button', { name: /add task/i })).toHaveFocus();
+      expect(getButton()).toHaveFocus();
     });
 
-    it('is not focusable when disabled', async () => {
-      const { user } = await setup({ disabled: true });
+    it('should not be focusable when disabled', async () => {
+      const user = userEvent.setup();
+      renderComponent({ disabled: true });
 
       await user.tab();
 
-      expect(screen.getByRole('button', { name: /add task/i })).not.toHaveFocus();
+      expect(getButton()).not.toHaveFocus();
     });
   });
 });

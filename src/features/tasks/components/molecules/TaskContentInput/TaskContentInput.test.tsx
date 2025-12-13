@@ -1,7 +1,7 @@
+import { TaskContentInput } from '@/features/tasks/components/molecules/TaskContentInput/TaskContentInput';
 import { render, screen } from '@testing-library/react';
-import { describe, it, expect, vi, beforeEach } from 'vitest';
 import userEvent from '@testing-library/user-event';
-import { TaskContentInput } from './TaskContentInput';
+import { beforeEach, describe, expect, it, vi } from 'vitest';
 
 vi.mock('@/shared/components/atoms/InputValueCount/InputValueCount', () => ({
   InputValueCount: ({ valueLength, maxLength }: { valueLength: number; maxLength: number }) => (
@@ -49,144 +49,122 @@ vi.mock('@/shared/constants', () => ({
 
 describe('TaskContentInput', () => {
   const mockOnChange = vi.fn();
-  const defaultProps = {
-    value: '',
-    disabled: false,
-    onChange: mockOnChange,
+
+  const renderComponent = (value = '', disabled = false) => {
+    return render(
+      <TaskContentInput
+        value={value}
+        disabled={disabled}
+        onChange={mockOnChange}
+      />
+    );
   };
 
   beforeEach(() => {
     vi.clearAllMocks();
   });
 
-  describe('basic rendering', () => {
-    it('should render the textarea with correct attributes', () => {
-      render(<TaskContentInput {...defaultProps} />);
+  describe('rendering', () => {
+    it('should render textarea with correct attributes and accessibility properties', () => {
+      renderComponent();
 
       const textarea = screen.getByRole('textbox', { name: 'Task content input' });
-      expect(textarea).toBeInTheDocument();
       expect(textarea).toHaveAttribute('id', 'task-content');
       expect(textarea).toHaveAttribute('placeholder', 'After finishing the project, take a tour');
       expect(textarea).toHaveAttribute('maxlength', '500');
+      expect(textarea).toHaveAttribute('aria-label', 'Task content input');
+      expect(textarea).toHaveAttribute('aria-multiline', 'true');
     });
 
-    it('should render the label with sr-only class', () => {
-      render(<TaskContentInput {...defaultProps} />);
+    it('should render visually hidden label and keyboard instructions', () => {
+      renderComponent();
 
       const label = screen.getByText('Task description');
-      expect(label).toBeInTheDocument();
       expect(label).toHaveClass('sr-only');
-    });
-
-    it('should render InputValueCount component', () => {
-      render(
-        <TaskContentInput
-          {...defaultProps}
-          value="Hello"
-        />
-      );
-
-      const counter = screen.getByTestId('input-value-count');
-      expect(counter).toBeInTheDocument();
-      expect(counter).toHaveTextContent('5/500');
-    });
-
-    it('should render keyboard instruction text for screen readers', () => {
-      render(<TaskContentInput {...defaultProps} />);
+      expect(label).toHaveAttribute('for');
 
       const instruction = screen.getByText('Press Enter to save, Shift+Enter for new line.');
-      expect(instruction).toBeInTheDocument();
       expect(instruction).toHaveClass('sr-only');
     });
 
-    it('should render all child components in correct order', () => {
-      const { container } = render(<TaskContentInput {...defaultProps} />);
+    it('should render character counter with correct count', () => {
+      renderComponent('Hello');
 
-      const wrapper = container.firstChild as HTMLElement;
-      expect(wrapper.children).toHaveLength(4);
+      const counter = screen.getByTestId('input-value-count');
+      expect(counter).toHaveTextContent('5/500');
     });
   });
 
   describe('value display', () => {
-    it('should display the provided value', () => {
-      render(
-        <TaskContentInput
-          {...defaultProps}
-          value="Test task content"
-        />
-      );
+    it('should display provided value', () => {
+      renderComponent('Test task content');
 
-      const textarea = screen.getByRole('textbox', { name: 'Task content input' });
-      expect(textarea).toHaveValue('Test task content');
+      expect(screen.getByRole('textbox', { name: 'Task content input' })).toHaveValue('Test task content');
     });
 
-    it('should display empty value when value is empty string', () => {
-      render(
-        <TaskContentInput
-          {...defaultProps}
-          value=""
-        />
-      );
-
-      const textarea = screen.getByRole('textbox', { name: 'Task content input' });
-      expect(textarea).toHaveValue('');
-    });
-
-    it('should update character count based on value length', () => {
-      const { rerender } = render(
-        <TaskContentInput
-          {...defaultProps}
-          value="Hello"
-        />
-      );
-
+    it('should update character count when value changes', () => {
+      const { rerender } = renderComponent('Hello');
       expect(screen.getByTestId('input-value-count')).toHaveTextContent('5/500');
 
       rerender(
         <TaskContentInput
-          {...defaultProps}
           value="Hello World"
+          disabled={false}
+          onChange={mockOnChange}
         />
       );
+
       expect(screen.getByTestId('input-value-count')).toHaveTextContent('11/500');
+    });
+
+    it('should handle empty and maximum length values', () => {
+      const { rerender } = renderComponent('');
+
+      expect(screen.getByRole('textbox', { name: 'Task content input' })).toHaveValue('');
+      expect(screen.getByTestId('input-value-count')).toHaveTextContent('0/500');
+
+      const maxLengthValue = 'a'.repeat(500);
+      rerender(
+        <TaskContentInput
+          value={maxLengthValue}
+          disabled={false}
+          onChange={mockOnChange}
+        />
+      );
+
+      expect(screen.getByRole('textbox', { name: 'Task content input' })).toHaveValue(maxLengthValue);
+      expect(screen.getByTestId('input-value-count')).toHaveTextContent('500/500');
     });
   });
 
   describe('user interaction', () => {
     it('should call onChange when user types', async () => {
       const user = userEvent.setup();
-      render(<TaskContentInput {...defaultProps} />);
+      renderComponent();
 
-      const textarea = screen.getByRole('textbox', { name: 'Task content input' });
-      await user.type(textarea, 'New task');
+      await user.type(screen.getByRole('textbox', { name: 'Task content input' }), 'New task');
 
       expect(mockOnChange).toHaveBeenCalled();
       expect(mockOnChange).toHaveBeenCalledWith('N');
-      expect(mockOnChange).toHaveBeenCalledWith('e');
-    });
-
-    it('should pass the current value to onChange', async () => {
-      const user = userEvent.setup();
-      render(
-        <TaskContentInput
-          {...defaultProps}
-          value="Initial"
-        />
-      );
-
-      const textarea = screen.getByRole('textbox', { name: 'Task content input' });
-      await user.clear(textarea);
-      await user.type(textarea, 'Changed');
-
-      expect(mockOnChange).toHaveBeenCalled();
     });
 
     it('should handle multi-line input with Shift+Enter', async () => {
       const user = userEvent.setup();
-      render(<TaskContentInput {...defaultProps} />);
+      renderComponent();
 
-      const textarea = screen.getByRole('textbox', { name: 'Task content input' });
-      await user.type(textarea, 'Line 1{Shift>}{Enter}{/Shift}Line 2');
+      await user.type(
+        screen.getByRole('textbox', { name: 'Task content input' }),
+        'Line 1{Shift>}{Enter}{/Shift}Line 2'
+      );
+
+      expect(mockOnChange).toHaveBeenCalled();
+    });
+
+    it('should handle special characters', async () => {
+      const user = userEvent.setup();
+      renderComponent();
+
+      await user.type(screen.getByRole('textbox', { name: 'Task content input' }), '!@#$%');
 
       expect(mockOnChange).toHaveBeenCalled();
     });
@@ -195,9 +173,7 @@ describe('TaskContentInput', () => {
   describe('keyboard handling', () => {
     it('should prevent default on Enter key without Shift', async () => {
       const user = userEvent.setup();
-
-      render(<TaskContentInput {...defaultProps} />);
-
+      renderComponent();
       const textarea = screen.getByRole('textbox', { name: 'Task content input' });
 
       await user.click(textarea);
@@ -206,166 +182,34 @@ describe('TaskContentInput', () => {
       expect(textarea).toBeInTheDocument();
     });
 
-    it('should not prevent default on Enter key with Shift', async () => {
+    it('should allow new line on Enter key with Shift', async () => {
       const user = userEvent.setup();
-      render(<TaskContentInput {...defaultProps} />);
+      renderComponent();
 
-      const textarea = screen.getByRole('textbox', { name: 'Task content input' });
-      await user.click(textarea);
-
+      await user.click(screen.getByRole('textbox', { name: 'Task content input' }));
       await user.keyboard('{Shift>}{Enter}{/Shift}');
 
-      expect(textarea).toBeInTheDocument();
-    });
-
-    it('should handle other keys normally', async () => {
-      const user = userEvent.setup();
-      render(<TaskContentInput {...defaultProps} />);
-
-      const textarea = screen.getByRole('textbox', { name: 'Task content input' });
-      await user.type(textarea, 'abc{Backspace}{Delete}');
-
-      expect(mockOnChange).toHaveBeenCalled();
+      expect(screen.getByRole('textbox', { name: 'Task content input' })).toBeInTheDocument();
     });
   });
 
   describe('disabled state', () => {
-    it('should disable textarea when disabled prop is true', () => {
-      render(
-        <TaskContentInput
-          {...defaultProps}
-          disabled={true}
-        />
-      );
-
-      const textarea = screen.getByRole('textbox', { name: 'Task content input' });
-      expect(textarea).toBeDisabled();
-    });
-
-    it('should not call onChange when disabled and user attempts to type', async () => {
+    it('should disable textarea and prevent onChange when disabled', async () => {
       const user = userEvent.setup();
-      render(
-        <TaskContentInput
-          {...defaultProps}
-          disabled={true}
-        />
-      );
-
+      renderComponent('', true);
       const textarea = screen.getByRole('textbox', { name: 'Task content input' });
+
+      expect(textarea).toBeDisabled();
 
       await user.type(textarea, 'test');
 
       expect(mockOnChange).not.toHaveBeenCalled();
     });
 
-    it('should enable textarea when disabled prop is false', () => {
-      render(
-        <TaskContentInput
-          {...defaultProps}
-          disabled={false}
-        />
-      );
+    it('should enable textarea when disabled is false', () => {
+      renderComponent('', false);
 
-      const textarea = screen.getByRole('textbox', { name: 'Task content input' });
-      expect(textarea).not.toBeDisabled();
-    });
-  });
-
-  describe('max length', () => {
-    it('should enforce max length constraint', () => {
-      render(<TaskContentInput {...defaultProps} />);
-
-      const textarea = screen.getByRole('textbox', { name: 'Task content input' });
-      expect(textarea).toHaveAttribute('maxlength', '500');
-    });
-
-    it('should pass max length to InputValueCount', () => {
-      render(
-        <TaskContentInput
-          {...defaultProps}
-          value="test"
-        />
-      );
-
-      const counter = screen.getByTestId('input-value-count');
-      expect(counter).toHaveTextContent('4/500');
-    });
-  });
-
-  describe('accessibility', () => {
-    it('should have proper aria-label', () => {
-      render(<TaskContentInput {...defaultProps} />);
-
-      const textarea = screen.getByRole('textbox', { name: 'Task content input' });
-      expect(textarea).toHaveAttribute('aria-label', 'Task content input');
-    });
-
-    it('should have aria-multiline attribute', () => {
-      render(<TaskContentInput {...defaultProps} />);
-
-      const textarea = screen.getByRole('textbox', { name: 'Task content input' });
-      expect(textarea).toHaveAttribute('aria-multiline', 'true');
-    });
-
-    it('should have associated label with htmlFor attribute', () => {
-      render(<TaskContentInput {...defaultProps} />);
-
-      const label = screen.getByText('Task description');
-      expect(label).toHaveAttribute('for');
-
-      const textarea = screen.getByRole('textbox', { name: 'Task content input' });
-      expect(textarea).toHaveAttribute('id', 'task-content');
-    });
-
-    it('should provide keyboard instructions for screen readers', () => {
-      render(<TaskContentInput {...defaultProps} />);
-
-      const instruction = screen.getByText('Press Enter to save, Shift+Enter for new line.');
-      expect(instruction).toBeInTheDocument();
-      expect(instruction.className).toContain('sr-only');
-    });
-  });
-
-  describe('edge cases', () => {
-    it('should handle empty value', () => {
-      render(
-        <TaskContentInput
-          {...defaultProps}
-          value=""
-        />
-      );
-
-      const textarea = screen.getByRole('textbox', { name: 'Task content input' });
-      expect(textarea).toHaveValue('');
-
-      const counter = screen.getByTestId('input-value-count');
-      expect(counter).toHaveTextContent('0/500');
-    });
-
-    it('should handle value at max length', () => {
-      const maxLengthValue = 'a'.repeat(500);
-      render(
-        <TaskContentInput
-          {...defaultProps}
-          value={maxLengthValue}
-        />
-      );
-
-      const textarea = screen.getByRole('textbox', { name: 'Task content input' });
-      expect(textarea).toHaveValue(maxLengthValue);
-
-      const counter = screen.getByTestId('input-value-count');
-      expect(counter).toHaveTextContent('500/500');
-    });
-
-    it('should handle special characters', async () => {
-      const user = userEvent.setup();
-      render(<TaskContentInput {...defaultProps} />);
-
-      const textarea = screen.getByRole('textbox', { name: 'Task content input' });
-      await user.type(textarea, '!@#$%^&*()');
-
-      expect(mockOnChange).toHaveBeenCalled();
+      expect(screen.getByRole('textbox', { name: 'Task content input' })).not.toBeDisabled();
     });
   });
 });

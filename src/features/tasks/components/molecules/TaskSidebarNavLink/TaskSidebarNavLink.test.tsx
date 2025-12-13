@@ -1,10 +1,10 @@
-import { TaskCounts } from '@/features/tasks/types';
+import { TaskSidebarNavLink } from '@/features/tasks/components/molecules/TaskSidebarNavLink/TaskSidebarNavLink';
+import type { TaskCounts } from '@/features/tasks/types';
 import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
-import { LucideIcon } from 'lucide-react';
+import type { LucideIcon } from 'lucide-react';
 import { MemoryRouter } from 'react-router';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
-import { TaskSidebarNavLink } from './TaskSidebarNavLink';
 
 vi.mock('@/shared/utils/ui/ui.utils', () => ({
   getBadgeCount: vi.fn((href: string, taskCounts: TaskCounts) => {
@@ -50,6 +50,7 @@ describe('TaskSidebarNavLink', () => {
     (props: React.SVGProps<SVGSVGElement>) => (
       <svg
         data-testid="mock-icon"
+        aria-hidden="true"
         {...props}>
         Icon
       </svg>
@@ -57,332 +58,133 @@ describe('TaskSidebarNavLink', () => {
     { displayName: 'MockIcon' }
   ) as LucideIcon;
 
-  const mockLink = {
-    href: '/inbox',
-    label: 'Inbox',
-    icon: MockIcon,
+  interface RenderOptions {
+    href?: string;
+    label?: string;
+    isActive?: boolean;
+    taskCounts?: TaskCounts;
+  }
+
+  const renderComponent = ({
+    href = '/inbox',
+    label = 'Inbox',
+    isActive = false,
+    taskCounts = { inboxTasks: 5, todayTasks: 3 },
+  }: RenderOptions = {}) => {
+    const link = { href, label, icon: MockIcon };
+    return render(
+      <MemoryRouter>
+        <TaskSidebarNavLink
+          link={link}
+          isActive={isActive}
+          taskCounts={taskCounts}
+          onClick={mockOnClick}
+        />
+      </MemoryRouter>
+    );
   };
 
-  const mockTaskCounts: TaskCounts = {
-    inboxTasks: 5,
-    todayTasks: 3,
-  };
-
-  const renderWithRouter = (ui: React.ReactElement) => {
-    return render(<MemoryRouter>{ui}</MemoryRouter>);
-  };
+  const getMenuButton = () => screen.getByTestId('sidebar-menu-button');
+  const getLink = (name: string) => screen.getByRole('link', { name });
+  const getBadge = () => screen.queryByTestId('sidebar-menu-badge');
+  const getIcon = () => screen.getByTestId('mock-icon');
 
   beforeEach(() => {
     vi.clearAllMocks();
   });
 
-  describe('basic rendering', () => {
-    it('should render the sidebar menu item', () => {
-      renderWithRouter(
-        <TaskSidebarNavLink
-          link={mockLink}
-          isActive={false}
-          taskCounts={mockTaskCounts}
-          onClick={mockOnClick}
-        />
-      );
+  describe('rendering', () => {
+    it('should render link with correct href, label, and icon', () => {
+      renderComponent();
 
-      const menuButton = screen.getByTestId('sidebar-menu-button');
-      expect(menuButton).toBeInTheDocument();
-    });
-
-    it('should render the link with correct href', () => {
-      renderWithRouter(
-        <TaskSidebarNavLink
-          link={mockLink}
-          isActive={false}
-          taskCounts={mockTaskCounts}
-          onClick={mockOnClick}
-        />
-      );
-
-      const link = screen.getByRole('link', { name: 'Inbox' });
+      expect(getMenuButton()).toBeInTheDocument();
+      const link = getLink('Inbox');
       expect(link).toHaveAttribute('href', '/inbox');
-    });
-
-    it('should render the link label', () => {
-      renderWithRouter(
-        <TaskSidebarNavLink
-          link={mockLink}
-          isActive={false}
-          taskCounts={mockTaskCounts}
-          onClick={mockOnClick}
-        />
-      );
-
       expect(screen.getByText('Inbox')).toBeInTheDocument();
+      expect(getIcon()).toBeInTheDocument();
     });
 
-    it('should render the icon', () => {
-      renderWithRouter(
-        <TaskSidebarNavLink
-          link={mockLink}
-          isActive={false}
-          taskCounts={mockTaskCounts}
-          onClick={mockOnClick}
-        />
-      );
+    it('should render different link types correctly', () => {
+      renderComponent({ href: '/projects', label: 'Projects' });
 
-      const icon = screen.getByTestId('mock-icon');
-      expect(icon).toBeInTheDocument();
-      expect(icon).toHaveAttribute('aria-hidden', 'true');
+      const link = getLink('Projects');
+      expect(link).toHaveAttribute('href', '/projects');
+      expect(screen.getByText('Projects')).toBeInTheDocument();
     });
   });
 
   describe('active state', () => {
-    it('should pass isActive prop to SidebarMenuButton', () => {
-      renderWithRouter(
-        <TaskSidebarNavLink
-          link={mockLink}
-          isActive={true}
-          taskCounts={mockTaskCounts}
-          onClick={mockOnClick}
-        />
-      );
+    it('should set correct attributes when active', () => {
+      renderComponent({ isActive: true });
 
-      const menuButton = screen.getByTestId('sidebar-menu-button');
-      expect(menuButton).toHaveAttribute('data-active', 'true');
-    });
-
-    it('should set aria-current to "page" when active', () => {
-      renderWithRouter(
-        <TaskSidebarNavLink
-          link={mockLink}
-          isActive={true}
-          taskCounts={mockTaskCounts}
-          onClick={mockOnClick}
-        />
-      );
-
-      const link = screen.getByRole('link', { name: 'Inbox' });
-      expect(link).toHaveAttribute('aria-current', 'page');
+      expect(getMenuButton()).toHaveAttribute('data-active', 'true');
+      expect(getLink('Inbox')).toHaveAttribute('aria-current', 'page');
     });
 
     it('should not set aria-current when inactive', () => {
-      renderWithRouter(
-        <TaskSidebarNavLink
-          link={mockLink}
-          isActive={false}
-          taskCounts={mockTaskCounts}
-          onClick={mockOnClick}
-        />
-      );
+      renderComponent({ isActive: false });
 
-      const link = screen.getByRole('link', { name: 'Inbox' });
-      expect(link).not.toHaveAttribute('aria-current');
+      expect(getMenuButton()).toHaveAttribute('data-active', 'false');
+      expect(getLink('Inbox')).not.toHaveAttribute('aria-current');
     });
   });
 
   describe('badge display', () => {
-    it('should show badge when count is greater than 0', () => {
-      renderWithRouter(
-        <TaskSidebarNavLink
-          link={mockLink}
-          isActive={false}
-          taskCounts={{ inboxTasks: 5, todayTasks: 3 }}
-          onClick={mockOnClick}
-        />
-      );
+    it('should show badge with correct count when greater than 0', () => {
+      renderComponent({ taskCounts: { inboxTasks: 7, todayTasks: 3 } });
 
-      const badge = screen.getByTestId('sidebar-menu-badge');
+      const badge = getBadge();
       expect(badge).toBeInTheDocument();
-      expect(badge).toHaveTextContent('5');
-    });
-
-    it('should not show badge when count is 0', () => {
-      renderWithRouter(
-        <TaskSidebarNavLink
-          link={mockLink}
-          isActive={false}
-          taskCounts={{ inboxTasks: 0, todayTasks: 0 }}
-          onClick={mockOnClick}
-        />
-      );
-
-      const badge = screen.queryByTestId('sidebar-menu-badge');
-      expect(badge).not.toBeInTheDocument();
+      expect(badge).toHaveTextContent('7');
+      expect(badge).toHaveAttribute('aria-label', '7 tasks');
     });
 
     it('should show correct count for today link', () => {
-      const todayLink = {
-        href: '/today',
-        label: 'Today',
-        icon: MockIcon,
-      };
+      renderComponent({ href: '/today', label: 'Today', taskCounts: { inboxTasks: 5, todayTasks: 3 } });
 
-      renderWithRouter(
-        <TaskSidebarNavLink
-          link={todayLink}
-          isActive={false}
-          taskCounts={{ inboxTasks: 5, todayTasks: 3 }}
-          onClick={mockOnClick}
-        />
-      );
-
-      const badge = screen.getByTestId('sidebar-menu-badge');
-      expect(badge).toHaveTextContent('3');
+      expect(getBadge()).toHaveTextContent('3');
     });
 
-    it('should have proper aria-label on badge', () => {
-      renderWithRouter(
-        <TaskSidebarNavLink
-          link={mockLink}
-          isActive={false}
-          taskCounts={{ inboxTasks: 7, todayTasks: 3 }}
-          onClick={mockOnClick}
-        />
-      );
+    it('should not show badge when count is 0 or route not tracked', () => {
+      renderComponent({ taskCounts: { inboxTasks: 0, todayTasks: 0 } });
+      expect(getBadge()).not.toBeInTheDocument();
 
-      const badge = screen.getByTestId('sidebar-menu-badge');
-      expect(badge).toHaveAttribute('aria-label', '7 tasks');
+      renderComponent({ href: '/projects', label: 'Projects' });
+      expect(getBadge()).not.toBeInTheDocument();
+    });
+
+    it('should handle large task counts', () => {
+      renderComponent({ taskCounts: { inboxTasks: 999, todayTasks: 3 } });
+
+      const badge = getBadge();
+      expect(badge).toHaveTextContent('999');
+      expect(badge).toHaveAttribute('aria-label', '999 tasks');
     });
   });
 
   describe('user interactions', () => {
     it('should call onClick when button is clicked', async () => {
       const user = userEvent.setup();
-      renderWithRouter(
-        <TaskSidebarNavLink
-          link={mockLink}
-          isActive={false}
-          taskCounts={mockTaskCounts}
-          onClick={mockOnClick}
-        />
-      );
+      renderComponent();
 
-      const menuButton = screen.getByTestId('sidebar-menu-button');
-      await user.click(menuButton);
+      await user.click(getMenuButton());
 
       expect(mockOnClick).toHaveBeenCalledTimes(1);
     });
   });
 
   describe('accessibility', () => {
-    it('should have proper aria-label on link', () => {
-      renderWithRouter(
-        <TaskSidebarNavLink
-          link={mockLink}
-          isActive={false}
-          taskCounts={mockTaskCounts}
-          onClick={mockOnClick}
-        />
-      );
+    it('should have proper aria-label and hide icon from screen readers', () => {
+      renderComponent();
 
-      const link = screen.getByLabelText('Inbox');
-      expect(link).toBeInTheDocument();
-    });
-
-    it('should hide icon from screen readers', () => {
-      renderWithRouter(
-        <TaskSidebarNavLink
-          link={mockLink}
-          isActive={false}
-          taskCounts={mockTaskCounts}
-          onClick={mockOnClick}
-        />
-      );
-
-      const icon = screen.getByTestId('mock-icon');
-      expect(icon).toHaveAttribute('aria-hidden', 'true');
-    });
-
-    it('should provide task count information to screen readers via badge', () => {
-      renderWithRouter(
-        <TaskSidebarNavLink
-          link={mockLink}
-          isActive={false}
-          taskCounts={{ inboxTasks: 10, todayTasks: 3 }}
-          onClick={mockOnClick}
-        />
-      );
-
-      const badge = screen.getByLabelText('10 tasks');
-      expect(badge).toBeInTheDocument();
+      expect(screen.getByLabelText('Inbox')).toBeInTheDocument();
+      expect(getIcon()).toHaveAttribute('aria-hidden', 'true');
     });
   });
 
   describe('component memoization', () => {
     it('should have displayName set correctly', () => {
       expect(TaskSidebarNavLink.displayName).toBe('SideNavItem');
-    });
-  });
-
-  describe('different link types', () => {
-    it('should handle different routes correctly', () => {
-      const projectLink = {
-        href: '/projects',
-        label: 'Projects',
-        icon: MockIcon,
-      };
-
-      renderWithRouter(
-        <TaskSidebarNavLink
-          link={projectLink}
-          isActive={false}
-          taskCounts={mockTaskCounts}
-          onClick={mockOnClick}
-        />
-      );
-
-      const link = screen.getByRole('link', { name: 'Projects' });
-      expect(link).toHaveAttribute('href', '/projects');
-      expect(screen.getByText('Projects')).toBeInTheDocument();
-    });
-
-    it('should not show badge for routes not in getBadgeCount logic', () => {
-      const projectLink = {
-        href: '/projects',
-        label: 'Projects',
-        icon: MockIcon,
-      };
-
-      renderWithRouter(
-        <TaskSidebarNavLink
-          link={projectLink}
-          isActive={false}
-          taskCounts={mockTaskCounts}
-          onClick={mockOnClick}
-        />
-      );
-
-      const badge = screen.queryByTestId('sidebar-menu-badge');
-      expect(badge).not.toBeInTheDocument();
-    });
-  });
-
-  describe('edge cases', () => {
-    it('should handle zero task counts', () => {
-      renderWithRouter(
-        <TaskSidebarNavLink
-          link={mockLink}
-          isActive={false}
-          taskCounts={{ inboxTasks: 0, todayTasks: 0 }}
-          onClick={mockOnClick}
-        />
-      );
-
-      const badge = screen.queryByTestId('sidebar-menu-badge');
-      expect(badge).not.toBeInTheDocument();
-    });
-
-    it('should handle large task counts', () => {
-      renderWithRouter(
-        <TaskSidebarNavLink
-          link={mockLink}
-          isActive={false}
-          taskCounts={{ inboxTasks: 999, todayTasks: 3 }}
-          onClick={mockOnClick}
-        />
-      );
-
-      const badge = screen.getByTestId('sidebar-menu-badge');
-      expect(badge).toHaveTextContent('999');
-      expect(badge).toHaveAttribute('aria-label', '999 tasks');
     });
   });
 });

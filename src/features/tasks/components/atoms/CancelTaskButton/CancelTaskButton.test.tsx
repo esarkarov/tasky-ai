@@ -1,7 +1,7 @@
+import { CancelTaskButton } from '@/features/tasks/components/atoms/CancelTaskButton/CancelTaskButton';
 import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
-import { CancelTaskButton, CancelTaskButtonProps } from './CancelTaskButton';
 
 vi.mock('lucide-react', () => ({
   X: (props: Record<string, unknown>) => (
@@ -13,87 +13,79 @@ vi.mock('lucide-react', () => ({
   ),
 }));
 
+vi.mock('@/shared/components/ui/button', () => ({
+  Button: ({ children, ...props }: React.ComponentProps<'button'>) => <button {...props}>{children}</button>,
+}));
+
 describe('CancelTaskButton', () => {
-  const setup = async (overrides: Partial<CancelTaskButtonProps> = {}) => {
-    const user = userEvent.setup();
-    const onClick = vi.fn();
-    render(
-      <CancelTaskButton
-        onClick={onClick}
-        {...overrides}
-      />
-    );
-    const button = screen.getByRole('button', { name: /cancel task form/i });
-    return { user, button, onClick };
+  const mockOnClick = vi.fn();
+
+  interface RenderOptions {
+    onClick?: () => void;
+  }
+
+  const renderComponent = ({ onClick = mockOnClick }: RenderOptions = {}) => {
+    return render(<CancelTaskButton onClick={onClick} />);
   };
+
+  const getButton = () => screen.getByRole('button', { name: /cancel task form/i });
 
   beforeEach(() => {
     vi.clearAllMocks();
   });
 
-  describe('eendering', () => {
-    it('renders cancel text and X icon', async () => {
-      const { button } = await setup();
+  describe('rendering', () => {
+    it('should render button with text, icon, and correct attributes', () => {
+      renderComponent();
 
+      const button = getButton();
       expect(button).toBeInTheDocument();
+      expect(button).toHaveAttribute('type', 'button');
+      expect(button).toHaveAttribute('aria-label', 'Cancel task form');
       expect(screen.getByText('Cancel')).toBeInTheDocument();
       expect(screen.getByTestId('x-icon')).toBeInTheDocument();
-    });
-
-    it('has correct button type', async () => {
-      const { button } = await setup();
-
-      expect(button).toHaveAttribute('type', 'button');
     });
   });
 
   describe('user interactions', () => {
-    it('calls onClick when clicked', async () => {
-      const { user, button, onClick } = await setup();
+    it('should call onClick when button is clicked', async () => {
+      const user = userEvent.setup();
+      renderComponent();
 
-      await user.click(button);
+      await user.click(getButton());
 
-      expect(onClick).toHaveBeenCalledTimes(1);
+      expect(mockOnClick).toHaveBeenCalledTimes(1);
     });
 
-    it('is focusable via keyboard navigation (Tab)', async () => {
-      const { user, button } = await setup();
+    it('should call onClick when Enter or Space key is pressed', async () => {
+      const user = userEvent.setup();
+      renderComponent();
+
+      const button = getButton();
+      button.focus();
+
+      await user.keyboard('{Enter}');
+      expect(mockOnClick).toHaveBeenCalledTimes(1);
+
+      await user.keyboard(' ');
+      expect(mockOnClick).toHaveBeenCalledTimes(2);
+    });
+
+    it('should be focusable via Tab key', async () => {
+      const user = userEvent.setup();
+      renderComponent();
 
       await user.tab();
 
-      expect(button).toHaveFocus();
-    });
-
-    it('triggers onClick on Enter key press', async () => {
-      const { user, button, onClick } = await setup();
-
-      button.focus();
-      await user.keyboard('{Enter}');
-
-      expect(onClick).toHaveBeenCalledTimes(1);
-    });
-
-    it('triggers onClick on Space key press', async () => {
-      const { user, button, onClick } = await setup();
-
-      button.focus();
-      await user.keyboard(' ');
-
-      expect(onClick).toHaveBeenCalledTimes(1);
+      expect(getButton()).toHaveFocus();
     });
   });
 
   describe('accessibility', () => {
-    it('has correct aria-label for assistive technologies', async () => {
-      const { button } = await setup();
+    it('should hide icon from screen readers', () => {
+      renderComponent();
 
-      expect(button).toHaveAttribute('aria-label', 'Cancel task form');
-    });
-
-    it('hides icon from screen readers', async () => {
-      await setup();
       const icon = screen.getByTestId('x-icon');
-
       expect(icon).toHaveAttribute('aria-hidden', 'true');
     });
   });

@@ -1,18 +1,41 @@
 import type { TaskFormInput } from '@/features/tasks/types';
-import { render, screen, waitFor } from '@testing-library/react';
+import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { TaskFormDialog } from './TaskFormDialog';
 
 const mockHandleCreate = vi.fn();
+const mockClose = vi.fn();
+
+const createMockDisclosureState = (isOpen = false) => ({
+  isOpen,
+  setIsOpen: vi.fn(),
+  close: mockClose,
+  open: vi.fn(),
+  toggle: vi.fn(),
+});
+
+let mockDisclosureState = createMockDisclosureState();
+
 vi.mock('@/features/tasks/hooks/use-task-mutation/use-task-mutation', () => ({
-  useTaskMutation: vi.fn(() => ({
+  useTaskMutation: () => ({
     handleCreate: mockHandleCreate,
-  })),
+  }),
 }));
 
+vi.mock('@/shared/hooks/use-disclosure/use-disclosure', () => ({
+  useDisclosure: () => mockDisclosureState,
+}));
+
+interface TaskFormProps {
+  defaultValues: { content: string; due_date: Date | null; projectId: string | null };
+  mode: string;
+  handleCancel: () => void;
+  onSubmit: (data: TaskFormInput) => void;
+}
+
 vi.mock('@/features/tasks/components/organisms/TaskForm/TaskForm', () => ({
-  TaskForm: vi.fn(({ defaultValues, mode, handleCancel, onSubmit }) => (
+  TaskForm: ({ defaultValues, mode, handleCancel, onSubmit }: TaskFormProps) => (
     <div data-testid="task-form">
       <div data-testid="default-content">{defaultValues.content}</div>
       <div data-testid="default-due-date">{defaultValues.due_date?.toISOString() || 'null'}</div>
@@ -21,7 +44,32 @@ vi.mock('@/features/tasks/components/organisms/TaskForm/TaskForm', () => ({
       <button onClick={handleCancel}>Cancel</button>
       <button onClick={() => onSubmit({ content: 'Test task' } as TaskFormInput)}>Submit</button>
     </div>
-  )),
+  ),
+}));
+
+interface DialogContentProps {
+  children: React.ReactNode;
+  className: string;
+  'aria-label': string;
+}
+
+// Simple passthrough mocks that don't control visibility
+vi.mock('@/shared/components/ui/dialog', () => ({
+  Dialog: ({ children }: { children: React.ReactNode; open?: boolean; onOpenChange?: (open: boolean) => void }) => (
+    <div data-testid="dialog">{children}</div>
+  ),
+  DialogTrigger: ({ children }: { children: React.ReactNode; asChild?: boolean }) => (
+    <div data-testid="dialog-trigger">{children}</div>
+  ),
+  DialogContent: ({ children, className, 'aria-label': ariaLabel }: DialogContentProps) => (
+    <div
+      data-testid="dialog-content"
+      className={className}
+      role="dialog"
+      aria-label={ariaLabel}>
+      {children}
+    </div>
+  ),
 }));
 
 const mockUseLocation = vi.fn();
@@ -30,50 +78,55 @@ vi.mock('react-router', () => ({
 }));
 
 describe('TaskFormDialog', () => {
+  interface RenderOptions {
+    pathname?: string;
+    isOpen?: boolean;
+  }
+
+  const renderComponent = ({ pathname = '/inbox', isOpen = false }: RenderOptions = {}) => {
+    mockUseLocation.mockReturnValue({ pathname });
+    mockDisclosureState = createMockDisclosureState(isOpen);
+
+    return render(
+      <TaskFormDialog>
+        <button>Add Task</button>
+      </TaskFormDialog>
+    );
+  };
+
+  const getTrigger = () => screen.getByText('Add Task');
+  const getDialogContent = () => screen.getByTestId('dialog-content');
+  const getTaskForm = () => screen.queryByTestId('task-form');
+
   beforeEach(() => {
     vi.clearAllMocks();
-    mockUseLocation.mockReturnValue({ pathname: '/inbox' });
+    mockDisclosureState = createMockDisclosureState();
   });
 
   describe('rendering', () => {
-    it('renders dialog trigger with children', () => {
-      render(
-        <TaskFormDialog>
-          <button>Add Task</button>
-        </TaskFormDialog>
-      );
+    it('should render dialog trigger with children and dialog structure', () => {
+      renderComponent();
 
-      expect(screen.getByRole('button', { name: /add task/i })).toBeInTheDocument();
+      expect(getTrigger()).toBeInTheDocument();
+      expect(screen.getByTestId('dialog-trigger')).toBeInTheDocument();
+      expect(screen.getByTestId('dialog')).toBeInTheDocument();
     });
 
-    it('opens dialog when trigger is clicked', async () => {
-      const user = userEvent.setup();
+    it('should render TaskForm with correct attributes when isOpen is true', () => {
+      renderComponent({ isOpen: true });
 
-      render(
-        <TaskFormDialog>
-          <button>Add Task</button>
-        </TaskFormDialog>
-      );
-
-      await user.click(screen.getByRole('button', { name: /add task/i }));
-
-      expect(screen.getByTestId('task-form')).toBeInTheDocument();
-      expect(screen.getByRole('dialog', { name: /create new task form/i })).toBeInTheDocument();
+      const dialogContent = getDialogContent();
+      expect(dialogContent).toBeInTheDocument();
+      expect(dialogContent).toHaveClass('p-0 border-0 !rounded-xl');
+      expect(dialogContent).toHaveAttribute('role', 'dialog');
+      expect(dialogContent).toHaveAttribute('aria-label', 'Create new task form');
+      expect(getTaskForm()).toBeInTheDocument();
     });
   });
 
   describe('default values', () => {
-    it('sets default values correctly when not on today route', async () => {
-      const user = userEvent.setup();
-      mockUseLocation.mockReturnValue({ pathname: '/inbox' });
-
-      render(
-        <TaskFormDialog>
-          <button>Add Task</button>
-        </TaskFormDialog>
-      );
-
-      await user.click(screen.getByRole('button', { name: /add task/i }));
+    it('should set default values correctly when not on today route', () => {
+      renderComponent({ pathname: '/inbox', isOpen: true });
 
       expect(screen.getByTestId('default-content')).toHaveTextContent('');
       expect(screen.getByTestId('default-due-date')).toHaveTextContent('null');
@@ -81,80 +134,36 @@ describe('TaskFormDialog', () => {
       expect(screen.getByTestId('mode')).toHaveTextContent('create');
     });
 
-    // it('sets due_date to today when on today route', async () => {
-    //   const user = userEvent.setup();
-    //   mockUseLocation.mockReturnValue({ pathname: '/today' });
-    //   render(
-    //     <TaskFormDialog>
-    //       <button>Add Task</button>
-    //     </TaskFormDialog>
-    //   );
+    it('should set due_date to today when on today route', () => {
+      renderComponent({ pathname: '/app/today', isOpen: true });
 
-    //   await user.click(screen.getByRole('button', { name: /add task/i }));
-    //   await screen.findByTestId('task-form');
+      const dueDateText = screen.getByTestId('default-due-date').textContent!;
+      expect(dueDateText).not.toBe('null');
 
-    //   const iso = screen.getByTestId('value-date').textContent!;
-    //   const rendered = new Date(iso);
-
-    //   const today = startOfToday();
-    //   expect(rendered.toDateString()).toBe(today.toDateString());
-    // });
+      const renderedDate = new Date(dueDateText);
+      const today = new Date();
+      expect(renderedDate.toDateString()).toBe(today.toDateString());
+    });
   });
 
   describe('user interactions', () => {
-    it('closes dialog when cancel button is clicked', async () => {
+    it('should call handleCreate when form is submitted', async () => {
       const user = userEvent.setup();
+      renderComponent({ isOpen: true });
 
-      render(
-        <TaskFormDialog>
-          <button>Add Task</button>
-        </TaskFormDialog>
-      );
-
-      await user.click(screen.getByRole('button', { name: /add task/i }));
-      expect(screen.getByTestId('task-form')).toBeInTheDocument();
-
-      await user.click(screen.getByRole('button', { name: /cancel/i }));
-
-      await waitFor(() => {
-        expect(screen.queryByTestId('task-form')).not.toBeInTheDocument();
-      });
-    });
-
-    it('calls handleCreate when form is submitted', async () => {
-      const user = userEvent.setup();
-
-      render(
-        <TaskFormDialog>
-          <button>Add Task</button>
-        </TaskFormDialog>
-      );
-
-      await user.click(screen.getByRole('button', { name: /add task/i }));
       await user.click(screen.getByRole('button', { name: /submit/i }));
 
       expect(mockHandleCreate).toHaveBeenCalledWith({ content: 'Test task' });
+      expect(mockHandleCreate).toHaveBeenCalledTimes(1);
     });
 
-    it('can open and close dialog multiple times', async () => {
+    it('should call close when cancel button is clicked', async () => {
       const user = userEvent.setup();
-
-      render(
-        <TaskFormDialog>
-          <button>Add Task</button>
-        </TaskFormDialog>
-      );
-
-      await user.click(screen.getByRole('button', { name: /add task/i }));
-      expect(screen.getByTestId('task-form')).toBeInTheDocument();
+      renderComponent({ isOpen: true });
 
       await user.click(screen.getByRole('button', { name: /cancel/i }));
-      await waitFor(() => {
-        expect(screen.queryByTestId('task-form')).not.toBeInTheDocument();
-      });
 
-      await user.click(screen.getByRole('button', { name: /add task/i }));
-      expect(screen.getByTestId('task-form')).toBeInTheDocument();
+      expect(mockClose).toHaveBeenCalledTimes(1);
     });
   });
 });

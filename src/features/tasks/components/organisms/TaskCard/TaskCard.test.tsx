@@ -8,12 +8,16 @@ const mockHandleUpdate = vi.fn();
 const mockCancelForm = vi.fn();
 const mockOpenForm = vi.fn();
 
-let mockUseFetcherReturn = { json: null };
-let mockUseDisclosureReturn = {
-  isOpen: false,
+const createMockUseFetcher = (json = null) => ({ json });
+
+const createMockUseDisclosure = (isOpen = false) => ({
+  isOpen,
   open: mockOpenForm,
   close: mockCancelForm,
-};
+});
+
+let mockUseFetcherReturn = createMockUseFetcher();
+let mockUseDisclosureReturn = createMockUseDisclosure();
 
 vi.mock('react-router', () => ({
   useFetcher: () => mockUseFetcherReturn,
@@ -34,8 +38,13 @@ vi.mock('@/shared/hooks/use-disclosure/use-disclosure', () => ({
   useDisclosure: () => mockUseDisclosureReturn,
 }));
 
+interface TaskItemProps {
+  task: { content: string; completed: boolean };
+  handleEdit: () => void;
+}
+
 vi.mock('@/features/tasks/components/organisms/TaskItem/TaskItem', () => ({
-  TaskItem: ({ task, handleEdit }: { task: { content: string; completed: boolean }; handleEdit: () => void }) => (
+  TaskItem: ({ task, handleEdit }: TaskItemProps) => (
     <div data-testid="task-item">
       <span>{task.content}</span>
       <span>{task.completed ? 'Completed' : 'Incomplete'}</span>
@@ -44,18 +53,15 @@ vi.mock('@/features/tasks/components/organisms/TaskItem/TaskItem', () => ({
   ),
 }));
 
+interface TaskFormProps {
+  defaultValues: { content: string };
+  mode: string;
+  handleCancel: () => void;
+  onSubmit: () => void;
+}
+
 vi.mock('@/features/tasks/components/organisms/TaskForm/TaskForm', () => ({
-  TaskForm: ({
-    defaultValues,
-    mode,
-    handleCancel,
-    onSubmit,
-  }: {
-    defaultValues: { content: string };
-    mode: string;
-    handleCancel: () => void;
-    onSubmit: () => void;
-  }) => (
+  TaskForm: ({ defaultValues, mode, handleCancel, onSubmit }: TaskFormProps) => (
     <div data-testid="task-form">
       <span>Mode: {mode}</span>
       <span>Content: {defaultValues.content}</span>
@@ -66,111 +72,100 @@ vi.mock('@/features/tasks/components/organisms/TaskForm/TaskForm', () => ({
 }));
 
 describe('TaskCard', () => {
-  const defaultProps = {
-    id: 'task-1',
-    content: 'Test task',
-    completed: false,
-    dueDate: null,
-    project: createMockProject(),
+  interface RenderOptions {
+    id?: string;
+    content?: string;
+    completed?: boolean;
+    dueDate?: Date | null;
+    isOpen?: boolean;
+  }
+
+  const renderComponent = ({
+    id = 'task-1',
+    content = 'Test task',
+    completed = false,
+    dueDate = null,
+    isOpen = false,
+  }: RenderOptions = {}) => {
+    mockUseDisclosureReturn = createMockUseDisclosure(isOpen);
+
+    return render(
+      <TaskCard
+        id={id}
+        content={content}
+        completed={completed}
+        dueDate={dueDate}
+        project={createMockProject()}
+      />
+    );
   };
+
+  const getArticle = () => screen.getByRole('listitem');
+  const getTaskItem = () => screen.queryByTestId('task-item');
+  const getTaskForm = () => screen.queryByTestId('task-form');
 
   beforeEach(() => {
     vi.clearAllMocks();
-    mockUseFetcherReturn = { json: null };
-    mockUseDisclosureReturn = {
-      isOpen: false,
-      open: mockOpenForm,
-      close: mockCancelForm,
-    };
+    mockUseFetcherReturn = createMockUseFetcher();
+    mockUseDisclosureReturn = createMockUseDisclosure();
   });
 
   describe('rendering', () => {
-    it('should render task item by default', () => {
-      render(<TaskCard {...defaultProps} />);
+    it('should render article with task item and correct ARIA attributes', () => {
+      renderComponent({ content: 'Buy groceries', completed: false });
 
-      expect(screen.getByTestId('task-item')).toBeInTheDocument();
-      expect(screen.getByText('Test task')).toBeInTheDocument();
-    });
-
-    it('should render with correct ARIA attributes', () => {
-      render(<TaskCard {...defaultProps} />);
-
-      const article = screen.getByRole('listitem');
-      expect(article).toHaveAttribute('aria-label', 'Task: Test task');
+      const article = getArticle();
+      expect(article).toBeInTheDocument();
+      expect(article).toHaveClass('task-card');
+      expect(article).toHaveAttribute('aria-label', 'Task: Buy groceries');
       expect(article).toHaveAttribute('aria-checked', 'false');
+
+      expect(getTaskItem()).toBeInTheDocument();
+      expect(screen.getByText('Buy groceries')).toBeInTheDocument();
     });
 
-    it('should show completed status in ARIA when task is completed', () => {
-      render(
-        <TaskCard
-          {...defaultProps}
-          completed={true}
-        />
-      );
+    it('should set aria-checked to true when task is completed', () => {
+      renderComponent({ completed: true });
 
-      const article = screen.getByRole('listitem');
-      expect(article).toHaveAttribute('aria-checked', 'true');
-    });
-
-    it('should have displayName set', () => {
-      expect(TaskCard.displayName).toBe('TaskCard');
+      expect(getArticle()).toHaveAttribute('aria-checked', 'true');
     });
   });
 
-  describe('edit mode toggle', () => {
-    it('should show task form when edit is clicked', async () => {
+  describe('edit mode', () => {
+    it('should show TaskItem when not in edit mode', () => {
+      renderComponent({ isOpen: false });
+
+      expect(getTaskItem()).toBeInTheDocument();
+      expect(getTaskForm()).not.toBeInTheDocument();
+    });
+
+    it('should show TaskForm when in edit mode', () => {
+      renderComponent({ isOpen: true });
+
+      expect(getTaskItem()).not.toBeInTheDocument();
+      expect(getTaskForm()).toBeInTheDocument();
+    });
+
+    it('should call openForm when edit button is clicked', async () => {
       const user = userEvent.setup();
-
-      render(<TaskCard {...defaultProps} />);
-
-      expect(screen.getByTestId('task-item')).toBeInTheDocument();
-      expect(screen.queryByTestId('task-form')).not.toBeInTheDocument();
+      renderComponent();
 
       await user.click(screen.getByText('Edit'));
 
-      expect(mockOpenForm).toHaveBeenCalled();
+      expect(mockOpenForm).toHaveBeenCalledTimes(1);
     });
 
-    it('should display task form when isOpen is true', () => {
-      mockUseDisclosureReturn.isOpen = true;
+    it('should render TaskForm with correct props in edit mode', () => {
+      renderComponent({ content: 'Test task', isOpen: true });
 
-      render(<TaskCard {...defaultProps} />);
-
-      expect(screen.getByTestId('task-form')).toBeInTheDocument();
-      expect(screen.queryByTestId('task-item')).not.toBeInTheDocument();
-    });
-  });
-
-  describe('task form', () => {
-    it('should pass correct props to TaskForm', () => {
-      mockUseDisclosureReturn.isOpen = true;
-
-      render(<TaskCard {...defaultProps} />);
-
-      expect(screen.getByTestId('task-form')).toBeInTheDocument();
       expect(screen.getByText('Mode: update')).toBeInTheDocument();
       expect(screen.getByText('Content: Test task')).toBeInTheDocument();
     });
   });
 
-  describe('accessibility', () => {
-    it('should have proper article structure', () => {
-      render(<TaskCard {...defaultProps} />);
-
-      const article = screen.getByRole('listitem');
-      expect(article).toHaveClass('task-card');
-    });
-
-    it('should update aria-label with task content', () => {
-      render(
-        <TaskCard
-          {...defaultProps}
-          content="Buy groceries"
-        />
-      );
-
-      const article = screen.getByRole('listitem');
-      expect(article).toHaveAttribute('aria-label', 'Task: Buy groceries');
+  describe('component metadata', () => {
+    it('should have displayName set correctly', () => {
+      expect(TaskCard.displayName).toBe('TaskCard');
     });
   });
 });

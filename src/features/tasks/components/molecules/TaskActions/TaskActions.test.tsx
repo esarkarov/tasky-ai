@@ -1,9 +1,9 @@
 import { createMockTask } from '@/core/test-setup/factories';
-import { Task } from '@/features/tasks/types';
+import { TaskActions } from '@/features/tasks/components/molecules/TaskActions/TaskActions';
+import type { Task } from '@/features/tasks/types';
 import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
-import { TaskActions } from './TaskActions';
 
 vi.mock('@/features/tasks/components/atoms/EditTaskButton/EditTaskButton', () => ({
   EditTaskButton: ({ onClick }: { onClick: () => void }) => (
@@ -15,20 +15,16 @@ vi.mock('@/features/tasks/components/atoms/EditTaskButton/EditTaskButton', () =>
   ),
 }));
 
+interface ConfirmationDialogProps {
+  id: string;
+  label: string;
+  handleDelete: (id: string) => void;
+  variant: string;
+  title: string;
+}
+
 vi.mock('@/shared/components/molecules/ConfirmationDialog/ConfirmationDialog', () => ({
-  ConfirmationDialog: ({
-    id,
-    label,
-    handleDelete,
-    variant,
-    title,
-  }: {
-    id: string;
-    label: string;
-    handleDelete: (id: string) => void;
-    variant: string;
-    title: string;
-  }) => (
+  ConfirmationDialog: ({ id, label, handleDelete, variant, title }: ConfirmationDialogProps) => (
     <button
       onClick={() => handleDelete(id)}
       aria-label="Delete task"
@@ -50,11 +46,11 @@ vi.mock('@/features/tasks/hooks/use-task-mutation/use-task-mutation', () => ({
 describe('TaskActions', () => {
   const mockHandleEdit = vi.fn();
 
-  beforeEach(() => {
-    vi.clearAllMocks();
-  });
+  interface RenderOptions {
+    task?: Task;
+  }
 
-  const renderComponent = (task: Task) => {
+  const renderComponent = ({ task = createMockTask() }: RenderOptions = {}) => {
     return render(
       <TaskActions
         task={task}
@@ -63,58 +59,53 @@ describe('TaskActions', () => {
     );
   };
 
-  describe('basic rendering', () => {
-    it('should render the actions container with proper accessibility attributes', () => {
-      const task = createMockTask();
-      renderComponent(task);
-      const container = screen.getByRole('group', { name: 'Task actions' });
+  const getContainer = () => screen.getByRole('group', { name: 'Task actions' });
+  const getEditButton = () => screen.queryByLabelText('Edit task');
+  const getDeleteButton = () => screen.getByTestId('confirmation-dialog');
 
+  beforeEach(() => {
+    vi.clearAllMocks();
+  });
+
+  describe('rendering', () => {
+    it('should render container with proper accessibility attributes and classes', () => {
+      renderComponent();
+
+      const container = getContainer();
       expect(container).toBeInTheDocument();
       expect(container).toHaveClass('absolute', 'right-0', 'top-1.5', 'flex', 'items-center', 'gap-1');
     });
 
     it('should render EditTaskButton when task is not completed', () => {
-      const task = createMockTask({ completed: false });
-      renderComponent(task);
-      const editButton = screen.getByLabelText('Edit task');
+      renderComponent({ task: createMockTask({ completed: false }) });
 
-      expect(editButton).toBeInTheDocument();
+      expect(getEditButton()).toBeInTheDocument();
     });
 
     it('should not render EditTaskButton when task is completed', () => {
-      const task = createMockTask({ completed: true });
-      renderComponent(task);
-      const editButton = screen.queryByLabelText('Edit task');
+      renderComponent({ task: createMockTask({ completed: true }) });
 
-      expect(editButton).not.toBeInTheDocument();
+      expect(getEditButton()).not.toBeInTheDocument();
     });
 
-    it('should always render ConfirmationDialog regardless of completion status', () => {
-      const task = createMockTask({ completed: false });
-      renderComponent(task);
-      const deleteButton = screen.getByTestId('confirmation-dialog');
+    it('should always render ConfirmationDialog when task is not completed', () => {
+      renderComponent({ task: createMockTask({ completed: false }) });
 
-      expect(deleteButton).toBeInTheDocument();
+      expect(getDeleteButton()).toBeInTheDocument();
     });
 
-    it('should render ConfirmationDialog even for completed tasks', () => {
-      const task = createMockTask({ completed: true });
-      renderComponent(task);
-      const deleteButton = screen.getByTestId('confirmation-dialog');
+    it('should always render ConfirmationDialog when task is completed', () => {
+      renderComponent({ task: createMockTask({ completed: true }) });
 
-      expect(deleteButton).toBeInTheDocument();
+      expect(getDeleteButton()).toBeInTheDocument();
     });
   });
 
   describe('ConfirmationDialog props', () => {
     it('should pass correct props to ConfirmationDialog', () => {
-      const task = createMockTask({
-        id: 'task-123',
-        content: 'My task content',
-      });
-      renderComponent(task);
-      const deleteButton = screen.getByTestId('confirmation-dialog');
+      renderComponent({ task: createMockTask({ id: 'task-123', content: 'My task content' }) });
 
+      const deleteButton = getDeleteButton();
       expect(deleteButton).toHaveAttribute('data-variant', 'icon');
       expect(deleteButton).toHaveAttribute('data-title', 'Delete task?');
       expect(deleteButton).toHaveAttribute('data-label', 'My task content');
@@ -124,23 +115,11 @@ describe('TaskActions', () => {
   describe('user interactions', () => {
     it('should call handleEdit when EditTaskButton is clicked', async () => {
       const user = userEvent.setup();
-      const task = createMockTask({ completed: false });
-      renderComponent(task);
-      const editButton = screen.getByLabelText('Edit task');
+      renderComponent({ task: createMockTask({ completed: false }) });
 
-      await user.click(editButton);
+      await user.click(getEditButton()!);
 
       expect(mockHandleEdit).toHaveBeenCalledTimes(1);
-    });
-
-    it('should not allow editing completed tasks', () => {
-      const task = createMockTask({ completed: true });
-      renderComponent(task);
-      const editButton = screen.queryByLabelText('Edit task');
-
-      expect(editButton).not.toBeInTheDocument();
-
-      expect(mockHandleEdit).not.toHaveBeenCalled();
     });
   });
 });

@@ -2,9 +2,9 @@ import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { TaskForm } from './TaskForm';
-import { TaskFormInput } from '@/features/tasks/types';
-import { Project } from '@/features/projects/types';
-import { CrudMode } from '@/shared/types';
+import type { TaskFormInput } from '@/features/tasks/types';
+import type { Project } from '@/features/projects/types';
+import type { CrudMode } from '@/shared/types';
 
 const mockHandleCancel = vi.fn();
 const mockHandleSubmit = vi.fn();
@@ -13,8 +13,7 @@ const mockSetDueDate = vi.fn();
 const mockRemoveDueDate = vi.fn();
 const mockHandleProjectChange = vi.fn();
 
-let mockIsLoading = false;
-let compositeState = {
+const createMockCompositeState = (overrides = {}) => ({
   content: '',
   dueDate: null,
   selectedProject: null,
@@ -25,7 +24,11 @@ let compositeState = {
   handleProjectChange: mockHandleProjectChange,
   removeDueDate: mockRemoveDueDate,
   handleSubmit: mockHandleSubmit,
-};
+  ...overrides,
+});
+
+let mockIsLoading = false;
+let compositeState = createMockCompositeState();
 
 const mockProjects: Project[] = [
   {
@@ -41,35 +44,16 @@ const mockProjects: Project[] = [
     $databaseId: 'db1',
     $permissions: [],
   },
-  {
-    $id: 'proj-2',
-    name: 'Personal',
-    color_hex: '#00FF00',
-    color_name: 'green',
-    userId: 'user-1',
-    tasks: [],
-    $createdAt: '2024-01-01',
-    $updatedAt: '2024-01-01',
-    $collectionId: 'col1',
-    $databaseId: 'db1',
-    $permissions: [],
-  },
 ];
 
 vi.mock('react-router', () => ({
   useLoaderData: () => ({
-    projects: {
-      documents: mockProjects,
-    },
+    projects: { documents: mockProjects },
   }),
 }));
 
 vi.mock('@/features/tasks/hooks/use-task-mutation/use-task-mutation', () => ({
-  useTaskMutation: () => {
-    return {
-      isLoading: mockIsLoading,
-    };
-  },
+  useTaskMutation: () => ({ isLoading: mockIsLoading }),
 }));
 
 vi.mock('@/features/tasks/hooks/use-task-form-composite/use-task-form-composite', () => ({
@@ -106,60 +90,11 @@ vi.mock('@/features/tasks/components/molecules/TaskContentInput/TaskContentInput
 }));
 
 vi.mock('@/features/tasks/components/molecules/TaskDueDatePicker/TaskDueDatePicker', () => ({
-  TaskDueDatePicker: ({
-    dueDate,
-    handleDateSelect,
-    handleDateRemove,
-    disabled,
-  }: {
-    dueDate: Date | null;
-    handleDateSelect: (date: Date) => void;
-    handleDateRemove: () => void;
-    disabled: boolean;
-  }) => (
-    <div data-testid="task-due-date-picker">
-      <span>{dueDate ? dueDate.toISOString() : 'No date'}</span>
-      <button
-        onClick={() => handleDateSelect(new Date('2024-12-31'))}
-        disabled={disabled}
-        data-testid="select-date-button">
-        Select Date
-      </button>
-      <button
-        onClick={handleDateRemove}
-        disabled={disabled}
-        data-testid="remove-date-button">
-        Remove Date
-      </button>
-    </div>
-  ),
+  TaskDueDatePicker: () => <div data-testid="task-due-date-picker">Date Picker</div>,
 }));
 
 vi.mock('@/features/projects/components/molecules/ProjectPicker/ProjectPicker', () => ({
-  ProjectPicker: ({
-    value,
-    onValueChange,
-    projects,
-    disabled,
-  }: {
-    value: Project | null;
-    onValueChange: (project: Project) => void;
-    projects: Project[];
-    disabled: boolean;
-  }) => (
-    <div data-testid="project-picker">
-      <span data-testid="selected-project">{value ? value.name : 'No project'}</span>
-      {projects.map((project) => (
-        <button
-          key={project.$id}
-          onClick={() => onValueChange(project)}
-          disabled={disabled}
-          data-testid={`select-project-${project.name.toLowerCase()}`}>
-          Select {project.name}
-        </button>
-      ))}
-    </div>
-  ),
+  ProjectPicker: () => <div data-testid="project-picker">Project Picker</div>,
 }));
 
 vi.mock('@/features/tasks/components/molecules/TaskFormActions/TaskFormActions', () => ({
@@ -192,132 +127,169 @@ vi.mock('@/features/tasks/components/molecules/TaskFormActions/TaskFormActions',
   ),
 }));
 
+vi.mock('@/shared/components/ui/card', () => ({
+  Card: ({ children, className, ...props }: React.ComponentProps<'div'>) => (
+    <div
+      className={className}
+      {...props}>
+      {children}
+    </div>
+  ),
+  CardContent: ({ children, className }: React.ComponentProps<'div'>) => <div className={className}>{children}</div>,
+  CardFooter: ({ children, className }: React.ComponentProps<'div'>) => <div className={className}>{children}</div>,
+}));
+
+vi.mock('@/shared/components/ui/separator', () => ({
+  Separator: () => <hr data-testid="separator" />,
+}));
+
+vi.mock('@/shared/utils/ui/ui.utils', () => ({
+  cn: (...classes: (string | boolean | undefined)[]) => classes.filter(Boolean).join(' '),
+}));
+
 describe('TaskForm', () => {
-  const defaultProps = {
-    mode: 'create' as CrudMode,
-    handleCancel: mockHandleCancel,
+  interface RenderOptions {
+    mode?: CrudMode;
+    className?: string;
+    defaultValues?: TaskFormInput;
+    compositeOverrides?: Partial<ReturnType<typeof createMockCompositeState>>;
+  }
+
+  const renderComponent = ({
+    mode = 'create',
+    className,
+    defaultValues,
+    compositeOverrides = {},
+  }: RenderOptions = {}) => {
+    compositeState = createMockCompositeState(compositeOverrides);
+
+    return render(
+      <TaskForm
+        mode={mode}
+        className={className}
+        defaultValues={defaultValues}
+        handleCancel={mockHandleCancel}
+      />
+    );
   };
+
+  const getForm = () => screen.getByRole('form');
+  const getContentInput = () => screen.getByTestId('task-content-input');
+  const getSubmitButton = () => screen.getByTestId('submit-button');
+  const getCancelButton = () => screen.getByTestId('cancel-button');
 
   beforeEach(() => {
     vi.clearAllMocks();
     mockIsLoading = false;
-    compositeState = {
-      ...compositeState,
-      content: '',
-      dueDate: null,
-      selectedProject: null,
-      isSubmitting: false,
-      isValid: true,
-    };
+    compositeState = createMockCompositeState();
   });
 
   describe('rendering', () => {
-    it('renders all form components', () => {
-      render(<TaskForm {...defaultProps} />);
+    it('should render all form components with correct title and structure', () => {
+      renderComponent({ mode: 'create' });
 
-      expect(screen.getByTestId('task-content-input')).toBeInTheDocument();
+      expect(getForm()).toBeInTheDocument();
+      expect(screen.getByText('Create task')).toBeInTheDocument();
+      expect(getContentInput()).toBeInTheDocument();
       expect(screen.getByTestId('task-due-date-picker')).toBeInTheDocument();
       expect(screen.getByTestId('project-picker')).toBeInTheDocument();
       expect(screen.getByTestId('task-form-actions')).toBeInTheDocument();
+      expect(screen.getByTestId('separator')).toBeInTheDocument();
     });
 
-    it('displays correct mode title', () => {
-      render(
-        <TaskForm
-          {...defaultProps}
-          mode="create"
-        />
-      );
-      expect(screen.getByText('Create task')).toBeInTheDocument();
-    });
-  });
+    it('should render correct title for update mode', () => {
+      renderComponent({ mode: 'update' });
 
-  describe('default values', () => {
-    it('renders with empty content', () => {
-      render(<TaskForm {...defaultProps} />);
-      expect(screen.getByTestId('task-content-input')).toHaveValue('');
+      expect(screen.getByText('Edit task')).toBeInTheDocument();
     });
 
-    it('renders provided default content', () => {
-      compositeState.content = 'Buy milk';
+    it('should apply custom className', () => {
+      renderComponent({ className: 'custom-class' });
 
-      render(
-        <TaskForm
-          {...defaultProps}
-          defaultValues={{ content: 'Buy milk' } as TaskFormInput}
-        />
-      );
-      expect(screen.getByTestId('task-content-input')).toHaveValue('Buy milk');
+      expect(getForm()).toHaveClass('custom-class');
     });
   });
 
-  describe('user Interactions', () => {
-    it('updates content', async () => {
+  describe('form state', () => {
+    it('should render with default empty content', () => {
+      renderComponent();
+
+      expect(getContentInput()).toHaveValue('');
+    });
+
+    it('should render with provided default content', () => {
+      renderComponent({ compositeOverrides: { content: 'Buy milk' } });
+
+      expect(getContentInput()).toHaveValue('Buy milk');
+    });
+  });
+
+  describe('user interactions', () => {
+    it('should call setContent when user types', async () => {
       const user = userEvent.setup();
-      render(<TaskForm {...defaultProps} />);
+      renderComponent();
 
-      await user.type(screen.getByTestId('task-content-input'), 'A');
+      await user.type(getContentInput(), 'A');
+
       expect(mockSetContent).toHaveBeenCalledWith('A');
     });
 
-    it('submits form', async () => {
+    it('should call handleSubmit when submit button is clicked', async () => {
       const user = userEvent.setup();
+      renderComponent({ compositeOverrides: { isValid: false } });
 
-      compositeState.isValid = false;
-      render(<TaskForm {...defaultProps} />);
+      await user.click(getSubmitButton());
 
-      await user.click(screen.getByTestId('submit-button'));
-      expect(mockHandleSubmit).toHaveBeenCalled();
+      expect(mockHandleSubmit).toHaveBeenCalledTimes(1);
     });
 
-    it('cancels form', async () => {
+    it('should call handleCancel when cancel button is clicked', async () => {
       const user = userEvent.setup();
+      renderComponent({ compositeOverrides: { isValid: false } });
 
-      compositeState.isValid = false;
-      render(<TaskForm {...defaultProps} />);
+      await user.click(getCancelButton());
 
-      await user.click(screen.getByTestId('cancel-button'));
-      expect(mockHandleCancel).toHaveBeenCalled();
+      expect(mockHandleCancel).toHaveBeenCalledTimes(1);
     });
   });
 
-  describe('loading states', () => {
-    it('disables UI when loading', () => {
+  describe('loading and disabled states', () => {
+    it('should disable inputs when isLoading is true', () => {
       mockIsLoading = true;
+      renderComponent();
 
-      render(<TaskForm {...defaultProps} />);
+      expect(getContentInput()).toBeDisabled();
+      expect(getSubmitButton()).toBeDisabled();
+      expect(getCancelButton()).toBeDisabled();
+    });
 
-      expect(screen.getByTestId('task-content-input')).toBeDisabled();
-      expect(screen.getByTestId('submit-button')).toBeDisabled();
+    it('should disable inputs when isSubmitting is true', () => {
+      renderComponent({ compositeOverrides: { isSubmitting: true } });
+
+      expect(getContentInput()).toBeDisabled();
+      expect(getSubmitButton()).toBeDisabled();
+    });
+
+    it('should apply loading styles when pending', () => {
+      mockIsLoading = true;
+      renderComponent();
+
+      expect(getForm()).toHaveClass('animate-pulse pointer-events-none');
+      expect(getForm()).toHaveAttribute('aria-busy', 'true');
     });
   });
 
   describe('form validation', () => {
-    it('disables submit when invalid', () => {
-      compositeState.isValid = true;
+    it('should disable submit when form is invalid', () => {
+      renderComponent({ compositeOverrides: { isValid: true } });
 
-      render(<TaskForm {...defaultProps} />);
-      expect(screen.getByTestId('submit-button')).toBeDisabled();
+      expect(getSubmitButton()).toBeDisabled();
     });
 
-    it('enables submit when valid', () => {
-      compositeState.isValid = false;
+    it('should enable submit when form is valid', () => {
+      renderComponent({ compositeOverrides: { isValid: false } });
 
-      render(<TaskForm {...defaultProps} />);
-      expect(screen.getByTestId('submit-button')).not.toBeDisabled();
-    });
-  });
-
-  describe('custom props', () => {
-    it('applies custom className', () => {
-      render(
-        <TaskForm
-          {...defaultProps}
-          className="custom"
-        />
-      );
-
-      expect(screen.getByRole('form')).toHaveClass('custom');
+      expect(getSubmitButton()).not.toBeDisabled();
     });
   });
 });

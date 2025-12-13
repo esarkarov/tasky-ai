@@ -19,24 +19,28 @@ vi.mock('lucide-react', () => ({
   Inbox: (props: Record<string, unknown>) => (
     <svg
       data-testid="inbox-icon"
+      aria-hidden="true"
       {...props}
     />
   ),
   Calendar1: (props: Record<string, unknown>) => (
     <svg
       data-testid="calendar1-icon"
+      aria-hidden="true"
       {...props}
     />
   ),
   CalendarDays: (props: Record<string, unknown>) => (
     <svg
       data-testid="calendar-days-icon"
+      aria-hidden="true"
       {...props}
     />
   ),
   CircleCheck: (props: Record<string, unknown>) => (
     <svg
       data-testid="circle-check-icon"
+      aria-hidden="true"
       {...props}
     />
   ),
@@ -118,251 +122,128 @@ vi.mock('@/shared/components/ui/sidebar', () => ({
 
 describe('TaskSidebarNavGroup', () => {
   const mockHandleMobileNavigation = vi.fn();
-  const mockTaskCounts: TaskCounts = {
-    inboxTasks: 5,
-    todayTasks: 3,
+
+  interface RenderOptions {
+    currentPath?: string;
+    taskCounts?: TaskCounts;
+  }
+
+  const renderComponent = ({
+    currentPath = '/app/inbox',
+    taskCounts = { inboxTasks: 5, todayTasks: 3 },
+  }: RenderOptions = {}) => {
+    return render(
+      <TaskSidebarNavGroup
+        currentPath={currentPath}
+        taskCounts={taskCounts}
+        handleMobileNavigation={mockHandleMobileNavigation}
+      />
+    );
   };
+
+  const getNavLink = (label: string) => screen.getByTestId(`nav-link-${label.toLowerCase()}`);
+  const getNavLinkAnchor = (label: string) => getNavLink(label).querySelector('a')!;
+  const getAddTaskButton = () => screen.getByTestId('add-task-button');
 
   beforeEach(() => {
     vi.clearAllMocks();
   });
 
   describe('rendering', () => {
-    it('should render sidebar group with navigation role', () => {
-      render(
-        <TaskSidebarNavGroup
-          currentPath="/app/inbox"
-          taskCounts={mockTaskCounts}
-          handleMobileNavigation={mockHandleMobileNavigation}
-        />
-      );
+    it('should render sidebar group with navigation role, add task button, and all nav links', () => {
+      renderComponent();
 
       const sidebarGroup = screen.getByTestId('sidebar-group');
       expect(sidebarGroup).toHaveAttribute('role', 'navigation');
       expect(sidebarGroup).toHaveAttribute('aria-label', 'Primary navigation');
-    });
 
-    it('should render add task button', () => {
-      render(
-        <TaskSidebarNavGroup
-          currentPath="/app/inbox"
-          taskCounts={mockTaskCounts}
-          handleMobileNavigation={mockHandleMobileNavigation}
-        />
-      );
-
-      const addButton = screen.getByTestId('add-task-button');
+      const addButton = getAddTaskButton();
       expect(addButton).toBeInTheDocument();
       expect(addButton).toHaveAttribute('aria-label', 'Add new task');
       expect(addButton).toHaveClass('!text-primary');
-    });
-
-    it('should render add task button inside TaskFormDialog', () => {
-      render(
-        <TaskSidebarNavGroup
-          currentPath="/app/inbox"
-          taskCounts={mockTaskCounts}
-          handleMobileNavigation={mockHandleMobileNavigation}
-        />
-      );
+      expect(screen.getByText('Add task')).toBeInTheDocument();
 
       expect(screen.getByTestId('task-form-dialog')).toBeInTheDocument();
-      expect(screen.getByText('Add task')).toBeInTheDocument();
-    });
-
-    it('should render CirclePlus icon', () => {
-      render(
-        <TaskSidebarNavGroup
-          currentPath="/app/inbox"
-          taskCounts={mockTaskCounts}
-          handleMobileNavigation={mockHandleMobileNavigation}
-        />
-      );
-
       expect(screen.getByTestId('circle-plus-icon')).toBeInTheDocument();
+
+      expect(getNavLink('inbox')).toBeInTheDocument();
+      expect(getNavLink('today')).toBeInTheDocument();
+      expect(getNavLink('upcoming')).toBeInTheDocument();
+      expect(getNavLink('completed')).toBeInTheDocument();
     });
 
-    it('should render all navigation links', () => {
-      render(
-        <TaskSidebarNavGroup
-          currentPath="/app/inbox"
-          taskCounts={mockTaskCounts}
-          handleMobileNavigation={mockHandleMobileNavigation}
-        />
-      );
+    it('should have correct hierarchy and structure', () => {
+      renderComponent();
 
-      expect(screen.getByTestId('nav-link-inbox')).toBeInTheDocument();
-      expect(screen.getByTestId('nav-link-today')).toBeInTheDocument();
-      expect(screen.getByTestId('nav-link-upcoming')).toBeInTheDocument();
-      expect(screen.getByTestId('nav-link-completed')).toBeInTheDocument();
-    });
-  });
-
-  describe('active state', () => {
-    it('should mark current path as active', () => {
-      render(
-        <TaskSidebarNavGroup
-          currentPath="/app/inbox"
-          taskCounts={mockTaskCounts}
-          handleMobileNavigation={mockHandleMobileNavigation}
-        />
-      );
-
-      const inboxLink = screen.getByTestId('nav-link-inbox').querySelector('a');
-      expect(inboxLink).toHaveAttribute('data-active', 'true');
-    });
-
-    it('should not mark other paths as active', () => {
-      render(
-        <TaskSidebarNavGroup
-          currentPath="/app/inbox"
-          taskCounts={mockTaskCounts}
-          handleMobileNavigation={mockHandleMobileNavigation}
-        />
-      );
-
-      const todayLink = screen.getByTestId('nav-link-today').querySelector('a');
-      const upcomingLink = screen.getByTestId('nav-link-upcoming').querySelector('a');
-
-      expect(todayLink).toHaveAttribute('data-active', 'false');
-      expect(upcomingLink).toHaveAttribute('data-active', 'false');
-    });
-  });
-
-  describe('task counts', () => {
-    it('should pass task counts to navigation links', () => {
-      render(
-        <TaskSidebarNavGroup
-          currentPath="/app/inbox"
-          taskCounts={{ inboxTasks: 10, todayTasks: 7 }}
-          handleMobileNavigation={mockHandleMobileNavigation}
-        />
-      );
-
-      const inboxLink = screen.getByTestId('nav-link-inbox');
-      expect(inboxLink).toHaveTextContent('Tasks: 10');
-    });
-
-    it('should handle zero task counts', () => {
-      render(
-        <TaskSidebarNavGroup
-          currentPath="/app/inbox"
-          taskCounts={{ inboxTasks: 0, todayTasks: 0 }}
-          handleMobileNavigation={mockHandleMobileNavigation}
-        />
-      );
-
-      const inboxLink = screen.getByTestId('nav-link-inbox');
-      expect(inboxLink).toHaveTextContent('Tasks: 0');
-    });
-  });
-
-  describe('mobile navigation', () => {
-    it('should call handleMobileNavigation when nav link is clicked', async () => {
-      const user = userEvent.setup();
-      render(
-        <TaskSidebarNavGroup
-          currentPath="/app/inbox"
-          taskCounts={mockTaskCounts}
-          handleMobileNavigation={mockHandleMobileNavigation}
-        />
-      );
-
-      const inboxLink = screen.getByTestId('nav-link-inbox').querySelector('a')!;
-      await user.click(inboxLink);
-
-      expect(mockHandleMobileNavigation).toHaveBeenCalledTimes(1);
-    });
-
-    it('should call handleMobileNavigation for each clicked link', async () => {
-      const user = userEvent.setup();
-      render(
-        <TaskSidebarNavGroup
-          currentPath="/app/inbox"
-          taskCounts={mockTaskCounts}
-          handleMobileNavigation={mockHandleMobileNavigation}
-        />
-      );
-
-      const todayLink = screen.getByTestId('nav-link-today').querySelector('a')!;
-      await user.click(todayLink);
-
-      const upcomingLink = screen.getByTestId('nav-link-upcoming').querySelector('a')!;
-      await user.click(upcomingLink);
-
-      expect(mockHandleMobileNavigation).toHaveBeenCalledTimes(2);
-    });
-  });
-
-  describe('structure', () => {
-    it('should wrap navigation links in NavList components', () => {
-      render(
-        <TaskSidebarNavGroup
-          currentPath="/app/inbox"
-          taskCounts={mockTaskCounts}
-          handleMobileNavigation={mockHandleMobileNavigation}
-        />
-      );
-
+      expect(screen.getByTestId('sidebar-group')).toBeInTheDocument();
+      expect(screen.getByTestId('sidebar-group-content')).toBeInTheDocument();
+      expect(screen.getByTestId('sidebar-menu')).toBeInTheDocument();
       expect(screen.getByTestId('nav-list-0')).toBeInTheDocument();
       expect(screen.getByTestId('nav-list-1')).toBeInTheDocument();
       expect(screen.getByTestId('nav-list-2')).toBeInTheDocument();
       expect(screen.getByTestId('nav-list-3')).toBeInTheDocument();
     });
+  });
 
-    it('should have correct hierarchy of sidebar components', () => {
-      render(
-        <TaskSidebarNavGroup
-          currentPath="/app/inbox"
-          taskCounts={mockTaskCounts}
-          handleMobileNavigation={mockHandleMobileNavigation}
-        />
-      );
+  describe('active state', () => {
+    it('should mark current path as active and others as inactive', () => {
+      renderComponent({ currentPath: '/app/inbox' });
 
-      expect(screen.getByTestId('sidebar-group')).toBeInTheDocument();
-      expect(screen.getByTestId('sidebar-group-content')).toBeInTheDocument();
-      expect(screen.getByTestId('sidebar-menu')).toBeInTheDocument();
+      expect(getNavLinkAnchor('inbox')).toHaveAttribute('data-active', 'true');
+      expect(getNavLinkAnchor('today')).toHaveAttribute('data-active', 'false');
+      expect(getNavLinkAnchor('upcoming')).toHaveAttribute('data-active', 'false');
+      expect(getNavLinkAnchor('completed')).toHaveAttribute('data-active', 'false');
+    });
+
+    it('should update active state based on current path', () => {
+      renderComponent({ currentPath: '/app/today' });
+
+      expect(getNavLinkAnchor('today')).toHaveAttribute('data-active', 'true');
+      expect(getNavLinkAnchor('inbox')).toHaveAttribute('data-active', 'false');
+    });
+  });
+
+  describe('task counts', () => {
+    it('should display task counts correctly', () => {
+      renderComponent({ taskCounts: { inboxTasks: 10, todayTasks: 7 } });
+
+      expect(getNavLink('inbox')).toHaveTextContent('Tasks: 10');
+      expect(getNavLink('today')).toHaveTextContent('Tasks: 7');
+    });
+
+    it('should handle zero task counts', () => {
+      renderComponent({ taskCounts: { inboxTasks: 0, todayTasks: 0 } });
+
+      expect(getNavLink('inbox')).toHaveTextContent('Tasks: 0');
+      expect(getNavLink('today')).toHaveTextContent('Tasks: 0');
+    });
+  });
+
+  describe('user interactions', () => {
+    it('should call handleMobileNavigation when nav links are clicked', async () => {
+      const user = userEvent.setup();
+      renderComponent();
+
+      await user.click(getNavLinkAnchor('inbox'));
+      expect(mockHandleMobileNavigation).toHaveBeenCalledTimes(1);
+
+      await user.click(getNavLinkAnchor('today'));
+      expect(mockHandleMobileNavigation).toHaveBeenCalledTimes(2);
+
+      await user.click(getNavLinkAnchor('upcoming'));
+      expect(mockHandleMobileNavigation).toHaveBeenCalledTimes(3);
     });
   });
 
   describe('accessibility', () => {
-    it('should have navigation landmark with label', () => {
-      render(
-        <TaskSidebarNavGroup
-          currentPath="/app/inbox"
-          taskCounts={mockTaskCounts}
-          handleMobileNavigation={mockHandleMobileNavigation}
-        />
-      );
+    it('should have proper ARIA attributes and hide icons from screen readers', () => {
+      renderComponent();
 
-      const nav = screen.getByRole('navigation', { name: 'Primary navigation' });
-      expect(nav).toBeInTheDocument();
-    });
+      expect(screen.getByRole('navigation', { name: 'Primary navigation' })).toBeInTheDocument();
+      expect(screen.getByLabelText('Add new task')).toBeInTheDocument();
 
-    it('should have accessible add task button', () => {
-      render(
-        <TaskSidebarNavGroup
-          currentPath="/app/inbox"
-          taskCounts={mockTaskCounts}
-          handleMobileNavigation={mockHandleMobileNavigation}
-        />
-      );
-
-      const addButton = screen.getByLabelText('Add new task');
-      expect(addButton).toBeInTheDocument();
-    });
-
-    it('should hide icon from screen readers', () => {
-      render(
-        <TaskSidebarNavGroup
-          currentPath="/app/inbox"
-          taskCounts={mockTaskCounts}
-          handleMobileNavigation={mockHandleMobileNavigation}
-        />
-      );
-
-      const icon = screen.getByTestId('circle-plus-icon');
-      expect(icon.parentElement).toHaveAttribute('aria-hidden', 'true');
+      const circlePlusIcon = screen.getByTestId('circle-plus-icon');
+      expect(circlePlusIcon.parentElement).toHaveAttribute('aria-hidden', 'true');
     });
   });
 });

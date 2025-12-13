@@ -1,8 +1,8 @@
+import { TaskFormActions } from '@/features/tasks/components/molecules/TaskFormActions/TaskFormActions';
 import { CrudMode } from '@/shared/types';
 import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
-import { TaskFormActions } from './TaskFormActions';
 
 vi.mock('@/features/tasks/components/atoms/CancelTaskButton/CancelTaskButton', () => ({
   CancelTaskButton: ({ onClick }: { onClick: () => void }) => (
@@ -38,117 +38,74 @@ describe('TaskFormActions', () => {
   const mockHandleCancel = vi.fn();
   const mockHandleSubmit = vi.fn();
 
-  const defaultProps = {
-    mode: 'create' as CrudMode,
-    disabled: false,
-    handleCancel: mockHandleCancel,
-    handleSubmit: mockHandleSubmit,
+  const renderComponent = (mode: CrudMode = 'create', disabled = false) => {
+    return render(
+      <TaskFormActions
+        mode={mode}
+        disabled={disabled}
+        handleCancel={mockHandleCancel}
+        handleSubmit={mockHandleSubmit}
+      />
+    );
   };
 
   beforeEach(() => {
     vi.clearAllMocks();
   });
 
-  describe('basic rendering', () => {
-    it('should render cancel button', () => {
-      render(<TaskFormActions {...defaultProps} />);
+  it('should render cancel and submit buttons with correct accessibility attributes', () => {
+    renderComponent();
 
-      expect(screen.getByTestId('cancel-button')).toBeInTheDocument();
-    });
-
-    it('should render submit button', () => {
-      render(<TaskFormActions {...defaultProps} />);
-
-      expect(screen.getByTestId('submit-button')).toBeInTheDocument();
-    });
-
-    it('should have role group on container', () => {
-      render(<TaskFormActions {...defaultProps} />);
-
-      expect(screen.getByRole('group')).toBeInTheDocument();
-    });
-
-    it('should have aria-label on container', () => {
-      render(<TaskFormActions {...defaultProps} />);
-
-      expect(screen.getByLabelText('Task form actions')).toBeInTheDocument();
-    });
+    expect(screen.getByTestId('cancel-button')).toBeInTheDocument();
+    expect(screen.getByTestId('submit-button')).toBeInTheDocument();
+    expect(screen.getByRole('group')).toBeInTheDocument();
+    expect(screen.getByLabelText('Task form actions')).toBeInTheDocument();
   });
 
-  describe('user interactions', () => {
-    it('should call handleCancel when cancel button is clicked', async () => {
-      const user = userEvent.setup();
-      render(<TaskFormActions {...defaultProps} />);
+  it('should call handleCancel when cancel button is clicked', async () => {
+    const user = userEvent.setup();
+    renderComponent();
 
-      const cancelButton = screen.getByTestId('cancel-button');
-      await user.click(cancelButton);
+    await user.click(screen.getByTestId('cancel-button'));
 
-      expect(mockHandleCancel).toHaveBeenCalledTimes(1);
-    });
-
-    it('should call handleSubmit when submit button is clicked', async () => {
-      const user = userEvent.setup();
-      mockHandleSubmit.mockResolvedValue(undefined);
-      render(<TaskFormActions {...defaultProps} />);
-
-      const submitButton = screen.getByTestId('submit-button');
-      await user.click(submitButton);
-
-      expect(mockHandleSubmit).toHaveBeenCalledTimes(1);
-    });
+    expect(mockHandleCancel).toHaveBeenCalledTimes(1);
   });
 
-  describe('Mode prop', () => {
-    it('should pass create mode to submit button', () => {
-      render(
-        <TaskFormActions
-          {...defaultProps}
-          mode="create"
-        />
-      );
+  it('should call handleSubmit when submit button is clicked', async () => {
+    const user = userEvent.setup();
+    mockHandleSubmit.mockResolvedValue(undefined);
+    renderComponent();
 
-      const submitButton = screen.getByTestId('submit-button');
-      expect(submitButton).toHaveAttribute('data-mode', 'create');
-      expect(submitButton).toHaveTextContent('Add Task');
-    });
+    await user.click(screen.getByTestId('submit-button'));
 
-    it('should pass update mode to submit button', () => {
-      render(
-        <TaskFormActions
-          {...defaultProps}
-          mode="update"
-        />
-      );
-
-      const submitButton = screen.getByTestId('submit-button');
-      expect(submitButton).toHaveAttribute('data-mode', 'update');
-      expect(submitButton).toHaveTextContent('Update Task');
-    });
+    expect(mockHandleSubmit).toHaveBeenCalledTimes(1);
   });
 
-  describe('disabled state', () => {
-    it('should pass disabled prop to submit button', () => {
-      render(
-        <TaskFormActions
-          {...defaultProps}
-          disabled={true}
-        />
-      );
+  it('should render submit button with create mode text and attribute', () => {
+    renderComponent('create');
 
-      const submitButton = screen.getByTestId('submit-button');
-      expect(submitButton).toBeDisabled();
-    });
+    const submitButton = screen.getByTestId('submit-button');
+    expect(submitButton).toHaveAttribute('data-mode', 'create');
+    expect(submitButton).toHaveTextContent('Add Task');
+  });
 
-    it('should enable submit button when disabled is false', () => {
-      render(
-        <TaskFormActions
-          {...defaultProps}
-          disabled={false}
-        />
-      );
+  it('should render submit button with update mode text and attribute', () => {
+    renderComponent('update');
 
-      const submitButton = screen.getByTestId('submit-button');
-      expect(submitButton).not.toBeDisabled();
-    });
+    const submitButton = screen.getByTestId('submit-button');
+    expect(submitButton).toHaveAttribute('data-mode', 'update');
+    expect(submitButton).toHaveTextContent('Update Task');
+  });
+
+  it('should disable submit button when disabled prop is true', () => {
+    renderComponent('create', true);
+
+    expect(screen.getByTestId('submit-button')).toBeDisabled();
+  });
+
+  it('should enable submit button when disabled prop is false', () => {
+    renderComponent('create', false);
+
+    expect(screen.getByTestId('submit-button')).not.toBeDisabled();
   });
 });

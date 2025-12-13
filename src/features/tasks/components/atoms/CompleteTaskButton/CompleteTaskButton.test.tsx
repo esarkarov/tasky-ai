@@ -2,14 +2,25 @@ import { render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { CompleteTaskButton } from './CompleteTaskButton';
-import { ReactNode } from 'react';
 
 const mockToggleComplete = vi.fn();
+
 vi.mock('@/features/tasks/hooks/use-task-completion/use-task-completion', () => ({
   useTaskCompletion: () => ({
     toggleComplete: mockToggleComplete,
   }),
 }));
+
+interface ButtonProps {
+  children: React.ReactNode;
+  onClick: () => void;
+  variant: string;
+  size: string;
+  className?: string;
+  role: string;
+  'aria-checked'?: boolean;
+  'aria-label'?: string;
+}
 
 vi.mock('@/shared/components/ui/button', () => ({
   Button: ({
@@ -21,16 +32,7 @@ vi.mock('@/shared/components/ui/button', () => ({
     role,
     'aria-checked': ariaChecked,
     'aria-label': ariaLabel,
-  }: {
-    children: ReactNode;
-    onClick: () => void;
-    variant: string;
-    size: string;
-    className?: string;
-    role: string;
-    'aria-checked'?: boolean;
-    'aria-label'?: string;
-  }) => (
+  }: ButtonProps) => (
     <button
       type="button"
       data-variant={variant}
@@ -61,29 +63,33 @@ vi.mock('@/shared/utils/ui/ui.utils', () => ({
 }));
 
 describe('CompleteTaskButton', () => {
-  const setup = async (props?: { completed?: boolean; taskId?: string }) => {
-    const user = userEvent.setup();
-    const taskId = props?.taskId ?? 'task-123';
-    const completed = props?.completed ?? false;
-    render(
+  interface RenderOptions {
+    taskId?: string;
+    completed?: boolean;
+  }
+
+  const renderComponent = ({ taskId = 'task-123', completed = false }: RenderOptions = {}) => {
+    return render(
       <CompleteTaskButton
         taskId={taskId}
         completed={completed}
       />
     );
-    const button = screen.getByRole('checkbox');
-    const icon = screen.getByTestId('check-icon');
-    return { user, button, icon, taskId };
   };
+
+  const getButton = () => screen.getByRole('checkbox');
+  const getIcon = () => screen.getByTestId('check-icon');
 
   beforeEach(() => {
     vi.clearAllMocks();
+    mockToggleComplete.mockResolvedValue(undefined);
   });
 
   describe('rendering', () => {
-    it('renders correctly with checkbox role and proper attributes', async () => {
-      const { button } = await setup();
+    it('should render button with correct role and attributes', () => {
+      renderComponent();
 
+      const button = getButton();
       expect(button).toBeInTheDocument();
       expect(button).toHaveAttribute('role', 'checkbox');
       expect(button).toHaveAttribute('type', 'button');
@@ -91,101 +97,93 @@ describe('CompleteTaskButton', () => {
       expect(button).toHaveAttribute('data-size', 'icon');
     });
 
-    it('renders check icon inside button', async () => {
-      const { icon } = await setup();
+    it('should render check icon with aria-hidden', () => {
+      renderComponent();
+
+      const icon = getIcon();
       expect(icon).toBeInTheDocument();
       expect(icon).toHaveAttribute('aria-hidden', 'true');
     });
   });
 
   describe('incomplete state', () => {
-    it('sets aria-checked to false and label to “Mark task as complete”', async () => {
-      await setup({ completed: false });
-      const button = screen.getByRole('checkbox');
+    it('should have correct aria-checked and aria-label when incomplete', () => {
+      renderComponent({ completed: false });
+
+      const button = getButton();
       expect(button).toHaveAttribute('aria-checked', 'false');
-      expect(screen.getByLabelText('Mark task as complete')).toBeInTheDocument();
+      expect(button).toHaveAttribute('aria-label', 'Mark task as complete');
     });
 
-    it('renders check icon with opacity-0 and hover transition classes', async () => {
-      const { icon } = await setup({ completed: false });
+    it('should render icon with opacity-0 and hover transition classes when incomplete', () => {
+      renderComponent({ completed: false });
 
-      expect(icon).toBeInTheDocument();
+      const icon = getIcon();
       const className = icon.getAttribute('class') || '';
-
       expect(className).toContain('opacity-0');
       expect(className).toContain('group-hover/button:opacity-100');
+    });
+
+    it('should call toggleComplete with true when incomplete task is clicked', async () => {
+      const user = userEvent.setup();
+      renderComponent({ taskId: 'task-456', completed: false });
+
+      await user.click(getButton());
+
+      await waitFor(() => {
+        expect(mockToggleComplete).toHaveBeenCalledWith('task-456', true);
+        expect(mockToggleComplete).toHaveBeenCalledTimes(1);
+      });
     });
   });
 
   describe('completed state', () => {
-    it('sets aria-checked to true and label to “Mark task as incomplete”', async () => {
-      await setup({ completed: true });
-      const button = screen.getByRole('checkbox');
+    it('should have correct aria-checked and aria-label when completed', () => {
+      renderComponent({ completed: true });
+
+      const button = getButton();
       expect(button).toHaveAttribute('aria-checked', 'true');
-      expect(screen.getByLabelText('Mark task as incomplete')).toBeInTheDocument();
+      expect(button).toHaveAttribute('aria-label', 'Mark task as incomplete');
     });
 
-    it('applies visual completion indicator', async () => {
-      const { icon } = await setup({ completed: true });
+    it('should render icon with visual completion indicator when completed', () => {
+      renderComponent({ completed: true });
+
+      const icon = getIcon();
       expect(icon).toBeInTheDocument();
       expect(icon.getAttribute('data-has-class')).toBe('true');
     });
-  });
 
-  describe('user interactions', () => {
-    it('calls toggleTaskComplete(true) when incomplete task clicked', async () => {
-      const { user, button, taskId } = await setup({ completed: false });
-      mockToggleComplete.mockResolvedValue(undefined);
+    it('should call toggleComplete with false when completed task is clicked', async () => {
+      const user = userEvent.setup();
+      renderComponent({ taskId: 'task-789', completed: true });
 
-      await user.click(button);
+      await user.click(getButton());
 
       await waitFor(() => {
-        expect(mockToggleComplete).toHaveBeenCalledWith(taskId, true);
-      });
-    });
-
-    it('calls toggleTaskComplete(false) when completed task clicked', async () => {
-      const { user, button, taskId } = await setup({ completed: true });
-      mockToggleComplete.mockResolvedValue(undefined);
-
-      await user.click(button);
-
-      await waitFor(() => {
-        expect(mockToggleComplete).toHaveBeenCalledWith(taskId, false);
+        expect(mockToggleComplete).toHaveBeenCalledWith('task-789', false);
+        expect(mockToggleComplete).toHaveBeenCalledTimes(1);
       });
     });
   });
 
-  describe('accessibility', () => {
-    it('is keyboard accessible with Enter and Space', async () => {
-      const { user, button, taskId } = await setup({ completed: false });
-      mockToggleComplete.mockResolvedValue(undefined);
+  describe('keyboard interactions', () => {
+    it('should toggle completion with Enter and Space keys', async () => {
+      const user = userEvent.setup();
+      renderComponent({ taskId: 'task-101', completed: false });
 
+      const button = getButton();
       button.focus();
+
       await user.keyboard('{Enter}');
-      await user.keyboard(' ');
-
       await waitFor(() => {
-        expect(mockToggleComplete).toHaveBeenCalledWith(taskId, true);
+        expect(mockToggleComplete).toHaveBeenCalledWith('task-101', true);
       });
-    });
 
-    it('uses correct aria-label per completion state', async () => {
-      const { rerender } = render(
-        <CompleteTaskButton
-          taskId="task-123"
-          completed={false}
-        />
-      );
-      expect(screen.getByLabelText('Mark task as complete')).toBeInTheDocument();
-
-      rerender(
-        <CompleteTaskButton
-          taskId="task-123"
-          completed
-        />
-      );
-      expect(screen.getByLabelText('Mark task as incomplete')).toBeInTheDocument();
+      await user.keyboard(' ');
+      await waitFor(() => {
+        expect(mockToggleComplete).toHaveBeenCalledTimes(2);
+      });
     });
   });
 });
