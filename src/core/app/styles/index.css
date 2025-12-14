@@ -155,4 +155,33 @@
   .animate-glow-pulse {
     animation: glow-pulse 4s ease-in-out infinite;
   }
+
+  .animate-slide-in {
+    animation: fade-in-up 0.5s ease-out forwards;
+  }
+
+  .stagger-1 {
+    animation-delay: 0.05s;
+    opacity: 0;
+  }
+  .stagger-2 {
+    animation-delay: 0.1s;
+    opacity: 0;
+  }
+  .stagger-3 {
+    animation-delay: 0.15s;
+    opacity: 0;
+  }
+  .stagger-4 {
+    animation-delay: 0.2s;
+    opacity: 0;
+  }
+  .stagger-5 {
+    animation-delay: 0.25s;
+    opacity: 0;
+  }
+  .stagger-6 {
+    animation-delay: 0.3s;
+    opacity: 0;
+  }
 }

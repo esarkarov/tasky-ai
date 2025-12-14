@@ -48,6 +48,7 @@ export const ROUTES = {
   NOT_FOUND: '*',
 
   APP_PATHS: {
+    DASHBOARD: 'dashboard',
     INBOX: 'inbox',
     TODAY: 'today',
     UPCOMING: 'upcoming',

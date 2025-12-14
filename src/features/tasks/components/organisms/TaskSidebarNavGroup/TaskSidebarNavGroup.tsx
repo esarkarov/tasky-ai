@@ -9,9 +9,14 @@ import {
   SidebarMenuButton,
   SidebarMenuItem,
 } from '@/shared/components/ui/sidebar';
-import { Calendar1, CalendarDays, CircleCheck, CirclePlus, Inbox } from 'lucide-react';
+import { Calendar1, CalendarDays, CircleCheck, CirclePlus, Inbox, LayoutDashboard } from 'lucide-react';
 
 const TASK_SIDEBAR_LINKS = [
+  {
+    href: '/app/dashboard',
+    label: 'Dashboard',
+    icon: LayoutDashboard,
+  },
   {
     href: '/app/inbox',
     label: 'Inbox',

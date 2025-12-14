@@ -1,7 +1,8 @@
 import { AppTemplate, HomePage, LoginPage, RegisterPage, RootTemplate, sidebarLoader } from '@/core/router/lazy';
+import { dashboardRoutes } from '@/features/analytics/router';
 import { projectRoutes } from '@/features/projects/router';
-import { taskAction } from '@/features/tasks/router/lazy';
 import { taskRoutes } from '@/features/tasks/router';
+import { taskAction } from '@/features/tasks/router/lazy';
 import { ErrorPage } from '@/pages/ErrorPage/ErrorPage';
 import { Loader } from '@/shared/components/atoms/Loader/Loader';
 import { RedirectIfAuthenticated } from '@/shared/components/guards/RedirectIfAuthenticated/RedirectIfAuthenticated';
@@ -10,7 +11,7 @@ import { ROUTES } from '@/shared/constants';
 import { createElement } from 'react';
 import { createBrowserRouter, RouteObject } from 'react-router';
 
-export const protectedRoutes: RouteObject[] = [...taskRoutes, ...projectRoutes];
+export const protectedRoutes: RouteObject[] = [...taskRoutes, ...projectRoutes, ...dashboardRoutes];
 
 export const publicRoutes: RouteObject[] = [
   {

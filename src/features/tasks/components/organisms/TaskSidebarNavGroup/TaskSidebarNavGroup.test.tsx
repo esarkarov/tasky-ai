@@ -44,6 +44,13 @@ vi.mock('lucide-react', () => ({
       {...props}
     />
   ),
+  LayoutDashboard: (props: Record<string, unknown>) => (
+    <svg
+      data-testid="dashboard-icon"
+      aria-hidden="true"
+      {...props}
+    />
+  ),
 }));
 
 vi.mock('@/features/tasks/components/molecules/TaskSidebarNavLink/TaskSidebarNavLink', () => ({
