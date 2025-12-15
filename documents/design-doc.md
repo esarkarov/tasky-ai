@@ -50,10 +50,9 @@ Tasky AI is built as a single-page application (SPA) using React with TypeScript
 
 ### Technology Stack
 
-- **Frontend**: React.js, TypeScript, React-Router, Tailwind CSS, Shadcn UI
+- **Frontend**: React.js, TypeScript, React Router, Tailwind CSS, Shadcn UI
 - **Testing & Quality**: Vitest, React Testing Library, Playwright, ESLint, Prettier
-- **Backend Services**: Appwrite DB, Gemini API
-- **Authentication**: Clerk React SDK
+- **Backend Services**: Appwrite DB, Gemini API, Clerk
 - **CI/CD & Tooling**: Pnpm, GitHub, GitHub Actions, Vite, Vercel
 
 ## Folder Structure
@@ -71,6 +70,7 @@ src/
 │ │ └── types/             # Type definitions
 │ ├── tasks/               # Same structure for tasks
 │ └── ai/                  # Same structure for ai
+│ └── analytics/           # Same structure for analytics
 ├── shared/                # UI elements, utils, constants, custom hooks etc.
 ├── pages/                 # Route-level screens
 ```

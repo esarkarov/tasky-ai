@@ -1,4 +1,4 @@
-# AI Task Generation Sequence
+# AI Task Generation Flow
 
 ```mermaid
 sequenceDiagram

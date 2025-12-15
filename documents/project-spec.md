@@ -4,8 +4,7 @@
 
 ## Project Overview
 
-**Tasky AI** is a project and task management application that uses AI to help users generate tasks. Users can create projects, manage tasks, and use AI to generate task suggestions from natural language prompts.
-The application uses a Backend-as-a-Service (BaaS) architecture with third-party services for authentication, data storage, and AI capabilities.
+**Tasky AI** is a single-user task management web application. It lets you organize work into projects and uses AI to help generate task lists when you create new projects.
 
 ## Tasky AI Software System
 
@@ -17,7 +16,7 @@ _This is a high-level view of the Tasky AI system and its context. The system co
 
 #### System Users
 
-- **👤 User** — A person who manages projects and tasks, and can generate tasks using AI. Users can create multiple projects, organize tasks within projects, track progress, and leverage AI to generate task suggestions.
+- **👤 End User** — A person who manages projects and tasks, and can generate tasks using AI. Users can create multiple projects, organize tasks within projects, track progress, and leverage AI to generate task suggestions.
 
 #### External Systems
 
@@ -31,7 +30,7 @@ _This is a high-level view of the Tasky AI system and its context. The system co
 
 ### System Architecture
 
-_Due to the BaaS architecture, Tasky AI does not have multiple internal containers. The system consists of a single web application that communicates directly with external services.._
+_Tasky AI does not have multiple internal containers. The system consists of a single web application that communicates directly with external services.._
 
 - **Tasky AI Web Application** [React.js]
 - Single-page web application.
