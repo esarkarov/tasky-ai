@@ -1,7 +1,7 @@
+import { TimeRangeButton } from '@/features/analytics/components/atoms/TimeRangeButton/TimeRangeButton';
 import { render, screen } from '@testing-library/react';
 import { userEvent } from '@testing-library/user-event';
 import { describe, expect, it, vi } from 'vitest';
-import { TimeRangeButton } from './TimeRangeButton';
 
 describe('TimeRangeButton', () => {
   const mockOnClick = vi.fn();
@@ -67,23 +67,6 @@ describe('TimeRangeButton', () => {
       const user = userEvent.setup();
       render(
         <TimeRangeButton
-          range="7d"
-          isActive={false}
-          onClick={mockOnClick}
-        />
-      );
-
-      const button = screen.getByRole('button', { name: '7d' });
-      await user.click(button);
-
-      expect(mockOnClick).toHaveBeenCalledTimes(1);
-      expect(mockOnClick).toHaveBeenCalledWith('7d');
-    });
-
-    it('should call onClick with correct range when different range is clicked', async () => {
-      const user = userEvent.setup();
-      render(
-        <TimeRangeButton
           range="30d"
           isActive={false}
           onClick={mockOnClick}
@@ -97,30 +80,50 @@ describe('TimeRangeButton', () => {
       expect(mockOnClick).toHaveBeenCalledWith('30d');
     });
 
+    it('should call onClick with correct range when different range is clicked', async () => {
+      const user = userEvent.setup();
+      const mockOnClick2 = vi.fn();
+      render(
+        <TimeRangeButton
+          range="6m"
+          isActive={false}
+          onClick={mockOnClick2}
+        />
+      );
+
+      const button = screen.getByRole('button', { name: '6m' });
+      await user.click(button);
+
+      expect(mockOnClick2).toHaveBeenCalledTimes(1);
+      expect(mockOnClick2).toHaveBeenCalledWith('6m');
+    });
+
     it('should call onClick when active button is clicked', async () => {
       const user = userEvent.setup();
+      const mockOnClick3 = vi.fn();
       render(
         <TimeRangeButton
           range="7d"
           isActive={true}
-          onClick={mockOnClick}
+          onClick={mockOnClick3}
         />
       );
 
       const button = screen.getByRole('button', { name: '7d' });
       await user.click(button);
 
-      expect(mockOnClick).toHaveBeenCalledTimes(1);
-      expect(mockOnClick).toHaveBeenCalledWith('7d');
+      expect(mockOnClick3).toHaveBeenCalledTimes(1);
+      expect(mockOnClick3).toHaveBeenCalledWith('7d');
     });
 
     it('should handle multiple clicks independently', async () => {
       const user = userEvent.setup();
+      const mockOnClick4 = vi.fn();
       render(
         <TimeRangeButton
           range="7d"
           isActive={false}
-          onClick={mockOnClick}
+          onClick={mockOnClick4}
         />
       );
 
@@ -129,10 +132,10 @@ describe('TimeRangeButton', () => {
       await user.click(button);
       await user.click(button);
 
-      expect(mockOnClick).toHaveBeenCalledTimes(3);
-      expect(mockOnClick).toHaveBeenNthCalledWith(1, '7d');
-      expect(mockOnClick).toHaveBeenNthCalledWith(2, '7d');
-      expect(mockOnClick).toHaveBeenNthCalledWith(3, '7d');
+      expect(mockOnClick4).toHaveBeenCalledTimes(3);
+      expect(mockOnClick4).toHaveBeenNthCalledWith(1, '7d');
+      expect(mockOnClick4).toHaveBeenNthCalledWith(2, '7d');
+      expect(mockOnClick4).toHaveBeenNthCalledWith(3, '7d');
     });
   });
 });

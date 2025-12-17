@@ -1,6 +1,6 @@
 // Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
 
-exports[`ActivityInfoFooter > Snapshot > should match snapshot when rendered with typical data 1`] = `
+exports[`ActivityInfoFooter > snapshot > should match snapshot when rendered with typical data 1`] = `
 <div
   class="flex w-full items-center gap-2 text-sm"
 >

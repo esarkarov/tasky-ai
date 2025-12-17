@@ -1,6 +1,6 @@
 // Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
 
-exports[`ChartCenterLabel > Snapshot > should match snapshot when rendered with typical data 1`] = `
+exports[`ChartCenterLabel > snapshot > should match snapshot when rendered with typical data 1`] = `
 <svg>
   <text
     dominant-baseline="middle"

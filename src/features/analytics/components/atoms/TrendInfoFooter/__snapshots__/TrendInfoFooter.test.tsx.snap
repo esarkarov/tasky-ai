@@ -1,0 +1,112 @@
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
+
+exports[`TrendInfoFooter > snapshot > should match snapshot when rendered with negative trend 1`] = `
+<div
+  class="flex w-full items-start gap-2 text-sm"
+>
+  <div
+    class="grid gap-2"
+  >
+    <div
+      class="flex items-center gap-2 font-medium leading-none"
+    >
+      Trending 
+      down
+       by 
+      10
+      % this month
+      <svg
+        aria-hidden="true"
+        class="lucide lucide-trending-down h-4 w-4"
+        fill="none"
+        height="24"
+        stroke="currentColor"
+        stroke-linecap="round"
+        stroke-linejoin="round"
+        stroke-width="2"
+        viewBox="0 0 24 24"
+        width="24"
+        xmlns="http://www.w3.org/2000/svg"
+      >
+        <path
+          d="M16 17h6v-6"
+        />
+        <path
+          d="m22 17-8.5-8.5-5 5L2 7"
+        />
+      </svg>
+    </div>
+    <div
+      class="flex items-center gap-2 leading-none text-muted-foreground"
+    >
+      Jan 1 - Jan 31
+    </div>
+  </div>
+</div>
+`;
+
+exports[`TrendInfoFooter > snapshot > should match snapshot when rendered with positive trend 1`] = `
+<div
+  class="flex w-full items-start gap-2 text-sm"
+>
+  <div
+    class="grid gap-2"
+  >
+    <div
+      class="flex items-center gap-2 font-medium leading-none"
+    >
+      Trending 
+      up
+       by 
+      15
+      % this month
+      <svg
+        aria-hidden="true"
+        class="lucide lucide-trending-up h-4 w-4"
+        fill="none"
+        height="24"
+        stroke="currentColor"
+        stroke-linecap="round"
+        stroke-linejoin="round"
+        stroke-width="2"
+        viewBox="0 0 24 24"
+        width="24"
+        xmlns="http://www.w3.org/2000/svg"
+      >
+        <path
+          d="M16 7h6v6"
+        />
+        <path
+          d="m22 7-8.5 8.5-5-5L2 17"
+        />
+      </svg>
+    </div>
+    <div
+      class="flex items-center gap-2 leading-none text-muted-foreground"
+    >
+      Jan 1 - Jan 31
+    </div>
+  </div>
+</div>
+`;
+
+exports[`TrendInfoFooter > snapshot > should match snapshot when rendered with zero trend 1`] = `
+<div
+  class="flex w-full items-start gap-2 text-sm"
+>
+  <div
+    class="grid gap-2"
+  >
+    <div
+      class="flex items-center gap-2 font-medium leading-none"
+    >
+      No change from last month
+    </div>
+    <div
+      class="flex items-center gap-2 leading-none text-muted-foreground"
+    >
+      Jan 1 - Jan 31
+    </div>
+  </div>
+</div>
+`;
