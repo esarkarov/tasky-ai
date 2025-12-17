@@ -1,0 +1,38 @@
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
+
+exports[`StatsGrid > snapshot > should match snapshot when rendered with empty metrics 1`] = `
+<div
+  class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-5 mb-8"
+/>
+`;
+
+exports[`StatsGrid > snapshot > should match snapshot when rendered with typical metrics 1`] = `
+<div
+  class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-5 mb-8"
+>
+  <div
+    data-animation-class="animate-slide-in stagger-1"
+    data-testid="stat-card-Total Tasks"
+  >
+    Total Tasks
+  </div>
+  <div
+    data-animation-class="animate-slide-in stagger-2"
+    data-testid="stat-card-Completed"
+  >
+    Completed
+  </div>
+  <div
+    data-animation-class="animate-slide-in stagger-3"
+    data-testid="stat-card-In Progress"
+  >
+    In Progress
+  </div>
+  <div
+    data-animation-class="animate-slide-in stagger-4"
+    data-testid="stat-card-Overdue"
+  >
+    Overdue
+  </div>
+</div>
+`;

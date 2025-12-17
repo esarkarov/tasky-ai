@@ -1,0 +1,133 @@
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
+
+exports[`TaskDistributionChart > snapshot > should match snapshot when rendered with animation class 1`] = `
+<div
+  class="flex flex-col fade-in"
+>
+  <div
+    class="pb-0"
+  >
+    <h2>
+      Task Distribution
+    </h2>
+    <p>
+      By top 5 project
+    </p>
+  </div>
+  <div
+    class="flex-1 pb-0"
+  >
+    <div
+      data-testid="chart-container"
+    />
+  </div>
+  <div
+    class="flex-col gap-2 text-sm"
+  >
+    <div
+      class="leading-none text-muted-foreground"
+    >
+      Showing task breakdown by top 5 project
+    </div>
+  </div>
+</div>
+`;
+
+exports[`TaskDistributionChart > snapshot > should match snapshot when rendered with empty data 1`] = `
+<div
+  class="flex flex-col "
+>
+  <div
+    class="pb-0"
+  >
+    <h2>
+      Task Distribution
+    </h2>
+    <p>
+      By top 5 project
+    </p>
+  </div>
+  <div
+    class="flex-1 pb-0"
+  >
+    <div
+      data-testid="chart-container"
+    />
+  </div>
+  <div
+    class="flex-col gap-2 text-sm"
+  >
+    <div
+      class="leading-none text-muted-foreground"
+    >
+      Showing task breakdown by top 5 project
+    </div>
+  </div>
+</div>
+`;
+
+exports[`TaskDistributionChart > snapshot > should match snapshot when rendered with five categories 1`] = `
+<div
+  class="flex flex-col "
+>
+  <div
+    class="pb-0"
+  >
+    <h2>
+      Task Distribution
+    </h2>
+    <p>
+      By top 5 project
+    </p>
+  </div>
+  <div
+    class="flex-1 pb-0"
+  >
+    <div
+      data-testid="chart-container"
+    />
+  </div>
+  <div
+    class="flex-col gap-2 text-sm"
+  >
+    <div
+      class="leading-none text-muted-foreground"
+    >
+      Showing task breakdown by top 5 project
+    </div>
+  </div>
+</div>
+`;
+
+exports[`TaskDistributionChart > snapshot > should match snapshot when rendered with typical data 1`] = `
+<div
+  class="flex flex-col "
+>
+  <div
+    class="pb-0"
+  >
+    <h2>
+      Task Distribution
+    </h2>
+    <p>
+      By top 5 project
+    </p>
+  </div>
+  <div
+    class="flex-1 pb-0"
+  >
+    <div
+      data-testid="chart-container"
+    />
+  </div>
+  <div
+    class="flex-col gap-2 text-sm"
+  >
+    <div
+      class="leading-none text-muted-foreground"
+    >
+      Showing task breakdown by top 5 project
+    </div>
+  </div>
+</div>
+`;

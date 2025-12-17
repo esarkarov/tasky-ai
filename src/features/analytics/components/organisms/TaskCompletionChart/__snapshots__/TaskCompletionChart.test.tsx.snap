@@ -1,0 +1,94 @@
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
+
+exports[`TaskCompletionChart > snapshot > should match snapshot when rendered with animation class 1`] = `
+<div
+  class="lg:col-span-2 fade-in"
+>
+  <div>
+    <h2>
+      Task Completion Trends
+    </h2>
+    <p>
+      Showing task status for the last 6 months
+    </p>
+  </div>
+  <div>
+    <div
+      data-testid="chart-container"
+    />
+  </div>
+  <div>
+    <div
+      data-testid="trend-info-footer"
+    >
+      Negative
+       - 
+      10
+      % - 
+      Jan 2024 - Jun 2024
+    </div>
+  </div>
+</div>
+`;
+
+exports[`TaskCompletionChart > snapshot > should match snapshot when rendered with empty data 1`] = `
+<div
+  class="lg:col-span-2 "
+>
+  <div>
+    <h2>
+      Task Completion Trends
+    </h2>
+    <p>
+      Showing task status for the last 6 months
+    </p>
+  </div>
+  <div>
+    <div
+      data-testid="chart-container"
+    />
+  </div>
+  <div>
+    <div
+      data-testid="trend-info-footer"
+    >
+      Negative
+       - 
+      10
+      % - 
+      Jan 2024 - Jun 2024
+    </div>
+  </div>
+</div>
+`;
+
+exports[`TaskCompletionChart > snapshot > should match snapshot when rendered with typical data 1`] = `
+<div
+  class="lg:col-span-2 "
+>
+  <div>
+    <h2>
+      Task Completion Trends
+    </h2>
+    <p>
+      Showing task status for the last 6 months
+    </p>
+  </div>
+  <div>
+    <div
+      data-testid="chart-container"
+    />
+  </div>
+  <div>
+    <div
+      data-testid="trend-info-footer"
+    >
+      Negative
+       - 
+      10
+      % - 
+      Jan 2024 - Jun 2024
+    </div>
+  </div>
+</div>
+`;
