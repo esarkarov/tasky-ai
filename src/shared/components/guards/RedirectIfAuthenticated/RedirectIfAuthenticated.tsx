@@ -12,7 +12,7 @@ export const RedirectIfAuthenticated = () => {
 
   useEffect(() => {
     if (isLoaded && isSignedIn) {
-      navigate(ROUTES.TODAY, { replace: true });
+      navigate(ROUTES.DASHBOARD, { replace: true });
     }
   }, [isLoaded, isSignedIn, navigate, toast]);
 

@@ -19,7 +19,7 @@ export const LoginPage = () => {
 
         <div className="animate-fade-in-up opacity-0 [animation-delay:0.2s] [animation-fill-mode:forwards]">
           <SignIn
-            fallbackRedirectUrl={ROUTES.TODAY}
+            fallbackRedirectUrl={ROUTES.DASHBOARD}
             signUpUrl={ROUTES.REGISTER}
             appearance={{
               elements: {

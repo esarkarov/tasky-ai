@@ -8,7 +8,7 @@ vi.mock('@/shared/components/atoms/Head/Head', () => ({
 
 vi.mock('@/shared/constants', () => ({
   ROUTES: {
-    TODAY: '/today',
+    DASHBOARD: '/dashboard',
     LOGIN: '/login',
   },
 }));
@@ -55,7 +55,7 @@ describe('RegisterPage', () => {
     it('should pass correct redirect URLs to SignUp component', () => {
       expect(mockSignUp).toHaveBeenCalledWith(
         expect.objectContaining({
-          fallbackRedirectUrl: '/today',
+          fallbackRedirectUrl: '/dashboard',
           signInUrl: '/login',
         })
       );

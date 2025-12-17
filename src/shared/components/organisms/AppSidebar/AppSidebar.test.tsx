@@ -14,7 +14,7 @@ const mockTaskCounts = {
 
 vi.mock('@/shared/constants', () => ({
   ROUTES: {
-    INBOX: '/inbox',
+    DASHBOARD: '/dashboard',
   },
 }));
 
@@ -111,11 +111,11 @@ describe('AppSidebar', () => {
       expect(screen.getByTestId('user-chip')).toBeInTheDocument();
     });
 
-    it('should render inbox link with logo and correct attributes', () => {
+    it('should render dashboard link with logo and correct attributes', () => {
       renderComponent();
 
-      const link = screen.getByLabelText('Go to inbox');
-      expect(link).toHaveAttribute('href', '/inbox');
+      const link = screen.getByLabelText('Go to dashboard');
+      expect(link).toHaveAttribute('href', '/dashboard');
       expect(link).toContainElement(screen.getByTestId('logo'));
     });
 

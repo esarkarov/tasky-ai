@@ -28,7 +28,7 @@ vi.mock('@clerk/clerk-react', () => ({
 }));
 
 vi.mock('@/shared/constants', () => ({
-  ROUTES: { TODAY: '/today' },
+  ROUTES: { DASHBOARD: '/dashboard' },
 }));
 
 interface AuthState {
@@ -85,13 +85,13 @@ describe('RedirectIfAuthenticated', () => {
   });
 
   describe('authenticated user', () => {
-    it('should redirect to /today when user is signed in', async () => {
+    it('should redirect to /dashboard when user is signed in', async () => {
       setupAuth({ isLoaded: true, isSignedIn: true });
 
       renderComponent();
 
       await waitFor(() => {
-        expect(mockNavigate).toHaveBeenCalledWith('/today', { replace: true });
+        expect(mockNavigate).toHaveBeenCalledWith('/dashboard', { replace: true });
       });
     });
 
@@ -138,7 +138,7 @@ describe('RedirectIfAuthenticated', () => {
       );
 
       await waitFor(() => {
-        expect(mockNavigate).toHaveBeenCalledWith('/today', { replace: true });
+        expect(mockNavigate).toHaveBeenCalledWith('/dashboard', { replace: true });
       });
     });
   });
