@@ -7,7 +7,6 @@ export const Error = () => {
   const handleRetry = () => {
     navigate('.', { replace: true });
   };
-
   const handleGoHome = () => {
     navigate('/app/today');
   };
