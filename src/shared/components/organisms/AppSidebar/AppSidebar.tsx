@@ -24,9 +24,9 @@ export const AppSidebar = () => {
       aria-label="Main sidebar">
       <SidebarHeader className="py-2 border-b-2">
         <Link
-          to={ROUTES.INBOX}
+          to={ROUTES.DASHBOARD}
           className="p-2"
-          aria-label="Go to inbox">
+          aria-label="Go to dashboard">
           <Logo />
         </Link>
       </SidebarHeader>

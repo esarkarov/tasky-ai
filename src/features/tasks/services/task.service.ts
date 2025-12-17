@@ -105,6 +105,7 @@ export const taskService = {
   },
   async create(data: TaskFormInput): Promise<Task> {
     const userId = getUserId();
+
     try {
       const payload = {
         content: data.content,

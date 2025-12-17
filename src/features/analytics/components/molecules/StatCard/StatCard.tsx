@@ -1,6 +1,7 @@
-import { TrendIndicator } from '@/features/analytics/components/atoms/TrendIndicator/TrendIndicator';
+import { ICON_MAP } from '@/features/analytics/constants';
 import { StatMetric } from '@/features/analytics/types';
 import { Card, CardDescription, CardFooter, CardHeader, CardTitle } from '@/shared/components/ui/card';
+import { ListTodo } from 'lucide-react';
 
 interface StatCardProps {
   metric: StatMetric;
@@ -8,7 +9,8 @@ interface StatCardProps {
 }
 
 export const StatCard = ({ metric, animationClass = '' }: StatCardProps) => {
-  const { title, value, change, trend, icon } = metric;
+  const { title, value, icon, change } = metric;
+  const IconComponent = ICON_MAP[icon] || ListTodo;
 
   return (
     <div className={animationClass}>
@@ -20,14 +22,18 @@ export const StatCard = ({ metric, animationClass = '' }: StatCardProps) => {
             <CardDescription className="text-xs font-medium uppercase tracking-wider">{title}</CardDescription>
             <CardTitle className="text-3xl font-bold tracking-tight">{value}</CardTitle>
           </div>
-          <div className="text-4xl opacity-30 group-hover:opacity-40 transition-opacity duration-300">{icon}</div>
+          <div className="opacity-20 group-hover:opacity-30 transition-opacity duration-300">
+            <IconComponent
+              className="h-8 w-8"
+              strokeWidth={1.5}
+            />
+          </div>
         </CardHeader>
 
         <CardFooter className="relative pt-0">
-          <TrendIndicator
-            trend={trend}
-            change={change}
-          />
+          <div className="flex items-center gap-2 text-xs text-muted-foreground">
+            <span className="font-medium">{change}</span>
+          </div>
         </CardFooter>
       </Card>
     </div>

@@ -1,8 +1,8 @@
-import { ChartFooterText } from '@/features/analytics/components/atoms/ChartFooterText/ChartFooterText';
-import { TASK_DISTRIBUTION_CONFIG } from '@/features/analytics/constants';
+import { ChartCenterLabel } from '@/features/analytics/components/atoms/ChartCenterLabel/ChartCenterLabel';
 import { TaskDistribution } from '@/features/analytics/types';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/shared/components/ui/card';
-import { ChartContainer, ChartTooltip, ChartTooltipContent } from '@/shared/components/ui/chart';
+import { ChartConfig, ChartContainer, ChartTooltip, ChartTooltipContent } from '@/shared/components/ui/chart';
+import { useMemo } from 'react';
 import { Label, Pie, PieChart } from 'recharts';
 
 interface TaskDistributionChartProps {
@@ -12,26 +12,37 @@ interface TaskDistributionChartProps {
 
 export const TaskDistributionChart = ({ data, animationClass = '' }: TaskDistributionChartProps) => {
   const totalTasks = data.reduce((sum, item) => sum + item.tasks, 0);
+  const chartConfig = useMemo<ChartConfig>(() => {
+    const config: ChartConfig = {
+      tasks: {
+        label: 'Tasks',
+      },
+    };
+    data.forEach((item) => {
+      config[item.category] = {
+        label: item.label,
+        color: item.fill,
+      };
+    });
+
+    return config;
+  }, [data]);
 
   return (
     <Card className={`flex flex-col ${animationClass}`}>
       <CardHeader className="pb-0">
         <CardTitle>Task Distribution</CardTitle>
-        <CardDescription>By category</CardDescription>
+        <CardDescription>By top 5 project</CardDescription>
       </CardHeader>
 
       <CardContent className="flex-1 pb-0">
         <ChartContainer
-          config={TASK_DISTRIBUTION_CONFIG}
+          config={chartConfig}
           className="mx-auto aspect-square max-h-[300px]">
           <PieChart>
             <ChartTooltip
-              content={
-                <ChartTooltipContent
-                  nameKey="tasks"
-                  hideLabel
-                />
-              }
+              cursor={false}
+              content={<ChartTooltipContent hideLabel />}
             />
             <Pie
               data={data}
@@ -43,24 +54,10 @@ export const TaskDistributionChart = ({ data, animationClass = '' }: TaskDistrib
                 content={({ viewBox }) => {
                   if (viewBox && 'cx' in viewBox && 'cy' in viewBox) {
                     return (
-                      <text
-                        x={viewBox.cx}
-                        y={viewBox.cy}
-                        textAnchor="middle"
-                        dominantBaseline="middle">
-                        <tspan
-                          x={viewBox.cx}
-                          y={viewBox.cy}
-                          className="fill-foreground text-3xl font-bold">
-                          {totalTasks}
-                        </tspan>
-                        <tspan
-                          x={viewBox.cx}
-                          y={(viewBox.cy || 0) + 24}
-                          className="fill-muted-foreground">
-                          Total Tasks
-                        </tspan>
-                      </text>
+                      <ChartCenterLabel
+                        viewBox={viewBox}
+                        totalTasks={totalTasks}
+                      />
                     );
                   }
                 }}
@@ -71,7 +68,7 @@ export const TaskDistributionChart = ({ data, animationClass = '' }: TaskDistrib
       </CardContent>
 
       <CardFooter className="flex-col gap-2 text-sm">
-        <ChartFooterText text="Showing task breakdown by category" />
+        <div className="leading-none text-muted-foreground">Showing task breakdown by top 5 project</div>
       </CardFooter>
     </Card>
   );

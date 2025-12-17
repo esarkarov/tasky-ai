@@ -1,12 +1,11 @@
 export type TimeRange = '7d' | '30d' | '6m' | '1y';
-export type TrendDirection = 'up' | 'down';
+export type TaskStatus = 'completed' | 'pending' | 'overdue';
 
 export interface StatMetric {
   title: string;
   value: string;
-  change: string;
-  trend: TrendDirection;
   icon: string;
+  change: string;
 }
 
 export interface TaskCompletionData {
@@ -22,18 +21,22 @@ export interface ProjectProgress {
   fill: string;
 }
 
-export interface ProductivityData {
+export interface ActivityData {
   day: string;
-  hours: number;
+  tasks: number;
 }
 
 export interface TaskDistribution {
   category: string;
+  label?: string;
   tasks: number;
   fill: string;
 }
 
-export interface PerformanceMetric {
-  metric: string;
-  score: number;
+export interface AnalyticsDashboardData {
+  statMetrics: StatMetric[];
+  taskCompletionData: TaskCompletionData[];
+  taskDistributionData: TaskDistribution[];
+  projectProgressData: ProjectProgress[];
+  activityData: ActivityData[];
 }

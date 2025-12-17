@@ -39,6 +39,7 @@ export const ROUTES = {
   REGISTER: '/register',
 
   APP: APP_BASE,
+  DASHBOARD: `${APP_BASE}/dashboard`,
   INBOX: `${APP_BASE}/inbox`,
   TODAY: `${APP_BASE}/today`,
   UPCOMING: `${APP_BASE}/upcoming`,

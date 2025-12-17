@@ -1,15 +1,21 @@
 import { ROUTES } from '@/shared/constants';
-import { createElement } from 'react';
 import { RouteObject } from 'react-router';
+import { Error } from '../components/atoms/Error/Error';
+import { Skeleton } from '../components/atoms/Skeleton/Skeleton';
 
-export const DashboardPage = async () =>
-  createElement((await import('@/pages/DashboardPage/DashboardPage')).DashboardPage);
-
-export const dashboardRoutes: RouteObject[] = [
+export const analyticsRoutes: RouteObject[] = [
   {
     path: ROUTES.APP_PATHS.DASHBOARD,
-    lazy: {
-      element: DashboardPage,
+    lazy: async () => {
+      const { DashboardPage } = await import('@/pages/DashboardPage/DashboardPage');
+      const { dashboardLoader } = await import('@/features/analytics/router/loaders/dashboard.loader');
+
+      return {
+        Component: DashboardPage,
+        loader: dashboardLoader,
+      };
     },
+    HydrateFallback: Skeleton,
+    ErrorBoundary: Error,
   },
 ];

@@ -1,14 +1,12 @@
 import { DashboardHeader } from '@/features/analytics/components/molecules/DashboardHeader/DashboardHeader';
 import { TimeRangeSelector } from '@/features/analytics/components/molecules/TimeRangeSelector/TimeRangeSelector';
-import { PerformanceRadarChart } from '@/features/analytics/components/organisms/PerformanceRadarChart/PerformanceRadarChart';
 import { ProjectProgressChart } from '@/features/analytics/components/organisms/ProjectProgressChart/ProjectProgressChart';
 import { StatsGrid } from '@/features/analytics/components/organisms/StatsGrid/StatsGrid';
 import { TaskCompletionChart } from '@/features/analytics/components/organisms/TaskCompletionChart/TaskCompletionChart';
 import { TaskDistributionChart } from '@/features/analytics/components/organisms/TaskDistributionChart/TaskDistributionChart';
-import { WeeklyProductivityChart } from '@/features/analytics/components/organisms/WeeklyProductivityChart/WeeklyProductivityChart';
+import { WeeklyActivityChart } from '@/features/analytics/components/organisms/WeeklyActivityChart/WeeklyActivityChart';
 import type {
-  PerformanceMetric,
-  ProductivityData,
+  ActivityData,
   ProjectProgress,
   StatMetric,
   TaskCompletionData,
@@ -21,8 +19,7 @@ interface DashboardTemplateProps {
   taskCompletionData: TaskCompletionData[];
   taskDistributionData: TaskDistribution[];
   projectProgressData: ProjectProgress[];
-  productivityData: ProductivityData[];
-  performanceMetrics: PerformanceMetric[];
+  activityData: ActivityData[];
   selectedTimeRange: TimeRange;
   onTimeRangeChange: (range: TimeRange) => void;
   title: string;
@@ -34,8 +31,7 @@ export const DashboardTemplate = ({
   taskCompletionData,
   taskDistributionData,
   projectProgressData,
-  productivityData,
-  performanceMetrics,
+  activityData,
   selectedTimeRange,
   onTimeRangeChange,
   title,
@@ -66,18 +62,14 @@ export const DashboardTemplate = ({
           animationClass="animate-slide-in stagger-6"
         />
       </div>
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-5">
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-5">
         <ProjectProgressChart
           data={projectProgressData}
           animationClass="animate-slide-in stagger-5"
         />
-        <WeeklyProductivityChart
-          data={productivityData}
+        <WeeklyActivityChart
+          data={activityData}
           animationClass="animate-slide-in stagger-6"
-        />
-        <PerformanceRadarChart
-          data={performanceMetrics}
-          animationClass="animate-slide-in stagger-5"
         />
       </div>
     </div>
