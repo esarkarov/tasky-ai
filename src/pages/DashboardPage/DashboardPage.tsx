@@ -2,6 +2,8 @@
 
 import { DashboardTemplate } from '@/features/analytics/components/templates/DashboardTemplate/DashboardTemplate';
 import { AnalyticsDashboardData, TimeRange } from '@/features/analytics/types';
+import { Head } from '@/shared/components/atoms/Head/Head';
+import { AppTopBar } from '@/shared/components/organisms/AppTopBar/AppTopBar';
 import { useState } from 'react';
 import { useLoaderData, useNavigate } from 'react-router';
 
@@ -20,16 +22,22 @@ export const DashboardPage = () => {
   };
 
   return (
-    <DashboardTemplate
-      title="Analytics Dashboard"
-      description="Track your task productivity and project insights"
-      selectedTimeRange={timeRange}
-      onTimeRangeChange={handleTimeRangeChange}
-      statMetrics={loaderData.statMetrics}
-      taskCompletionData={loaderData.taskCompletionData}
-      taskDistributionData={loaderData.taskDistributionData}
-      projectProgressData={loaderData.projectProgressData}
-      activityData={loaderData.activityData}
-    />
+    <>
+      <Head title="Tasky AI | Analytics Dashboard" />
+
+      <AppTopBar title="Analytics Dashboard" />
+
+      <DashboardTemplate
+        title="Analytics Dashboard"
+        description="Track your task productivity and project insights"
+        selectedTimeRange={timeRange}
+        onTimeRangeChange={handleTimeRangeChange}
+        statMetrics={loaderData.statMetrics}
+        taskCompletionData={loaderData.taskCompletionData}
+        taskDistributionData={loaderData.taskDistributionData}
+        projectProgressData={loaderData.projectProgressData}
+        activityData={loaderData.activityData}
+      />
+    </>
   );
 };

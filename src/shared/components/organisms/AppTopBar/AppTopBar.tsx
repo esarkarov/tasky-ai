@@ -6,7 +6,7 @@ import { useEffect, useState } from 'react';
 
 interface AppTopBarProps {
   label?: string;
-  totalCount: number;
+  totalCount?: number;
   title: string;
 }
 

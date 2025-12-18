@@ -1,7 +1,7 @@
 import { cn } from '@/shared/utils/ui/ui.utils';
 
 export interface AppBarTitleProps {
-  totalCount: number;
+  totalCount?: number;
   isVisible: boolean;
   title: string;
   label: string;
